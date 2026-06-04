@@ -1026,7 +1026,7 @@ def interactive_setup() -> None:
     helpers so the plugin's import surface stays small, prompts for the
     server URL + bot token, captures an allowlist, and offers to set a
     home channel.  Replaces the central
-    ``hermes_cli/setup.py::_setup_mattermost`` function this migration
+    ``centurion_cli/setup.py::_setup_mattermost`` function this migration
     removes.
     """
     from centurion_cli.config import get_env_value, save_env_value
@@ -1130,7 +1130,7 @@ def _is_connected(config) -> bool:
     """Mattermost is considered connected when BOTH MATTERMOST_TOKEN and
     MATTERMOST_URL are set.
 
-    Looks up via ``hermes_cli.gateway.get_env_value`` at call time (not via
+    Looks up via ``centurion_cli.gateway.get_env_value`` at call time (not via
     the plugin's own bound import) so tests that patch
     ``gateway_mod.get_env_value`` can suppress ambient env vars.  Matches
     what the legacy connected-platforms check did before this migration.
@@ -1163,7 +1163,7 @@ def register(ctx) -> None:
         required_env=["MATTERMOST_URL", "MATTERMOST_TOKEN"],
         install_hint="pip install aiohttp",
         # Interactive setup wizard — replaces the central
-        # hermes_cli/setup.py::_setup_mattermost function.
+        # centurion_cli/setup.py::_setup_mattermost function.
         setup_fn=interactive_setup,
         # YAML→env config bridge — owns the translation of
         # ``config.yaml`` ``mattermost:`` keys (require_mention,

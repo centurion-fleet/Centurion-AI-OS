@@ -496,7 +496,7 @@ def _get_named_custom_provider(requested_provider: str) -> Optional[Dict[str, An
             # the request.  We only defer to the built-in when the raw name is
             # the canonical provider itself (``nous``, ``openrouter``, …) so
             # accidentally shadowing a canonical provider still resolves to
-            # the built-in. See tests/hermes_cli/test_runtime_provider_resolution.py
+            # the built-in. See tests/centurion_cli/test_runtime_provider_resolution.py
             # ``test_named_custom_provider_does_not_shadow_builtin_provider``.
             if (canonical or "").strip().lower() == requested_norm:
                 return None
@@ -1033,7 +1033,7 @@ def _resolve_azure_foundry_runtime(
     if not api_key:
         raise AuthError(
             "Azure Foundry requires an API key. Set AZURE_FOUNDRY_API_KEY in "
-            "~/.hermes/.env or run 'hermes model' to configure. To use "
+            "~/.centurion/.env or run 'hermes model' to configure. To use "
             "keyless Microsoft Entra ID auth instead, set "
             "model.auth_mode: entra_id in config.yaml (or pick "
             "'Microsoft Entra ID' in 'hermes model')."

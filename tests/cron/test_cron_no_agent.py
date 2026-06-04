@@ -28,7 +28,7 @@ def hermes_env(tmp_path, monkeypatch):
 
     monkeypatch.setenv("CENTURION_HOME", str(home))
 
-    # Reload modules that cache get_hermes_home() at import time.
+    # Reload modules that cache get_centurion_home() at import time.
     import importlib
     import centurion_constants
     importlib.reload(hermes_constants)

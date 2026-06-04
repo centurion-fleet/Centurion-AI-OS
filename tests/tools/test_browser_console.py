@@ -125,7 +125,7 @@ class TestBrowserConsoleToolsetWiring:
         from toolsets import TOOLSETS
         assert "browser_console" in TOOLSETS["browser"]["tools"]
 
-    def test_in_hermes_core_tools(self):
+    def test_in_centurion_core_tools(self):
         from toolsets import _HERMES_CORE_TOOLS
         assert "browser_console" in _HERMES_CORE_TOOLS
 
@@ -213,11 +213,11 @@ class TestBrowserVisionConfig:
         mock_response.choices = [mock_choice]
 
         with (
-            patch("hermes_constants.get_hermes_dir", return_value=shots_dir),
+            patch("hermes_constants.get_centurion_dir", return_value=shots_dir),
             patch("tools.browser_tool._cleanup_old_screenshots"),
             patch("tools.browser_tool._run_browser_command", return_value={"success": True, "data": {"path": str(screenshot)}}),
             patch("tools.browser_tool._get_vision_model", return_value="test-model"),
-            patch("hermes_cli.config.load_config", return_value={"auxiliary": {"vision": {"temperature": 1, "timeout": 45}}}),
+            patch("centurion_cli.config.load_config", return_value={"auxiliary": {"vision": {"temperature": 1, "timeout": 45}}}),
             patch("tools.browser_tool.call_llm", return_value=mock_response) as mock_llm,
         ):
             result = json.loads(browser_vision("what is on the page?", task_id="test"))
@@ -237,11 +237,11 @@ class TestBrowserVisionConfig:
         mock_response.choices = [mock_choice]
 
         with (
-            patch("hermes_constants.get_hermes_dir", return_value=shots_dir),
+            patch("hermes_constants.get_centurion_dir", return_value=shots_dir),
             patch("tools.browser_tool._cleanup_old_screenshots"),
             patch("tools.browser_tool._run_browser_command", return_value={"success": True, "data": {"path": str(screenshot)}}),
             patch("tools.browser_tool._get_vision_model", return_value="test-model"),
-            patch("hermes_cli.config.load_config", return_value={"auxiliary": {"vision": {}}}),
+            patch("centurion_cli.config.load_config", return_value={"auxiliary": {"vision": {}}}),
             patch("tools.browser_tool.call_llm", return_value=mock_response) as mock_llm,
         ):
             result = json.loads(browser_vision("what is on the page?", task_id="test"))

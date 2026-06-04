@@ -292,11 +292,11 @@ def test_classic_mode_does_not_double_read_same_file(tmp_path, monkeypatch):
     fake_home = tmp_path / "home"
     fake_home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: fake_home)
-    hermes_home = tmp_path / "classic"
-    hermes_home.mkdir()
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    centurion_home = tmp_path / "classic"
+    centurion_home.mkdir()
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
-    _write(hermes_home / "auth.json", _make_auth_store(pool={
+    _write(centurion_home / "auth.json", _make_auth_store(pool={
         "openrouter": [{
             "id": "only",
             "label": "classic",
@@ -310,7 +310,7 @@ def test_classic_mode_does_not_double_read_same_file(tmp_path, monkeypatch):
     from centurion_cli.auth import read_credential_pool, _global_auth_file_path
 
     # Classic mode: CENTURION_HOME is set to a custom path that is NOT under
-    # ~/.hermes/profiles/ — get_default_hermes_root() returns CENTURION_HOME
+    # ~/.centurion/profiles/ — get_default_centurion_root() returns CENTURION_HOME
     # itself, so the profile root and global root are the same directory,
     # and the helper correctly returns None (no fallback).
     assert _global_auth_file_path() is None

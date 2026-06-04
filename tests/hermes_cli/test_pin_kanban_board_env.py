@@ -34,7 +34,7 @@ def _isolate_kanban_board_env():
 
 
 def test_pin_writes_resolved_board_when_env_unset(monkeypatch):
-    main_mod = importlib.import_module("hermes_cli.main")
+    main_mod = importlib.import_module("centurion_cli.main")
 
     import centurion_cli.kanban_db as kdb
     monkeypatch.setattr(kdb, "get_current_board", lambda: "space")
@@ -46,7 +46,7 @@ def test_pin_writes_resolved_board_when_env_unset(monkeypatch):
 
 def test_pin_does_not_overwrite_existing_env(monkeypatch):
     monkeypatch.setenv("HERMES_KANBAN_BOARD", "preset")
-    main_mod = importlib.import_module("hermes_cli.main")
+    main_mod = importlib.import_module("centurion_cli.main")
 
     import centurion_cli.kanban_db as kdb
 
@@ -61,7 +61,7 @@ def test_pin_does_not_overwrite_existing_env(monkeypatch):
 
 
 def test_pin_swallows_resolution_failures(monkeypatch):
-    main_mod = importlib.import_module("hermes_cli.main")
+    main_mod = importlib.import_module("centurion_cli.main")
 
     import centurion_cli.kanban_db as kdb
 

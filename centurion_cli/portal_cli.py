@@ -6,7 +6,7 @@ Subcommands:
   tools    List Tool Gateway tools and which are active in the current config.
 
 This command is intentionally minimal — it does not duplicate functionality
-already in ``hermes auth`` or ``hermes tools``. It's a discovery + status
+already in ``hermes auth`` or ``centurion tools``. It's a discovery + status
 surface for the Portal subscription itself.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from centurion_cli.config import load_config
 
 DEFAULT_PORTAL_URL = "https://portal.nousresearch.com"
 SUBSCRIPTION_URL = "https://portal.nousresearch.com/manage-subscription"
-DOCS_URL = "https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway"
+DOCS_URL = "https://centurion-os.nousresearch.com/docs/user-guide/features/tool-gateway"
 
 
 def _nous_portal_base_url() -> str:

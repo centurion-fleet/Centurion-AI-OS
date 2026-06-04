@@ -1,6 +1,6 @@
 """ACP session manager — maps ACP sessions to Hermes AIAgent instances.
 
-Sessions are persisted to the shared SessionDB (``~/.hermes/state.db``) so they
+Sessions are persisted to the shared SessionDB (``~/.centurion/state.db``) so they
 survive process restarts and appear in ``session_search``.  When the editor
 reconnects after idle/restart, the ``load_session`` / ``resume_session`` calls
 find the persisted session in the database and restore the full conversation
@@ -8,7 +8,7 @@ history.
 """
 from __future__ import annotations
 
-from centurion_constants import get_hermes_home
+from centurion_constants import get_centurion_home
 
 import copy
 import json
@@ -39,7 +39,7 @@ def _win_path_to_wsl(path: str) -> str | None:
 def _translate_acp_cwd(cwd: str) -> str:
     """Translate Windows ACP cwd values when Hermes itself is running in WSL.
 
-    Windows ACP clients can launch ``hermes acp`` inside WSL while still sending
+    Windows ACP clients can launch ``centurion acp`` inside WSL while still sending
     editor workspaces as Windows drive paths such as ``E:\\Projects``. Store
     and execute against the WSL mount path so agents, tools, and persisted ACP
     sessions all agree on the usable workspace. Native Linux/macOS keeps the
@@ -143,7 +143,7 @@ def _expand_acp_enabled_toolsets(
 ) -> List[str]:
     """Return ACP toolsets plus explicit MCP server toolsets for this session."""
     expanded: List[str] = []
-    for name in list(toolsets or ["hermes-acp"]):
+    for name in list(toolsets or ["centurion-acp"]):
         if name and name not in expanded:
             expanded.append(name)
 
@@ -198,7 +198,7 @@ class SessionManager:
                            Used by tests. When omitted, a real AIAgent is created
                            using the current Hermes runtime provider configuration.
             db:            Optional SessionDB instance. When omitted, the default
-                           SessionDB (``~/.hermes/state.db``) is lazily created.
+                           SessionDB (``~/.centurion/state.db``) is lazily created.
         """
         self._sessions: Dict[str, SessionState] = {}
         self._lock = Lock()
@@ -407,14 +407,14 @@ class SessionManager:
         Note: we resolve ``CENTURION_HOME`` dynamically rather than relying on
         the module-level ``DEFAULT_DB_PATH`` constant, because that constant
         is evaluated at import time and won't reflect env-var changes made
-        later (e.g. by the test fixture ``_isolate_hermes_home``).
+        later (e.g. by the test fixture ``_isolate_centurion_home``).
         """
         if self._db_instance is not None:
             return self._db_instance
         try:
             from centurion_state import SessionDB
-            hermes_home = get_hermes_home()
-            self._db_instance = SessionDB(db_path=hermes_home / "state.db")
+            centurion_home = get_centurion_home()
+            self._db_instance = SessionDB(db_path=centurion_home / "state.db")
             return self._db_instance
         except Exception:
             logger.debug("SessionDB unavailable for ACP persistence", exc_info=True)
@@ -596,7 +596,7 @@ class SessionManager:
         kwargs = {
             "platform": "acp",
             "enabled_toolsets": _expand_acp_enabled_toolsets(
-                ["hermes-acp"],
+                ["centurion-acp"],
                 mcp_server_names=configured_mcp_servers,
             ),
             "quiet_mode": True,

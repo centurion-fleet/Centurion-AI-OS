@@ -1,4 +1,4 @@
-"""Tests for the update check mechanism in hermes_cli.banner."""
+"""Tests for the update check mechanism in centurion_cli.banner."""
 
 import json
 import os
@@ -21,7 +21,7 @@ def test_check_for_updates_uses_cache(tmp_path, monkeypatch):
     from centurion_cli.banner import check_for_updates
 
     # Create a fake git repo and fresh cache
-    repo_dir = tmp_path / "hermes-agent"
+    repo_dir = tmp_path / "centurion-os"
     repo_dir.mkdir()
     (repo_dir / ".git").mkdir()
 
@@ -29,7 +29,7 @@ def test_check_for_updates_uses_cache(tmp_path, monkeypatch):
     cache_file.write_text(json.dumps({"ts": time.time(), "behind": 3}))
 
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-    with patch("hermes_cli.banner.subprocess.run") as mock_run:
+    with patch("centurion_cli.banner.subprocess.run") as mock_run:
         result = check_for_updates()
 
     assert result == 3
@@ -40,7 +40,7 @@ def test_check_for_updates_expired_cache(tmp_path, monkeypatch):
     """When cache is expired, check_for_updates should call git fetch."""
     from centurion_cli.banner import check_for_updates
 
-    repo_dir = tmp_path / "hermes-agent"
+    repo_dir = tmp_path / "centurion-os"
     repo_dir.mkdir()
     (repo_dir / ".git").mkdir()
 
@@ -51,7 +51,7 @@ def test_check_for_updates_expired_cache(tmp_path, monkeypatch):
     mock_result = MagicMock(returncode=0, stdout="5\n")
 
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-    with patch("hermes_cli.banner.subprocess.run", return_value=mock_result) as mock_run:
+    with patch("centurion_cli.banner.subprocess.run", return_value=mock_result) as mock_run:
         result = check_for_updates()
 
     assert result == 5
@@ -63,14 +63,14 @@ def test_check_for_updates_no_git_dir(tmp_path, monkeypatch):
     import centurion_cli.banner as banner
 
     # Create a fake banner.py so the fallback path also has no .git
-    fake_banner = tmp_path / "hermes_cli" / "banner.py"
+    fake_banner = tmp_path / "centurion_cli" / "banner.py"
     fake_banner.parent.mkdir(parents=True, exist_ok=True)
     fake_banner.touch()
 
     monkeypatch.setattr(banner, "__file__", str(fake_banner))
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-    with patch("hermes_cli.banner.subprocess.run") as mock_run:
-        with patch("hermes_cli.banner.check_via_pypi", return_value=0):
+    with patch("centurion_cli.banner.subprocess.run") as mock_run:
+        with patch("centurion_cli.banner.check_via_pypi", return_value=0):
             result = banner.check_for_updates()
     assert result == 0
     mock_run.assert_not_called()
@@ -84,9 +84,9 @@ def test_check_for_updates_fallback_to_project_root(tmp_path, monkeypatch):
     if not (project_root / ".git").exists():
         pytest.skip("Not running from a git checkout")
 
-    # Point CENTURION_HOME at a temp dir with no hermes-agent/.git
+    # Point CENTURION_HOME at a temp dir with no centurion-os/.git
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-    with patch("hermes_cli.banner.subprocess.run") as mock_run:
+    with patch("centurion_cli.banner.subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(returncode=0, stdout="0\n")
         result = banner.check_for_updates()
     # Should have fallen back to project root and run git commands
@@ -118,7 +118,7 @@ def test_invalidate_update_cache_clears_all_profiles(tmp_path):
     """_invalidate_update_cache() should delete .update_check from ALL profiles."""
     from centurion_cli.main import _invalidate_update_cache
 
-    # Build a fake ~/.hermes with default + two named profiles
+    # Build a fake ~/.centurion with default + two named profiles
     default_home = tmp_path / ".centurion"
     default_home.mkdir()
     (default_home / ".update_check").write_text('{"ts":1,"behind":50}')

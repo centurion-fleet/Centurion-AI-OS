@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.web_server and related config utilities."""
+"""Tests for centurion_cli.web_server and related config utilities."""
 
 import os
 import json
@@ -101,7 +101,7 @@ class TestWebServerEndpoints:
     """Test the FastAPI REST endpoints using Starlette TestClient."""
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home):
+    def _setup_test_client(self, monkeypatch, _isolate_centurion_home):
         """Create a TestClient and isolate the state DB under the test CENTURION_HOME."""
         try:
             from starlette.testclient import TestClient
@@ -109,10 +109,10 @@ class TestWebServerEndpoints:
             pytest.skip("fastapi/starlette not installed")
 
         import centurion_state
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
         from centurion_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_centurion_home() / "state.db")
 
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
@@ -122,7 +122,7 @@ class TestWebServerEndpoints:
         assert resp.status_code == 200
         data = resp.json()
         assert "version" in data
-        assert "hermes_home" in data
+        assert "centurion_home" in data
         assert "active_sessions" in data
 
     def test_get_status_filters_unconfigured_gateway_platforms(self, monkeypatch):
@@ -346,7 +346,7 @@ class TestWebServerEndpoints:
 
     def test_path_traversal_dotdot_blocked(self):
         """Direct .. path traversal via encoded sequences."""
-        resp = self.client.get("/%2e%2e/hermes_cli/web_server.py")
+        resp = self.client.get("/%2e%2e/centurion_cli/web_server.py")
         assert resp.status_code in {200, 404}
         if resp.status_code == 200:
             assert "FastAPI" not in resp.text  # Should not serve the actual source
@@ -561,17 +561,17 @@ class TestNewEndpoints:
     """Tests for session detail, logs, cron, skills, tools, raw config, analytics."""
 
     @pytest.fixture(autouse=True)
-    def _setup(self, monkeypatch, _isolate_hermes_home):
+    def _setup(self, monkeypatch, _isolate_centurion_home):
         try:
             from starlette.testclient import TestClient
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
         import centurion_state
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
         from centurion_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_centurion_home() / "state.db")
 
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
@@ -600,8 +600,8 @@ class TestNewEndpoints:
     # --- Profiles ---
 
     def test_profiles_list_includes_default(self):
-        from centurion_constants import get_hermes_home
-        get_hermes_home().mkdir(parents=True, exist_ok=True)
+        from centurion_constants import get_centurion_home
+        get_centurion_home().mkdir(parents=True, exist_ok=True)
 
         resp = self.client.get("/api/profiles")
         assert resp.status_code == 200
@@ -609,16 +609,16 @@ class TestNewEndpoints:
         assert "default" in names
 
     def test_profiles_list_falls_back_when_profile_listing_fails(self, monkeypatch):
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
         import centurion_cli.profiles as profiles_mod
 
-        hermes_home = get_hermes_home()
-        hermes_home.mkdir(parents=True, exist_ok=True)
-        (hermes_home / "config.yaml").write_text(
+        centurion_home = get_centurion_home()
+        centurion_home.mkdir(parents=True, exist_ok=True)
+        (centurion_home / "config.yaml").write_text(
             "model:\n  provider: openrouter\n  name: anthropic/claude-sonnet-4.6\n",
             encoding="utf-8",
         )
-        named = hermes_home / "profiles" / "multi-agent"
+        named = centurion_home / "profiles" / "multi-agent"
         named.mkdir(parents=True)
         (named / ".env").write_text("EXAMPLE=1\n", encoding="utf-8")
         (named / "skills" / "demo").mkdir(parents=True)
@@ -664,19 +664,19 @@ class TestNewEndpoints:
         assert "test-prof-2" not in names
 
     def test_profile_setup_command_uses_named_profile_wrapper(self):
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
 
-        (get_hermes_home() / "profiles" / "coder").mkdir(parents=True)
+        (get_centurion_home() / "profiles" / "coder").mkdir(parents=True)
 
         resp = self.client.get("/api/profiles/coder/setup-command")
 
         assert resp.status_code == 200
         assert resp.json()["command"] == "coder setup"
 
-    def test_profile_setup_command_uses_hermes_for_default_profile(self):
-        from centurion_constants import get_hermes_home
+    def test_profile_setup_command_uses_centurion_for_default_profile(self):
+        from centurion_constants import get_centurion_home
 
-        get_hermes_home().mkdir(parents=True, exist_ok=True)
+        get_centurion_home().mkdir(parents=True, exist_ok=True)
 
         resp = self.client.get("/api/profiles/default/setup-command")
 
@@ -701,11 +701,11 @@ class TestNewEndpoints:
         assert wrapper_path.read_text() == '#!/bin/sh\nexec hermes -p writer "$@"\n'
 
     def test_profiles_create_with_clone_from_default_copies_default_skills(self, monkeypatch):
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
         import centurion_cli.profiles as profiles_mod
 
         monkeypatch.setattr(profiles_mod, "create_wrapper_script", lambda name: None)
-        default_skill = get_hermes_home() / "skills" / "custom" / "new-skill"
+        default_skill = get_centurion_home() / "skills" / "custom" / "new-skill"
         default_skill.mkdir(parents=True)
         (default_skill / "SKILL.md").write_text("---\nname: new-skill\n---\n", encoding="utf-8")
 
@@ -715,13 +715,13 @@ class TestNewEndpoints:
         )
 
         assert resp.status_code == 200
-        cloned_skill = get_hermes_home() / "profiles" / "cloned" / "skills" / "custom" / "new-skill" / "SKILL.md"
+        cloned_skill = get_centurion_home() / "profiles" / "cloned" / "skills" / "custom" / "new-skill" / "SKILL.md"
         assert cloned_skill.exists()
         profiles = {p["name"]: p for p in self.client.get("/api/profiles").json()["profiles"]}
         assert profiles["cloned"]["skill_count"] == 1
 
     def test_profiles_create_without_clone_seeds_bundled_skills(self, monkeypatch):
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
         import centurion_cli.profiles as profiles_mod
 
         monkeypatch.setattr(profiles_mod, "create_wrapper_script", lambda name: None)
@@ -740,16 +740,16 @@ class TestNewEndpoints:
         )
 
         assert resp.status_code == 200
-        seeded_skill = get_hermes_home() / "profiles" / "fresh" / "skills" / "software-development" / "plan" / "SKILL.md"
+        seeded_skill = get_centurion_home() / "profiles" / "fresh" / "skills" / "software-development" / "plan" / "SKILL.md"
         assert seeded_skill.exists()
         profiles = {p["name"]: p for p in self.client.get("/api/profiles").json()["profiles"]}
         assert profiles["fresh"]["skill_count"] == 1
 
     def test_profile_open_terminal_uses_macos_terminal(self, monkeypatch):
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
         import centurion_cli.web_server as web_server
 
-        (get_hermes_home() / "profiles" / "coder").mkdir(parents=True)
+        (get_centurion_home() / "profiles" / "coder").mkdir(parents=True)
         calls = []
         monkeypatch.setattr(web_server.sys, "platform", "darwin")
         monkeypatch.setattr(web_server.subprocess, "Popen", lambda args, **kwargs: calls.append(args))
@@ -762,10 +762,10 @@ class TestNewEndpoints:
         assert "coder setup" in " ".join(calls[0])
 
     def test_profile_open_terminal_uses_windows_cmd(self, monkeypatch):
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
         import centurion_cli.web_server as web_server
 
-        (get_hermes_home() / "profiles" / "coder").mkdir(parents=True)
+        (get_centurion_home() / "profiles" / "coder").mkdir(parents=True)
         calls = []
         monkeypatch.setattr(web_server.sys, "platform", "win32")
         monkeypatch.setattr(web_server.subprocess, "Popen", lambda args, **kwargs: calls.append(args))
@@ -1657,7 +1657,7 @@ class TestNormaliseThemeDefinition:
 
 
 class TestDiscoverUserThemes:
-    """Tests for _discover_user_themes() — scans ~/.hermes/dashboard-themes/."""
+    """Tests for _discover_user_themes() — scans ~/.centurion/dashboard-themes/."""
 
     def test_returns_empty_when_dir_missing(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
@@ -1836,7 +1836,7 @@ class TestPluginAPIAuth:
     """Tests that plugin API routes require the session token (issue #19533)."""
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home):
+    def _setup_test_client(self, monkeypatch, _isolate_centurion_home):
         """Create a TestClient without the session token header."""
         try:
             from starlette.testclient import TestClient
@@ -1844,10 +1844,10 @@ class TestPluginAPIAuth:
             pytest.skip("fastapi/starlette not installed")
 
         import centurion_state
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
         from centurion_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_centurion_home() / "state.db")
 
         self.client = TestClient(app)
         self.auth_client = TestClient(app)
@@ -2077,7 +2077,7 @@ skip_on_windows = pytest.mark.skipif(
 @skip_on_windows
 class TestPtyWebSocket:
     @pytest.fixture(autouse=True)
-    def _setup(self, monkeypatch, _isolate_hermes_home):
+    def _setup(self, monkeypatch, _isolate_centurion_home):
         from starlette.testclient import TestClient
 
         import centurion_cli.web_server as ws
@@ -2391,7 +2391,7 @@ class TestDashboardPluginStaticAssetAllowlist:
     """
 
     @pytest.fixture(autouse=True)
-    def _setup_test_client(self, monkeypatch, _isolate_hermes_home):
+    def _setup_test_client(self, monkeypatch, _isolate_centurion_home):
         try:
             from starlette.testclient import TestClient
         except ImportError:

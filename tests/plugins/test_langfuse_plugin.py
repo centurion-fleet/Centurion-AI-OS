@@ -125,7 +125,7 @@ class TestRuntimeGate:
             "it should short-circuit via _INIT_FAILED"
         )
 
-    def test_get_langfuse_does_not_import_hermes_config(self, monkeypatch):
+    def test_get_langfuse_does_not_import_centurion_config(self, monkeypatch):
         """The plugin must not re-read config.yaml per hook."""
         for k in (
             "HERMES_LANGFUSE_PUBLIC_KEY", "HERMES_LANGFUSE_SECRET_KEY",
@@ -133,15 +133,15 @@ class TestRuntimeGate:
         ):
             monkeypatch.delenv(k, raising=False)
 
-        # Drop any cached import of hermes_cli.config.
-        sys.modules.pop("hermes_cli.config", None)
+        # Drop any cached import of centurion_cli.config.
+        sys.modules.pop("centurion_cli.config", None)
 
         langfuse_plugin = self._fresh_plugin()
         for _ in range(20):
             langfuse_plugin._get_langfuse()
 
-        assert "hermes_cli.config" not in sys.modules, (
-            "langfuse plugin imported hermes_cli.config — regression toward "
+        assert "centurion_cli.config" not in sys.modules, (
+            "langfuse plugin imported centurion_cli.config — regression toward "
             "the rejected per-hook load_config() design"
         )
 

@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.model_catalog — remote manifest fetch + cache + fallback."""
+"""Tests for centurion_cli.model_catalog — remote manifest fetch + cache + fallback."""
 
 from __future__ import annotations
 
@@ -260,7 +260,7 @@ class TestProviderOverride:
 
 
 class TestIntegrationWithModelsModule:
-    """Exercise the fallback paths via the real callers in hermes_cli.models."""
+    """Exercise the fallback paths via the real callers in centurion_cli.models."""
 
     def test_curated_nous_ids_falls_back_to_hardcoded_on_empty_catalog(
         self, isolated_home

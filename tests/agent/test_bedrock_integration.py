@@ -5,7 +5,7 @@ provider registry, model catalog, and runtime resolution pipeline.
 These tests do NOT require AWS credentials or boto3 — all AWS calls
 are mocked.
 
-Note: Tests that import ``hermes_cli.auth`` or ``hermes_cli.runtime_provider``
+Note: Tests that import ``centurion_cli.auth`` or ``centurion_cli.runtime_provider``
 require Python 3.10+ due to ``str | None`` type syntax in the import chain.
 """
 
@@ -124,7 +124,7 @@ class TestResolveProvider:
         monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY")
 
         # Mock the auth store to have no active provider
-        with patch("hermes_cli.auth._load_auth_store", return_value={}):
+        with patch("centurion_cli.auth._load_auth_store", return_value={}):
             result = resolve_provider("auto")
         assert result == "bedrock"
 
@@ -140,8 +140,8 @@ class TestRuntimeProvider:
         monkeypatch.setenv("AWS_REGION", "eu-west-1")
 
         # Mock resolve_provider to return bedrock
-        with patch("hermes_cli.runtime_provider.resolve_provider", return_value="bedrock"), \
-             patch("hermes_cli.runtime_provider._get_model_config", return_value={"provider": "bedrock"}):
+        with patch("centurion_cli.runtime_provider.resolve_provider", return_value="bedrock"), \
+             patch("centurion_cli.runtime_provider._get_model_config", return_value={"provider": "bedrock"}):
             result = resolve_runtime_provider(requested="bedrock")
 
         assert result["provider"] == "bedrock"
@@ -157,8 +157,8 @@ class TestRuntimeProvider:
         monkeypatch.delenv("AWS_REGION", raising=False)
         monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
 
-        with patch("hermes_cli.runtime_provider.resolve_provider", return_value="bedrock"), \
-             patch("hermes_cli.runtime_provider._get_model_config", return_value={"provider": "bedrock"}):
+        with patch("centurion_cli.runtime_provider.resolve_provider", return_value="bedrock"), \
+             patch("centurion_cli.runtime_provider._get_model_config", return_value={"provider": "bedrock"}):
             result = resolve_runtime_provider(requested="bedrock")
 
         assert result["region"] == "us-east-1"
@@ -178,9 +178,9 @@ class TestRuntimeProvider:
         # Mock both the provider resolution and boto3's credential chain
         mock_session = MagicMock()
         mock_session.get_credentials.return_value = None
-        with patch("hermes_cli.runtime_provider.resolve_provider", return_value="bedrock"), \
-             patch("hermes_cli.runtime_provider._get_model_config", return_value={"provider": "bedrock"}), \
-             patch("hermes_cli.runtime_provider.resolve_requested_provider", return_value="auto"), \
+        with patch("centurion_cli.runtime_provider.resolve_provider", return_value="bedrock"), \
+             patch("centurion_cli.runtime_provider._get_model_config", return_value={"provider": "bedrock"}), \
+             patch("centurion_cli.runtime_provider.resolve_requested_provider", return_value="auto"), \
              patch.dict("sys.modules", {"botocore": MagicMock(), "botocore.session": MagicMock()}):
             import botocore.session as _bs
             _bs.get_session = MagicMock(return_value=mock_session)
@@ -197,8 +197,8 @@ class TestRuntimeProvider:
                      "AWS_BEARER_TOKEN_BEDROCK"]:
             monkeypatch.delenv(var, raising=False)
 
-        with patch("hermes_cli.runtime_provider.resolve_provider", return_value="bedrock"), \
-             patch("hermes_cli.runtime_provider._get_model_config", return_value={"provider": "bedrock"}):
+        with patch("centurion_cli.runtime_provider.resolve_provider", return_value="bedrock"), \
+             patch("centurion_cli.runtime_provider._get_model_config", return_value={"provider": "bedrock"}):
             result = resolve_runtime_provider(requested="bedrock")
         assert result["provider"] == "bedrock"
         assert result["api_mode"] == "bedrock_converse"
@@ -209,7 +209,7 @@ class TestRuntimeProvider:
 # ---------------------------------------------------------------------------
 
 class TestProvidersModule:
-    """Verify bedrock is wired into hermes_cli/providers.py."""
+    """Verify bedrock is wired into centurion_cli/providers.py."""
 
     def test_bedrock_alias_in_providers(self):
         from centurion_cli.providers import ALIASES
@@ -270,7 +270,7 @@ class TestPackaging:
 
     def test_bedrock_is_not_eager_installed_by_all_extra(self):
         extras = self._optional_dependencies()
-        assert "hermes-agent[bedrock]" not in extras["all"]
+        assert "centurion-os[bedrock]" not in extras["all"]
 
 
 # ---------------------------------------------------------------------------

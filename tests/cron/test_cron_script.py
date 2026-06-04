@@ -24,21 +24,21 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 @pytest.fixture
 def cron_env(tmp_path, monkeypatch):
     """Isolated cron environment with temp CENTURION_HOME."""
-    hermes_home = tmp_path / ".centurion"
-    hermes_home.mkdir()
-    (hermes_home / "cron").mkdir()
-    (hermes_home / "cron" / "output").mkdir()
-    (hermes_home / "scripts").mkdir()
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    centurion_home = tmp_path / ".centurion"
+    centurion_home.mkdir()
+    (centurion_home / "cron").mkdir()
+    (centurion_home / "cron" / "output").mkdir()
+    (centurion_home / "scripts").mkdir()
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     # Clear cached module-level paths
     import cron.jobs as jobs_mod
-    monkeypatch.setattr(jobs_mod, "HERMES_DIR", hermes_home)
-    monkeypatch.setattr(jobs_mod, "CRON_DIR", hermes_home / "cron")
-    monkeypatch.setattr(jobs_mod, "JOBS_FILE", hermes_home / "cron" / "jobs.json")
-    monkeypatch.setattr(jobs_mod, "OUTPUT_DIR", hermes_home / "cron" / "output")
+    monkeypatch.setattr(jobs_mod, "HERMES_DIR", centurion_home)
+    monkeypatch.setattr(jobs_mod, "CRON_DIR", centurion_home / "cron")
+    monkeypatch.setattr(jobs_mod, "JOBS_FILE", centurion_home / "cron" / "jobs.json")
+    monkeypatch.setattr(jobs_mod, "OUTPUT_DIR", centurion_home / "cron" / "output")
 
-    return hermes_home
+    return centurion_home
 
 
 class TestJobScriptField:
@@ -296,7 +296,7 @@ class TestScriptPathContainment:
     """
 
     def test_absolute_path_outside_scripts_dir_blocked(self, cron_env):
-        """Absolute paths outside ~/.hermes/scripts/ must be rejected."""
+        """Absolute paths outside ~/.centurion/scripts/ must be rejected."""
         from cron.scheduler import _run_job_script
 
         # Create a script outside the scripts dir

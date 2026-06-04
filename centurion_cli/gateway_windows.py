@@ -13,7 +13,7 @@ Design notes
   ``schtasks /Run`` immediately after install so the gateway starts right
   away without waiting for the next logon.
 * We write two files: a shared ``gateway.cmd`` wrapper script (cwd + env + the
-  actual ``python -m hermes_cli.main gateway run --replace`` invocation) and
+  actual ``python -m centurion_cli.main gateway run --replace`` invocation) and
   EITHER a schtasks entry pointing at it OR a Startup-folder ``.cmd`` that
   spawns it detached.
 * Status = merge of "is the schtasks entry registered?" + "is the startup
@@ -158,7 +158,7 @@ def _launch_elevated_gateway_command(command: str, extra_args: list[str] | None 
     decisions are already collected in the parent shell before this point.
     """
     _assert_windows()
-    args = ["-m", "hermes_cli.main", *_current_profile_cli_args(), "gateway", command]
+    args = ["-m", "centurion_cli.main", *_current_profile_cli_args(), "gateway", command]
     if extra_args:
         args.extend(extra_args)
     params = subprocess.list2cmdline(args)
@@ -234,7 +234,7 @@ def get_task_name() -> str:
     Named profile X: ``Hermes_Gateway_<X>``
     """
     _assert_windows()
-    # Local import to avoid circular module initialization during hermes_cli boot.
+    # Local import to avoid circular module initialization during centurion_cli boot.
     from centurion_cli.gateway import _profile_suffix
 
     suffix = _profile_suffix()
@@ -294,7 +294,7 @@ def get_startup_entry_path() -> Path:
 def _build_gateway_cmd_script(
     python_path: str,
     working_dir: str,
-    hermes_home: str,
+    centurion_home: str,
     profile_arg: str,
 ) -> str:
     """Build the ``gateway.cmd`` wrapper content (CRLF-terminated).
@@ -302,7 +302,7 @@ def _build_gateway_cmd_script(
     The script:
       - cd's into the project directory
       - exports CENTURION_HOME, PYTHONIOENCODING, VIRTUAL_ENV
-      - invokes ``pythonw -m hermes_cli.main [--profile X] gateway run``
+      - invokes ``pythonw -m centurion_cli.main [--profile X] gateway run``
         directly so the wrapper cmd.exe exits without a visible gateway console
 
     We intentionally do NOT inline PATH overrides here — cmd.exe inherits
@@ -311,7 +311,7 @@ def _build_gateway_cmd_script(
     """
     lines = ["@echo off", f"rem {_TASK_DESCRIPTION}"]
     lines.append(f"cd /d {_quote_cmd_script_arg(working_dir)}")
-    lines.append(f'set "CENTURION_HOME={hermes_home}"')
+    lines.append(f'set "CENTURION_HOME={centurion_home}"')
     lines.append('set "PYTHONIOENCODING=utf-8"')
     lines.append('set "HERMES_GATEWAY_DETACHED=1"')
     # VIRTUAL_ENV lets the gateway's own python detection find the venv
@@ -320,7 +320,7 @@ def _build_gateway_cmd_script(
     lines.append(f'set "VIRTUAL_ENV={venv_dir}"')
 
     pythonw_path = _derive_venv_pythonw(python_path)
-    prog_args = [pythonw_path, "-m", "hermes_cli.main"]
+    prog_args = [pythonw_path, "-m", "centurion_cli.main"]
     if profile_arg:
         prog_args.extend(profile_arg.split())
     prog_args.extend(["gateway", "run"])
@@ -360,10 +360,10 @@ def _write_task_script() -> Path:
 
     python_path = get_python_path()
     working_dir = str(PROJECT_ROOT)
-    hermes_home = str(Path(get_centurion_home()).resolve())
-    profile_arg = _profile_arg(hermes_home)
+    centurion_home = str(Path(get_centurion_home()).resolve())
+    profile_arg = _profile_arg(centurion_home)
 
-    content = _build_gateway_cmd_script(python_path, working_dir, hermes_home, profile_arg)
+    content = _build_gateway_cmd_script(python_path, working_dir, centurion_home, profile_arg)
     script_path = get_task_script_path()
     tmp = script_path.with_suffix(".tmp")
     tmp.write_text(content, encoding="utf-8", newline="")
@@ -527,16 +527,16 @@ def _build_gateway_argv() -> tuple[list[str], str, dict[str, str]]:
 
     python_exe, venv_dir, extra_pythonpath = _resolve_detached_python(get_python_path())
     working_dir = str(PROJECT_ROOT)
-    hermes_home = str(Path(get_centurion_home()).resolve())
-    profile_arg = _profile_arg(hermes_home)
+    centurion_home = str(Path(get_centurion_home()).resolve())
+    profile_arg = _profile_arg(centurion_home)
 
-    argv = [python_exe, "-m", "hermes_cli.main"]
+    argv = [python_exe, "-m", "centurion_cli.main"]
     if profile_arg:
         argv.extend(profile_arg.split())
     argv.extend(["gateway", "run"])
 
     env_overlay = {
-        "CENTURION_HOME": hermes_home,
+        "CENTURION_HOME": centurion_home,
         "PYTHONIOENCODING": "utf-8",
         "HERMES_GATEWAY_DETACHED": "1",
         "VIRTUAL_ENV": str(venv_dir),
@@ -548,7 +548,7 @@ def _build_gateway_argv() -> tuple[list[str], str, dict[str, str]]:
 def _spawn_detached(script_path: Path | None = None) -> int:
     """Launch the gateway as a fully detached background process.
 
-    We spawn ``pythonw.exe -m hermes_cli.main gateway run``
+    We spawn ``pythonw.exe -m centurion_cli.main gateway run``
     directly — NOT through a cmd.exe shim — because on Windows a cmd.exe
     child inherits the parent session's console handle and tends to get
     reaped when the spawning shell exits. pythonw.exe has no console, and
@@ -844,11 +844,11 @@ def _report_gateway_start(via: str) -> None:
 def _print_next_steps() -> None:
     from centurion_cli.config import get_centurion_home
 
-    hermes_home = Path(get_centurion_home()).resolve()
+    centurion_home = Path(get_centurion_home()).resolve()
     print()
     print("Next steps:")
     print("  hermes gateway status                      # Check status")
-    print(f"  type {hermes_home}\\logs\\gateway.log       # View logs")
+    print(f"  type {centurion_home}\\logs\\gateway.log       # View logs")
 
 
 def uninstall() -> None:

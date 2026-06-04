@@ -42,16 +42,16 @@ import pytest
 def isolated_home(monkeypatch):
     """Temp CENTURION_HOME with config + clean credential env vars."""
     test_home = tempfile.mkdtemp(prefix="hermes_test_31179_")
-    hermes_home = os.path.join(test_home, ".centurion")
-    os.makedirs(hermes_home)
-    monkeypatch.setenv("CENTURION_HOME", hermes_home)
+    centurion_home = os.path.join(test_home, ".centurion")
+    os.makedirs(centurion_home)
+    monkeypatch.setenv("CENTURION_HOME", centurion_home)
 
     # Strip all credential-shaped env vars so each scenario starts hermetic.
     for k in list(os.environ.keys()):
         if k.endswith("_API_KEY") or k.endswith("_TOKEN"):
             monkeypatch.delenv(k, raising=False)
 
-    yield hermes_home
+    yield centurion_home
     shutil.rmtree(test_home, ignore_errors=True)
 
 
@@ -65,7 +65,7 @@ def _fresh_modules():
     for mod in list(sys.modules.keys()):
         if mod.startswith(("agent.auxiliary_client", "agent.image_routing",
                            "tools.vision_tools", "tools.browser_tool",
-                           "hermes_cli.config")):
+                           "centurion_cli.config")):
             del sys.modules[mod]
 
 

@@ -256,7 +256,7 @@ class QQAdapter(BasePlatformAdapter):
 
         # Default interaction dispatcher: routes approval-button clicks to
         # tools.approval.resolve_gateway_approval() and update-prompt clicks
-        # to ~/.hermes/.update_response. Set here so the cross-adapter gateway
+        # to ~/.centurion/.update_response. Set here so the cross-adapter gateway
         # contract (send_exec_approval / send_update_prompt) works out of the
         # box; callers can override with set_interaction_callback(None) or
         # register a custom handler.
@@ -732,8 +732,8 @@ class QQAdapter(BasePlatformAdapter):
                 "shard": [0, 1],
                 "properties": {
                     "$os": "macOS",
-                    "$browser": "hermes-agent",
-                    "$device": "hermes-agent",
+                    "$browser": "centurion-os",
+                    "$device": "centurion-os",
                 },
             },
         }
@@ -1104,8 +1104,8 @@ class QQAdapter(BasePlatformAdapter):
           :func:`tools.approval.resolve_gateway_approval`
           (unblocks the agent thread waiting on a dangerous-command approval).
         - ``update_prompt:<answer>`` →
-          writes the answer to ``~/.hermes/.update_response`` for the
-          detached ``hermes update --gateway`` process to consume.
+          writes the answer to ``~/.centurion/.update_response`` for the
+          detached ``centurion update --gateway`` process to consume.
         - Anything else is logged at DEBUG and ignored.
 
         Installed as the adapter's default interaction callback in
@@ -1174,13 +1174,13 @@ class QQAdapter(BasePlatformAdapter):
         """Atomically write the update-prompt answer to ``.update_response``.
 
         Mirrors the Discord / Telegram / Feishu adapters: the detached
-        ``hermes update --gateway`` watcher polls this file for a ``y``/``n``
+        ``centurion update --gateway`` watcher polls this file for a ``y``/``n``
         response to its interactive prompts (stash-restore, config migration).
         Writes via ``tmp + rename`` so a partial write can't fool the reader.
         """
         try:
-            from centurion_constants import get_hermes_home
-            home = get_hermes_home()
+            from centurion_constants import get_centurion_home
+            home = get_centurion_home()
             response_path = home / ".update_response"
             tmp = response_path.with_suffix(".tmp")
             tmp.write_text(answer)
@@ -2689,11 +2689,11 @@ class QQAdapter(BasePlatformAdapter):
         """Send a Yes/No update-confirmation prompt with inline buttons.
 
         Matches the cross-adapter contract used by
-        ``gateway/run.py``'s ``hermes update --gateway`` watcher. Button
+        ``gateway/run.py``'s ``centurion update --gateway`` watcher. Button
         clicks surface as ``INTERACTION_CREATE`` with
         ``button_data = 'update_prompt:y'`` or ``'update_prompt:n'``;
         the adapter's interaction callback writes the answer to
-        ``~/.hermes/.update_response`` so the detached update process
+        ``~/.centurion/.update_response`` so the detached update process
         can read it.
         """
         del session_key, metadata  # present for contract parity only.

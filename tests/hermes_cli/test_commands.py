@@ -296,12 +296,12 @@ class TestSlackNativeSlashes:
             assert isinstance(desc, str)
             assert isinstance(hint, str)
 
-    def test_hermes_catchall_is_first(self):
+    def test_centurion_catchall_is_first(self):
         """``/hermes`` must be reserved as the first slot so the legacy
         ``/hermes <subcommand>`` form keeps working after we add new
         commands and hit the 50-slash cap."""
         slashes = slack_native_slashes()
-        assert slashes[0][0] == "hermes"
+        assert slashes[0][0] == "centurion"
 
     def test_names_respect_slack_limits(self):
         for name, _desc, _hint in slack_native_slashes():
@@ -1687,7 +1687,7 @@ class TestPluginCommandEnumeration:
     """
 
     def _patch_plugin_commands(self, monkeypatch, commands):
-        """Monkeypatch hermes_cli.plugins.get_plugin_commands() to a fixed dict."""
+        """Monkeypatch centurion_cli.plugins.get_plugin_commands() to a fixed dict."""
         from centurion_cli import plugins as _plugins_mod
 
         monkeypatch.setattr(

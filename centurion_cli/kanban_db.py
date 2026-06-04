@@ -36,8 +36,8 @@ Board resolution order (highest precedence first, all optional):
   the "currently selected" board. Written by ``hermes kanban boards
   switch <slug>``. When absent, the active board is ``default``.
 
-In standard installs ``<root>`` is ``~/.hermes``. In Docker / custom
-deployments where ``CENTURION_HOME`` points outside ``~/.hermes`` (e.g.
+In standard installs ``<root>`` is ``~/.centurion``. In Docker / custom
+deployments where ``CENTURION_HOME`` points outside ``~/.centurion`` (e.g.
 ``/opt/hermes``), ``<root>`` is ``CENTURION_HOME``. Legacy env-var
 overrides still work:
 
@@ -154,7 +154,7 @@ DEFAULT_BOARD = "default"
 
 # Slug validator: lowercase alphanumerics, digits, hyphens; 1–64 chars.
 # Strict enough to stop traversal (`..`) and embedded path separators, loose
-# enough that kebab-case names like ``atm10-server`` or ``hermes-agent``
+# enough that kebab-case names like ``atm10-server`` or ``centurion-os``
 # pass without fuss. Board names with display formatting (spaces, emoji)
 # live in ``board.json``; the slug is just the directory name.
 _BOARD_SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9\-_]{0,63}$")
@@ -182,7 +182,7 @@ def kanban_home() -> Path:
 
     1. ``HERMES_KANBAN_HOME`` env var when set and non-empty (explicit
        override for tests and unusual deployments).
-    2. ``get_default_hermes_root()``, which already returns ``<root>``
+    2. ``get_default_centurion_root()``, which already returns ``<root>``
        when ``CENTURION_HOME`` is ``<root>/profiles/<name>``, and returns
        ``CENTURION_HOME`` directly for Docker / custom deployments.
 
@@ -194,8 +194,8 @@ def kanban_home() -> Path:
     override = os.environ.get("HERMES_KANBAN_HOME", "").strip()
     if override:
         return Path(override).expanduser()
-    from centurion_constants import get_default_hermes_root
-    return get_default_hermes_root()
+    from centurion_constants import get_default_centurion_root
+    return get_default_centurion_root()
 
 
 def boards_root() -> Path:
@@ -5471,15 +5471,15 @@ def _rotate_worker_log(
         pass
 
 
-def _module_hermes_argv() -> list[str]:
+def _module_centurion_argv() -> list[str]:
     """Return the interpreter-bound Hermes CLI invocation."""
-    # ``hermes_cli.main`` is the console-script target declared in
-    # pyproject.toml, NOT a top-level ``hermes`` package — there is no
-    # ``hermes`` package to import.
-    return [sys.executable, "-m", "hermes_cli.main"]
+    # ``centurion_cli.main`` is the console-script target declared in
+    # pyproject.toml, NOT a top-level ``centurion`` package — there is no
+    # ``centurion`` package to import.
+    return [sys.executable, "-m", "centurion_cli.main"]
 
 
-def _absolute_hermes_path(path: str) -> str:
+def _absolute_centurion_path(path: str) -> str:
     """Return an absolute filesystem path for a resolved Hermes shim."""
     expanded = os.path.expanduser(path)
     return expanded if os.path.isabs(expanded) else os.path.abspath(expanded)
@@ -5533,7 +5533,7 @@ def _safe_which_no_cwd(command: str) -> Optional[str]:
     return None
 
 
-def _hermes_path_argv(path: str) -> list[str]:
+def _centurion_path_argv(path: str) -> list[str]:
     """Return argv for a resolved Hermes executable path.
 
     Windows batch shims (`.cmd` / `.bat`) are not safe as argv[0] for
@@ -5542,32 +5542,32 @@ def _hermes_path_argv(path: str) -> list[str]:
     executable is only a shell shim.
     """
     if _IS_WINDOWS and _is_windows_batch_shim(path):
-        return _module_hermes_argv()
-    return [_absolute_hermes_path(path)]
+        return _module_centurion_argv()
+    return [_absolute_centurion_path(path)]
 
 
-def _resolve_hermes_argv() -> list[str]:
-    """Resolve the ``hermes`` invocation as argv parts for ``Popen``.
+def _resolve_centurion_argv() -> list[str]:
+    """Resolve the ``centurion`` invocation as argv parts for ``Popen``.
 
     Tries in order:
 
     1. ``$HERMES_BIN`` — explicit operator override. Path-like values are
        normalized to absolute paths; bare command names keep normal PATH
        semantics and never prefer a same-directory file before ``PATH``.
-    2. ``shutil.which("hermes")`` — the console-script shim, normalized to
+    2. ``shutil.which("centurion")`` — the console-script shim, normalized to
        an absolute path. On Windows, ``which`` can return a relative
        ``.\\hermes.CMD`` when the current directory is on ``PATH``; directly
        launching batch shims is also unsafe with task-derived argv. The
        dispatcher therefore falls back to the interpreter-bound module form
        for implicit ``.cmd`` / ``.bat`` shims.
-    3. ``sys.executable -m hermes_cli.main`` — fallback for setups where
-       Hermes is launched from a venv and the ``hermes`` shim is not on
+    3. ``sys.executable -m centurion_cli.main`` — fallback for setups where
+       Hermes is launched from a venv and the ``centurion`` shim is not on
        the dispatcher's ``$PATH`` (cron, systemd ``User=`` services,
        launchd jobs, detached processes, etc.). Goes through the running
        interpreter so the result is independent of ``$PATH``.
 
-    Mirrors ``gateway.run._resolve_hermes_bin`` for the same reason. Kept
-    local (not imported from gateway) because ``hermes_cli`` sits below
+    Mirrors ``gateway.run._resolve_centurion_bin`` for the same reason. Kept
+    local (not imported from gateway) because ``centurion_cli`` sits below
     ``gateway`` in the dependency order.
     """
     import shutil
@@ -5575,19 +5575,19 @@ def _resolve_hermes_argv() -> list[str]:
     env_bin = os.environ.get("HERMES_BIN", "").strip()
     if env_bin:
         if _looks_like_path(env_bin):
-            return _hermes_path_argv(env_bin)
+            return _centurion_path_argv(env_bin)
         resolved_env_bin = _safe_which_no_cwd(env_bin)
         if resolved_env_bin:
-            return _hermes_path_argv(resolved_env_bin)
-        return _module_hermes_argv()
+            return _centurion_path_argv(resolved_env_bin)
+        return _module_centurion_argv()
 
-    hermes_bin = _safe_which_no_cwd("hermes") if _IS_WINDOWS else shutil.which("hermes")
+    hermes_bin = _safe_which_no_cwd("centurion") if _IS_WINDOWS else shutil.which("centurion")
     if hermes_bin:
-        return _hermes_path_argv(hermes_bin)
-    return _module_hermes_argv()
+        return _centurion_path_argv(hermes_bin)
+    return _module_centurion_argv()
 
 
-def _kanban_worker_skill_available(hermes_home: Optional[str]) -> bool:
+def _kanban_worker_skill_available(centurion_home: Optional[str]) -> bool:
     """True if the bundled ``kanban-worker`` skill resolves for the home the
     spawned worker will run under.
 
@@ -5604,8 +5604,8 @@ def _kanban_worker_skill_available(hermes_home: Optional[str]) -> bool:
     from pathlib import Path as _Path
 
     # An unset CENTURION_HOME means the worker falls back to the default root
-    # home (``~/.hermes``), which ships the bundled skill.
-    base = _Path(hermes_home) if hermes_home else (_Path.home() / ".centurion")
+    # home (``~/.centurion``), which ships the bundled skill.
+    base = _Path(centurion_home) if centurion_home else (_Path.home() / ".centurion")
     skills_root = base / "skills"
     if not skills_root.is_dir():
         return False
@@ -5724,7 +5724,7 @@ def _default_spawn(
     # Pin the shared board + workspaces root the dispatcher resolved, so
     # that even when the worker activates a profile (`hermes -p <name>`
     # rewrites CENTURION_HOME), its kanban paths still match the
-    # dispatcher's. Belt-and-braces with the `get_default_hermes_root()`
+    # dispatcher's. Belt-and-braces with the `get_default_centurion_root()`
     # resolution in `kanban_home()` — symmetric resolution is the norm,
     # but unusual symlink / Docker layouts are caught here too.
     env["HERMES_KANBAN_DB"] = str(kanban_db_path(board=board))
@@ -5741,7 +5741,7 @@ def _default_spawn(
     env["HERMES_PROFILE"] = profile_arg
 
     cmd = [
-        *_resolve_hermes_argv(),
+        *_resolve_centurion_argv(),
         "-p", profile_arg,
         # Worker subprocesses switch to a profile-scoped CENTURION_HOME above,
         # so they see that profile's shell-hook allowlist instead of the
@@ -5808,7 +5808,7 @@ def _default_spawn(
     except FileNotFoundError:
         log_f.close()
         raise RuntimeError(
-            "`hermes` executable not found on PATH. "
+            "`centurion` executable not found on PATH. "
             "Install Hermes Agent or activate its venv before running the kanban dispatcher."
         )
     # NOTE: we intentionally do NOT close log_f here — we want Popen's
@@ -6488,12 +6488,12 @@ def list_profiles_on_disk() -> list[str]:
     - the implicit ``default`` profile when the default Hermes root exists
 
     Reads profile paths directly so this module has no import dependency on
-    ``hermes_cli.profiles`` (which pulls in a large chunk of the CLI startup
+    ``centurion_cli.profiles`` (which pulls in a large chunk of the CLI startup
     path).
     """
     try:
-        from centurion_constants import get_default_hermes_root
-        default_root = get_default_hermes_root()
+        from centurion_constants import get_default_centurion_root
+        default_root = get_default_centurion_root()
         profiles_dir = default_root / "profiles"
     except Exception:
         return []

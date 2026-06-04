@@ -34,22 +34,22 @@ class TestWriteDenyExactPaths:
         path = os.path.join(str(Path.home()), ".netrc")
         assert _is_write_denied(path) is True
 
-    def test_hermes_env(self):
+    def test_centurion_env(self):
         # ``.env`` under the active CENTURION_HOME (profile-aware, not just
-        # ``~/.hermes``) must be write-denied. The hermetic test conftest
-        # points CENTURION_HOME at a tempdir — resolve via get_hermes_home()
+        # ``~/.centurion``) must be write-denied. The hermetic test conftest
+        # points CENTURION_HOME at a tempdir — resolve via get_centurion_home()
         # to match the denylist.
-        from centurion_constants import get_hermes_home
-        path = str(get_hermes_home() / ".env")
+        from centurion_constants import get_centurion_home
+        path = str(get_centurion_home() / ".env")
         assert _is_write_denied(path) is True
 
-    def test_hermes_root_env_when_running_under_profile(self, tmp_path, monkeypatch):
+    def test_centurion_root_env_when_running_under_profile(self, tmp_path, monkeypatch):
         """Top-level ``<root>/.env`` stays write-denied even when running under
         a profile (#15981).
 
         Before the fix, ``build_write_denied_paths`` only added
         ``<active_profile>/.env`` to the deny list, so the global
-        ``~/.hermes/.env`` (whose credentials are inherited by every profile)
+        ``~/.centurion/.env`` (whose credentials are inherited by every profile)
         could be silently overwritten by ``write_file`` while a profile was
         active.
         """
@@ -62,9 +62,9 @@ class TestWriteDenyExactPaths:
         monkeypatch.setenv("CENTURION_HOME", str(profile_home))
 
         # Sanity check: CENTURION_HOME does point to the profile dir, not the root.
-        from centurion_constants import get_hermes_home, get_default_hermes_root
-        assert get_hermes_home() == profile_home
-        assert get_default_hermes_root() == root
+        from centurion_constants import get_centurion_home, get_default_centurion_root
+        assert get_centurion_home() == profile_home
+        assert get_default_centurion_root() == root
 
         assert _is_write_denied(str(global_env)) is True
 
@@ -124,6 +124,6 @@ class TestWriteAllowed:
     def test_project_file(self):
         assert _is_write_denied("/home/user/project/main.py") is False
 
-    def test_hermes_config_not_env(self):
+    def test_centurion_config_not_env(self):
         path = os.path.join(str(Path.home()), ".centurion", "config.yaml")
         assert _is_write_denied(path) is False

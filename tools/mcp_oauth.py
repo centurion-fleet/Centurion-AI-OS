@@ -101,7 +101,7 @@ _SKIP_TOKENS = frozenset({"skip", "cancel", "s", "n", "no", "q", "quit"})
 # _wait_for_callback maps this to OAuthNonInteractiveError ("user_skipped")
 # so the MCP setup path treats it as a non-fatal "continue without this
 # server" rather than a hard failure.
-_USER_SKIPPED_SENTINEL = "__hermes_user_skipped__"
+_USER_SKIPPED_SENTINEL = "__centurion_user_skipped__"
 
 
 # ---------------------------------------------------------------------------
@@ -116,8 +116,8 @@ def _get_token_dir() -> Path:
     Layout: ``CENTURION_HOME/mcp-tokens/``
     """
     try:
-        from centurion_constants import get_hermes_home
-        base = Path(get_hermes_home())
+        from centurion_constants import get_centurion_home
+        base = Path(get_centurion_home())
     except ImportError:
         base = Path(os.environ.get("CENTURION_HOME", str(Path.home() / ".centurion")))
     return base / "mcp-tokens"
@@ -431,7 +431,7 @@ async def _redirect_handler(authorization_url: str) -> None:
             f"         ssh -N -L {_oauth_port}:127.0.0.1:{_oauth_port} <user>@<this-host>\n"
             f"       then open the URL above and let it redirect normally.\n"
             f"\n"
-            f"  See: https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh\n",
+            f"  See: https://centurion-os.nousresearch.com/docs/guides/oauth-over-ssh\n",
             file=sys.stderr,
         )
 

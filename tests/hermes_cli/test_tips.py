@@ -1,4 +1,4 @@
-"""Tests for hermes_cli/tips.py — random tip display at session start."""
+"""Tests for centurion_cli/tips.py — random tip display at session start."""
 
 import pytest
 from centurion_cli.tips import TIPS, get_random_tip

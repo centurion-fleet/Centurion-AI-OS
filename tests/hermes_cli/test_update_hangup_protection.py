@@ -1,8 +1,8 @@
-"""Tests for SIGHUP protection and stdout mirroring in ``hermes update``.
+"""Tests for SIGHUP protection and stdout mirroring in ``centurion update``.
 
 Covers ``_UpdateOutputStream``, ``_install_hangup_protection``, and
-``_finalize_update_output`` in ``hermes_cli/main.py``.  These exist so
-that ``hermes update`` survives a terminal disconnect mid-install
+``_finalize_update_output`` in ``centurion_cli/main.py``.  These exist so
+that ``centurion update`` survives a terminal disconnect mid-install
 (SSH drop, shell close) without leaving the venv half-installed.
 """
 
@@ -185,7 +185,7 @@ class TestInstallHangupProtection:
     def test_installs_sighup_ignore(self, tmp_path, monkeypatch):
         """SIGHUP should be set to SIG_IGN so SSH disconnect doesn't kill the update."""
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-        # Clear cached get_hermes_home if present
+        # Clear cached get_centurion_home if present
         import centurion_cli.config as _cfg
         if hasattr(_cfg, "_CENTURION_HOME_CACHE"):
             _cfg._CENTURION_HOME_CACHE = None  # type: ignore[attr-defined]
@@ -224,7 +224,7 @@ class TestInstallHangupProtection:
             assert log_path.exists()
             contents = log_path.read_text(encoding="utf-8")
             assert "checking mirror" in contents
-            assert "hermes update started" in contents
+            assert "centurion update started" in contents
         finally:
             _finalize_update_output(state)
             # Sanity-check restoration
@@ -248,7 +248,7 @@ class TestInstallHangupProtection:
             _finalize_update_output(state)
 
     def test_non_fatal_if_log_setup_fails(self, monkeypatch):
-        """If get_hermes_home() raises, stdio must be left untouched but SIGHUP still handled."""
+        """If get_centurion_home() raises, stdio must be left untouched but SIGHUP still handled."""
         prev_out, prev_err = sys.stdout, sys.stderr
 
         def _boom():
@@ -256,7 +256,7 @@ class TestInstallHangupProtection:
 
         # Patch the import inside _install_hangup_protection.
         monkeypatch.setattr(
-            "hermes_cli.config.get_hermes_home", _boom, raising=True
+            "centurion_cli.config.get_centurion_home", _boom, raising=True
         )
 
         original_handler = (

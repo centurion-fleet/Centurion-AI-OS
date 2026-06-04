@@ -81,8 +81,8 @@ def test_named_custom_provider_model_picker_falls_back_on_terminalmenu_runtime_e
         "simple_term_menu",
         types.SimpleNamespace(TerminalMenu=_BrokenTerminalMenu),
     )
-    monkeypatch.setattr("hermes_cli.models.fetch_api_models", lambda *args, **kwargs: ["model-a", "model-b"])
-    monkeypatch.setattr("hermes_cli.auth.deactivate_provider", lambda: None)
+    monkeypatch.setattr("centurion_cli.models.fetch_api_models", lambda *args, **kwargs: ["model-a", "model-b"])
+    monkeypatch.setattr("centurion_cli.auth.deactivate_provider", lambda: None)
 
     cfg = load_config()
     save_config(cfg)

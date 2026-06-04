@@ -49,7 +49,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 # Heavy google-cloud + googleapiclient imports are deferred to first
 # adapter use. Importing them eagerly here added ~110ms wall and ~33MB
 # RSS to *every* CLI invocation (the plugin loader imports this module at
-# ``model_tools`` import time, so ``hermes status``, ``hermes chat``, etc.
+# ``model_tools`` import time, so ``hermes status``, ``centurion chat``, etc.
 # all paid the cost even though they never instantiate the adapter).
 #
 # All names below are module globals that ``_load_google_modules()``
@@ -522,12 +522,12 @@ class GoogleChatAdapter(BasePlatformAdapter):
         # made the in-memory version of this heuristic flaky for
         # multi-restart sessions).
         try:
-            from centurion_constants import get_hermes_home as _get_hermes_home
-            _hermes_home = _get_hermes_home()
+            from centurion_constants import get_centurion_home as _get_centurion_home
+            _centurion_home = _get_centurion_home()
         except (ModuleNotFoundError, ImportError):
-            _hermes_home = _Path.home() / ".centurion"
+            _centurion_home = _Path.home() / ".centurion"
         self._thread_count_store = _ThreadCountStore(
-            _hermes_home / "google_chat_thread_counts.json"
+            _centurion_home / "google_chat_thread_counts.json"
         )
         # In-flight typing-card creates per chat_id. send_typing() reserves
         # an Event here BEFORE starting the API call so concurrent calls
@@ -3025,10 +3025,10 @@ def _env_enablement() -> Optional[Dict[str, Any]]:
 def interactive_setup() -> None:
     """Walk the user through Google Chat configuration via ``hermes setup``.
 
-    The setup wizard at ``hermes_cli/gateway.py`` calls this for plugin
+    The setup wizard at ``centurion_cli/gateway.py`` calls this for plugin
     platforms instead of using the in-tree ``_PLATFORMS`` data block. The
     flow mirrors the in-tree built-ins: print the GCP setup instructions,
-    prompt for env vars, persist them to ``~/.hermes/.env`` so the next
+    prompt for env vars, persist them to ``~/.centurion/.env`` so the next
     gateway restart picks them up.
     """
     from centurion_cli.cli_output import (
@@ -3110,7 +3110,7 @@ def interactive_setup() -> None:
         save_env_value("GOOGLE_CHAT_HOME_CHANNEL", home.strip())
 
     print()
-    print_success("Google Chat configuration saved to ~/.hermes/.env")
+    print_success("Google Chat configuration saved to ~/.centurion/.env")
     print_info("Restart the gateway: hermes gateway restart")
 
 
@@ -3293,7 +3293,7 @@ def register(ctx) -> None:
             "GOOGLE_CHAT_SUBSCRIPTION_NAME",
             "GOOGLE_CHAT_SERVICE_ACCOUNT_JSON",
         ],
-        install_hint="pip install 'hermes-agent[google_chat]'",
+        install_hint="pip install 'centurion-os[google_chat]'",
         setup_fn=interactive_setup,
         # Env-driven auto-configuration — the core env-populator hook calls
         # this during ``_apply_env_overrides`` and seeds

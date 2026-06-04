@@ -8,8 +8,8 @@ from those methods, and callers MUST check supports_runtime_registration()
 before invoking them.
 
 Host-side call sites (setup wizard, uninstall, status) continue to use
-the existing module-level functions in hermes_cli.gateway and
-hermes_cli.gateway_windows directly. This protocol is a thin facade
+the existing module-level functions in centurion_cli.gateway and
+centurion_cli.gateway_windows directly. This protocol is a thin facade
 used by new code that needs to be backend-agnostic — specifically the
 profile create/delete hooks (Phase 4) and the s6 dispatch path in
 ``hermes gateway start/stop/restart`` when running inside a container.
@@ -155,7 +155,7 @@ def _s6_running() -> bool:
 # Backend wrappers
 #
 # These adapters are thin facades over the existing module-level functions
-# in ``hermes_cli.gateway`` (systemd/launchd) and ``hermes_cli.gateway_windows``
+# in ``centurion_cli.gateway`` (systemd/launchd) and ``centurion_cli.gateway_windows``
 # (Windows Scheduled Tasks). The protocol's ``name`` parameter is currently
 # unused for host backends — they operate on whichever profile is currently
 # active (set via the ``hermes -p <profile>`` flag before the call). This
@@ -192,7 +192,7 @@ class _RegistrationUnsupportedMixin:
 
 
 class SystemdServiceManager(_RegistrationUnsupportedMixin):
-    """Thin wrapper around the ``systemd_*`` functions in hermes_cli.gateway.
+    """Thin wrapper around the ``systemd_*`` functions in centurion_cli.gateway.
 
     Existing host call sites continue to use those functions directly;
     this wrapper exists for new code that needs to be backend-agnostic
@@ -220,7 +220,7 @@ class SystemdServiceManager(_RegistrationUnsupportedMixin):
 
 
 class LaunchdServiceManager(_RegistrationUnsupportedMixin):
-    """Thin wrapper around the ``launchd_*`` functions in hermes_cli.gateway."""
+    """Thin wrapper around the ``launchd_*`` functions in centurion_cli.gateway."""
 
     kind: ServiceManagerKind = "launchd"
 
@@ -242,7 +242,7 @@ class LaunchdServiceManager(_RegistrationUnsupportedMixin):
 
 
 class WindowsServiceManager(_RegistrationUnsupportedMixin):
-    """Thin wrapper around ``hermes_cli.gateway_windows`` (Scheduled Task /
+    """Thin wrapper around ``centurion_cli.gateway_windows`` (Scheduled Task /
     Startup-folder fallback).
 
     The native Windows backend uses a Scheduled Task rather than a true
@@ -340,7 +340,7 @@ S6_SERVICE_PREFIX = "gateway-"
 _S6_BIN_DIR = "/command"
 
 
-# UID/GID of the in-image ``hermes`` user. Hardcoded to match what
+# UID/GID of the in-image ``centurion`` user. Hardcoded to match what
 # ``stage2-hook.sh`` enforces (the runtime invariant — see also
 # tests/docker/test_uid_remap.py). The container starts s6-supervise
 # under root and immediately drops to this UID via ``s6-setuidgid``.
@@ -359,7 +359,7 @@ def _seed_supervise_skeleton(svc_dir: Path) -> None:
     ``0700``. It also ``mkfifo``s ``<svc>/supervise/control`` with mode
     ``0600``. Because s6-supervise runs as PID 1's effective UID (root)
     these dirs end up root-owned mode 0700, and an unprivileged client
-    (the ``hermes`` user — UID 10000 — running every Hermes runtime
+    (the ``centurion`` user — UID 10000 — running every Hermes runtime
     operation via ``s6-setuidgid``) gets ``EACCES`` on any ``s6-svc``,
     ``s6-svstat``, or ``s6-svwait`` invocation against the slot.
 
@@ -577,7 +577,7 @@ class S6ServiceManager:
         the top of $CENTURION_HOME, not under profiles/). It must be
         spelled this way because ``_profile_suffix()`` returns the
         empty string for the root profile, and the dispatcher in
-        ``hermes_cli.gateway`` maps that empty string to the
+        ``centurion_cli.gateway`` maps that empty string to the
         ``gateway-default`` service slot. Passing ``-p default`` here
         would instead look up ``$CENTURION_HOME/profiles/default/`` — a
         completely different (and almost always nonexistent) profile.
@@ -588,7 +588,7 @@ class S6ServiceManager:
         ``port`` parameter that was passed in but never substituted
         into the rendered script (it was carried in for "API parity"
         with a deterministic SHA-256 allocator in
-        ``hermes_cli.profiles._allocate_gateway_port``). PR #30136
+        ``centurion_cli.profiles._allocate_gateway_port``). PR #30136
         review item I5 retired both the allocator and the parameter
         because they were dead code through the entire stack.
         """

@@ -50,7 +50,7 @@ def scenario(name):
             os.environ["CENTURION_HOME"] = home
             os.environ["HOME"] = home
             for m in list(sys.modules.keys()):
-                if m.startswith(("hermes_cli", "plugins", "gateway")):
+                if m.startswith(("centurion_cli", "plugins", "gateway")):
                     del sys.modules[m]
             sys.path.insert(0, str(WT))
             from centurion_cli import kanban_db as kb  # noqa: F401
@@ -236,7 +236,7 @@ def _(home, kb):
     ]
     for bad in bad_metas:
         r = subprocess.run(
-            [sys.executable, "-m", "hermes_cli.main", "kanban",
+            [sys.executable, "-m", "centurion_cli.main", "kanban",
              "complete", tid, "--metadata", bad],
             capture_output=True, text=True, env=env,
         )
@@ -441,7 +441,7 @@ def _(home, kb):
             if not resolved_abs.startswith(home_abs) and resolved_abs.startswith("/tmp"):
                 # This is escaping the home dir. Whether that's actually
                 # a problem depends on the threat model. Flag for attention.
-                print(f"  ⚠ workspace resolved OUTSIDE hermes_home: {resolved}")
+                print(f"  ⚠ workspace resolved OUTSIDE centurion_home: {resolved}")
                 print(f"    (not necessarily a bug — dir: workspaces are intentionally arbitrary, but worth documenting)")
         except Exception as e:
             print(f"  resolve_workspace rejected: {e}")
@@ -528,7 +528,7 @@ def _(home, kb):
 # FILESYSTEM WEIRDNESS
 # =============================================================================
 
-@scenario("hermes_home_with_spaces")
+@scenario("centurion_home_with_spaces")
 def _(home, kb):
     """CENTURION_HOME at a path with spaces — should work but catches
     anyone doing string interpolation without quoting."""
@@ -555,7 +555,7 @@ def _(home, kb):
         shutil.rmtree(weird, ignore_errors=True)
 
 
-@scenario("hermes_home_with_unicode")
+@scenario("centurion_home_with_unicode")
 def _(home, kb):
     """CENTURION_HOME with non-ASCII chars."""
     # Pre-create directly since tempfile doesn't love unicode prefixes
@@ -577,7 +577,7 @@ def _(home, kb):
         shutil.rmtree(weird, ignore_errors=True)
 
 
-@scenario("hermes_home_via_symlink")
+@scenario("centurion_home_via_symlink")
 def _(home, kb):
     """CENTURION_HOME is a symlink to the real dir. _INITIALIZED_PATHS
     uses Path.resolve() — two different symlink names pointing at the
@@ -686,11 +686,11 @@ def _(home, kb):
 # CONCURRENCY CORNERS
 # =============================================================================
 
-def _idempotency_race_worker(hermes_home: str, key: str, result_file: str,
+def _idempotency_race_worker(centurion_home: str, key: str, result_file: str,
                              barrier_path: str) -> None:
     """Subprocess body for the idempotency race test."""
-    os.environ["CENTURION_HOME"] = hermes_home
-    os.environ["HOME"] = hermes_home
+    os.environ["CENTURION_HOME"] = centurion_home
+    os.environ["HOME"] = centurion_home
     sys.path.insert(0, str(WT))
     from centurion_cli import kanban_db as kb
 

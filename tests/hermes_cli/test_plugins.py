@@ -1,4 +1,4 @@
-"""Tests for the Hermes plugin system (hermes_cli.plugins)."""
+"""Tests for the Hermes plugin system (centurion_cli.plugins)."""
 
 import logging
 import os
@@ -36,13 +36,13 @@ def _make_plugin_dir(base: Path, name: str, *, register_body: str = "pass",
     """Create a minimal plugin directory with plugin.yaml + __init__.py.
 
     If *auto_enable* is True (default), also write the plugin's name into
-    ``<hermes_home>/config.yaml`` under ``plugins.enabled``. Plugins are
+    ``<centurion_home>/config.yaml`` under ``plugins.enabled``. Plugins are
     opt-in by default, so tests that expect the plugin to actually load
     need this. Pass ``auto_enable=False`` for tests that exercise the
     unenabled path.
 
-    *base* is expected to be ``<hermes_home>/plugins/``; we derive
-    ``<hermes_home>`` from it by walking one level up.
+    *base* is expected to be ``<centurion_home>/plugins/``; we derive
+    ``<centurion_home>`` from it by walking one level up.
     """
     plugin_dir = base / name
     plugin_dir.mkdir(parents=True, exist_ok=True)
@@ -61,13 +61,13 @@ def _make_plugin_dir(base: Path, name: str, *, register_body: str = "pass",
         # Config is always read from CENTURION_HOME (not from the project
         # dir for project plugins), so that's where we opt in.
         import os
-        hermes_home_str = os.environ.get("CENTURION_HOME")
-        if hermes_home_str:
-            hermes_home = Path(hermes_home_str)
+        centurion_home_str = os.environ.get("CENTURION_HOME")
+        if centurion_home_str:
+            centurion_home = Path(centurion_home_str)
         else:
-            hermes_home = base.parent
-        hermes_home.mkdir(parents=True, exist_ok=True)
-        cfg_path = hermes_home / "config.yaml"
+            centurion_home = base.parent
+        centurion_home.mkdir(parents=True, exist_ok=True)
+        cfg_path = centurion_home / "config.yaml"
         cfg: dict = {}
         if cfg_path.exists():
             try:
@@ -90,7 +90,7 @@ class TestPluginDiscovery:
     """Tests for plugin discovery from directories and entry points."""
 
     def test_discover_user_plugins(self, tmp_path, monkeypatch):
-        """Plugins in ~/.hermes/plugins/ are discovered."""
+        """Plugins in ~/.centurion/plugins/ are discovered."""
         plugins_dir = tmp_path / "hermes_test" / "plugins"
         _make_plugin_dir(plugins_dir, "hello_plugin")
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path / "hermes_test"))
@@ -201,11 +201,11 @@ class TestPluginLoading:
         (plugin_dir / "plugin.yaml").write_text(yaml.dump({"name": "bad_plugin"}))
         # Explicitly enable so the loader tries to import it and hits the
         # missing-init error.
-        hermes_home = tmp_path / "hermes_test"
-        (hermes_home / "config.yaml").write_text(
+        centurion_home = tmp_path / "hermes_test"
+        (centurion_home / "config.yaml").write_text(
             yaml.safe_dump({"plugins": {"enabled": ["bad_plugin"]}})
         )
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
         mgr = PluginManager()
         mgr.discover_and_load()
@@ -224,11 +224,11 @@ class TestPluginLoading:
         (plugin_dir / "plugin.yaml").write_text(yaml.dump({"name": "no_reg"}))
         (plugin_dir / "__init__.py").write_text("# no register function\n")
         # Explicitly enable it so the loader actually tries to import.
-        hermes_home = tmp_path / "hermes_test"
-        (hermes_home / "config.yaml").write_text(
+        centurion_home = tmp_path / "hermes_test"
+        (centurion_home / "config.yaml").write_text(
             yaml.safe_dump({"plugins": {"enabled": ["no_reg"]}})
         )
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
         mgr = PluginManager()
         mgr.discover_and_load()
@@ -277,11 +277,11 @@ class TestPluginLoading:
         )
         # Even if the user explicitly enables it in config, the loader
         # should still treat it as exclusive and skip general loading.
-        hermes_home = tmp_path / "hermes_test"
-        (hermes_home / "config.yaml").write_text(
+        centurion_home = tmp_path / "hermes_test"
+        (centurion_home / "config.yaml").write_text(
             yaml.safe_dump({"plugins": {"enabled": ["mempalace"]}})
         )
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
         mgr = PluginManager()
         mgr.discover_and_load()
@@ -487,7 +487,7 @@ class TestPluginHooks:
         )
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path / "hermes_test"))
 
-        with caplog.at_level(logging.WARNING, logger="hermes_cli.plugins"):
+        with caplog.at_level(logging.WARNING, logger="centurion_cli.plugins"):
             mgr = PluginManager()
             mgr.discover_and_load()
 
@@ -499,7 +499,7 @@ class TestPreToolCallBlocking:
 
     def test_block_message_returned_for_valid_directive(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "centurion_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [{"action": "block", "message": "blocked by plugin"}],
         )
         assert get_pre_tool_call_block_message("todo", {}, task_id="t1") == "blocked by plugin"
@@ -507,7 +507,7 @@ class TestPreToolCallBlocking:
     def test_invalid_returns_are_ignored(self, monkeypatch):
         """Various malformed hook returns should not trigger a block."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "centurion_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 "block",                                 # not a dict
                 123,                                     # not a dict
@@ -521,14 +521,14 @@ class TestPreToolCallBlocking:
 
     def test_none_when_no_hooks(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "centurion_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
         assert get_pre_tool_call_block_message("web_search", {"q": "test"}) is None
 
     def test_first_valid_block_wins(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "centurion_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "allow"},
                 {"action": "block", "message": "first blocker"},
@@ -548,7 +548,7 @@ class TestThreadToolWhitelist:
         )
 
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "centurion_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
         set_thread_tool_whitelist({"memory", "skill_manage"})
@@ -564,7 +564,7 @@ class TestThreadToolWhitelist:
         )
 
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "centurion_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
         set_thread_tool_whitelist(
@@ -583,7 +583,7 @@ class TestThreadToolWhitelist:
         )
 
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "centurion_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
         set_thread_tool_whitelist({"memory"})
@@ -602,7 +602,7 @@ class TestThreadToolWhitelist:
         )
 
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "centurion_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
 
@@ -648,11 +648,11 @@ class TestPluginContext:
             '        handler=lambda args, **kw: "echo",\n'
             '    )\n'
         )
-        hermes_home = tmp_path / "hermes_test"
-        (hermes_home / "config.yaml").write_text(
+        centurion_home = tmp_path / "hermes_test"
+        (centurion_home / "config.yaml").write_text(
             yaml.safe_dump({"plugins": {"enabled": ["tool_plugin"]}})
         )
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
         mgr = PluginManager()
         mgr.discover_and_load()
@@ -688,11 +688,11 @@ class TestPluginContext:
                 '        handler=lambda args, **kw: "plugin",\n'
                 '    )\n'
             )
-            hermes_home = tmp_path / "hermes_test"
-            (hermes_home / "config.yaml").write_text(
+            centurion_home = tmp_path / "hermes_test"
+            (centurion_home / "config.yaml").write_text(
                 yaml.safe_dump({"plugins": {"enabled": ["shadow_plugin"]}})
             )
-            monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+            monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
             with caplog.at_level(logging.ERROR, logger="tools.registry"):
                 mgr = PluginManager()
@@ -731,11 +731,11 @@ class TestPluginContext:
                 '        override=True,\n'
                 '    )\n'
             )
-            hermes_home = tmp_path / "hermes_test"
-            (hermes_home / "config.yaml").write_text(
+            centurion_home = tmp_path / "hermes_test"
+            (centurion_home / "config.yaml").write_text(
                 yaml.safe_dump({"plugins": {"enabled": ["override_plugin"]}})
             )
-            monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+            monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
             with caplog.at_level(logging.INFO, logger="tools.registry"):
                 mgr = PluginManager()
@@ -772,11 +772,11 @@ class TestPluginContext:
             '        override=True,\n'
             '    )\n'
         )
-        hermes_home = tmp_path / "hermes_test"
-        (hermes_home / "config.yaml").write_text(
+        centurion_home = tmp_path / "hermes_test"
+        (centurion_home / "config.yaml").write_text(
             yaml.safe_dump({"plugins": {"enabled": ["new_override_plugin"]}})
         )
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
         try:
             mgr = PluginManager()
@@ -809,11 +809,11 @@ class TestPluginToolVisibility:
             '        handler=lambda args, **kw: "ok",\n'
             '    )\n'
         )
-        hermes_home = tmp_path / "hermes_test"
-        (hermes_home / "config.yaml").write_text(
+        centurion_home = tmp_path / "hermes_test"
+        (centurion_home / "config.yaml").write_text(
             yaml.safe_dump({"plugins": {"enabled": ["vis_plugin"]}})
         )
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
         mgr = PluginManager()
         mgr.discover_and_load()
@@ -1074,7 +1074,7 @@ class TestPluginCommands:
         manifest = PluginManifest(name="test-plugin", source="user")
         ctx = PluginContext(manifest, mgr)
 
-        with caplog.at_level(logging.WARNING, logger="hermes_cli.plugins"):
+        with caplog.at_level(logging.WARNING, logger="centurion_cli.plugins"):
             ctx.register_command("", lambda a: a)
         assert len(mgr._plugin_commands) == 0
         assert "empty name" in caplog.text
@@ -1085,7 +1085,7 @@ class TestPluginCommands:
         manifest = PluginManifest(name="test-plugin", source="user")
         ctx = PluginContext(manifest, mgr)
 
-        with caplog.at_level(logging.WARNING, logger="hermes_cli.plugins"):
+        with caplog.at_level(logging.WARNING, logger="centurion_cli.plugins"):
             ctx.register_command("help", lambda a: a)
         assert "help" not in mgr._plugin_commands
         assert "conflicts" in caplog.text.lower()
@@ -1108,14 +1108,14 @@ class TestPluginCommands:
         handler = lambda args: f"result: {args}"
         ctx.register_command("mycmd", handler, description="test")
 
-        with patch("hermes_cli.plugins._plugin_manager", mgr):
+        with patch("centurion_cli.plugins._plugin_manager", mgr):
             result = get_plugin_command_handler("mycmd")
             assert result is handler
 
     def test_get_plugin_command_handler_not_found(self):
         """get_plugin_command_handler() returns None for unregistered commands."""
         mgr = PluginManager()
-        with patch("hermes_cli.plugins._plugin_manager", mgr):
+        with patch("centurion_cli.plugins._plugin_manager", mgr):
             assert get_plugin_command_handler("nonexistent") is None
 
     def test_get_plugin_commands_returns_dict(self):
@@ -1126,7 +1126,7 @@ class TestPluginCommands:
         ctx.register_command("cmd-a", lambda a: a, description="A")
         ctx.register_command("cmd-b", lambda a: a, description="B")
 
-        with patch("hermes_cli.plugins._plugin_manager", mgr):
+        with patch("centurion_cli.plugins._plugin_manager", mgr):
             cmds = get_plugin_commands()
             assert "cmd-a" in cmds
             assert "cmd-b" in cmds
@@ -1168,8 +1168,8 @@ class TestPluginCommands:
 
     def test_get_plugin_context_engine_discovers_plugins_lazily(self, tmp_path, monkeypatch):
         """Context engine lookup should work before any explicit discover_plugins() call."""
-        hermes_home = tmp_path / "hermes_test"
-        plugins_dir = hermes_home / "plugins"
+        centurion_home = tmp_path / "hermes_test"
+        plugins_dir = centurion_home / "plugins"
         plugin_dir = plugins_dir / "engine-plugin"
         plugin_dir.mkdir(parents=True, exist_ok=True)
         (plugin_dir / "plugin.yaml").write_text(
@@ -1195,10 +1195,10 @@ class TestPluginCommands:
             "    ctx.register_context_engine(StubEngine())\n"
         )
         # Opt-in: plugins are opt-in by default, so enable in config.yaml
-        (hermes_home / "config.yaml").write_text(
+        (centurion_home / "config.yaml").write_text(
             yaml.safe_dump({"plugins": {"enabled": ["engine-plugin"]}})
         )
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
         import centurion_cli.plugins as plugins_mod
 
@@ -1292,7 +1292,7 @@ class TestPluginCommandResultResolution:
         async def _handler():
             return "threaded-ok"
 
-        monkeypatch.setattr("hermes_cli.plugins.asyncio.get_running_loop", lambda: _Loop())
+        monkeypatch.setattr("centurion_cli.plugins.asyncio.get_running_loop", lambda: _Loop())
         assert resolve_plugin_command_result(_handler()) == "threaded-ok"
 
     def test_running_loop_timeout_does_not_hang_forever(self, monkeypatch):
@@ -1306,8 +1306,8 @@ class TestPluginCommandResultResolution:
             await _asyncio.sleep(10)
             return "should-not-reach"
 
-        monkeypatch.setattr("hermes_cli.plugins.asyncio.get_running_loop", lambda: _Loop())
-        monkeypatch.setattr("hermes_cli.plugins._PLUGIN_COMMAND_AWAIT_TIMEOUT_SECS", 0.1)
+        monkeypatch.setattr("centurion_cli.plugins.asyncio.get_running_loop", lambda: _Loop())
+        monkeypatch.setattr("centurion_cli.plugins._PLUGIN_COMMAND_AWAIT_TIMEOUT_SECS", 0.1)
 
         import pytest
         with pytest.raises(TimeoutError):
@@ -1329,7 +1329,7 @@ class TestPluginDispatchTool:
         mock_registry = MagicMock()
         mock_registry.dispatch.return_value = '{"result": "ok"}'
 
-        with patch("hermes_cli.plugins.PluginContext.dispatch_tool.__module__", "hermes_cli.plugins"):
+        with patch("centurion_cli.plugins.PluginContext.dispatch_tool.__module__", "centurion_cli.plugins"):
             with patch.dict("sys.modules", {}):
                 with patch("tools.registry.registry", mock_registry):
                     result = ctx.dispatch_tool("web_search", {"query": "test"})

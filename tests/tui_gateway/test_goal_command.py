@@ -19,7 +19,7 @@ import pytest
 
 
 @pytest.fixture()
-def hermes_home(tmp_path, monkeypatch):
+def centurion_home(tmp_path, monkeypatch):
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -34,12 +34,12 @@ def hermes_home(tmp_path, monkeypatch):
 
 
 @pytest.fixture()
-def server(hermes_home):
+def server(centurion_home):
     with patch.dict(
         "sys.modules",
         {
-            "hermes_cli.env_loader": MagicMock(),
-            "hermes_cli.banner": MagicMock(),
+            "centurion_cli.env_loader": MagicMock(),
+            "centurion_cli.banner": MagicMock(),
         },
     ):
         mod = importlib.import_module("tui_gateway.server")

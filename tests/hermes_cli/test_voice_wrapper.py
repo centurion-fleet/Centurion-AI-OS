@@ -1,4 +1,4 @@
-"""Tests for ``hermes_cli.voice`` — the TUI gateway's voice wrapper.
+"""Tests for ``centurion_cli.voice`` — the TUI gateway's voice wrapper.
 
 The module is imported *lazily* by ``tui_gateway/server.py`` so that a
 box with missing audio deps fails at call time (returning a clean RPC

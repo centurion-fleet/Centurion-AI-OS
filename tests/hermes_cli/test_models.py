@@ -1,4 +1,4 @@
-"""Tests for the hermes_cli models module."""
+"""Tests for the centurion_cli models module."""
 
 from unittest.mock import patch, MagicMock
 
@@ -21,25 +21,25 @@ LIVE_OPENROUTER_MODELS = [
 
 class TestModelIds:
     def test_returns_non_empty_list(self):
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             ids = model_ids()
         assert isinstance(ids, list)
         assert len(ids) > 0
 
     def test_ids_match_fetched_catalog(self):
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             ids = model_ids()
         expected = [mid for mid, _ in LIVE_OPENROUTER_MODELS]
         assert ids == expected
 
     def test_all_ids_contain_provider_slash(self):
         """Model IDs should follow the provider/model format."""
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             for mid in model_ids():
                 assert "/" in mid, f"Model ID '{mid}' missing provider/ prefix"
 
     def test_no_duplicate_ids(self):
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             ids = model_ids()
         assert len(ids) == len(set(ids)), "Duplicate model IDs found"
 
@@ -73,7 +73,7 @@ class TestFetchOpenRouterModels:
                 return b'{"data":[{"id":"anthropic/claude-opus-4.6","pricing":{"prompt":"0.000015","completion":"0.000075"}},{"id":"qwen/qwen3.6-plus","pricing":{"prompt":"0.000000325","completion":"0.00000195"}},{"id":"nvidia/nemotron-3-super-120b-a12b:free","pricing":{"prompt":"0","completion":"0"}}]}'
 
         monkeypatch.setattr(_models_mod, "_openrouter_catalog_cache", None)
-        with patch("hermes_cli.models.urllib.request.urlopen", return_value=_Resp()):
+        with patch("centurion_cli.models.urllib.request.urlopen", return_value=_Resp()):
             models = fetch_openrouter_models(force_refresh=True)
 
         assert models == [
@@ -84,7 +84,7 @@ class TestFetchOpenRouterModels:
 
     def test_falls_back_to_static_snapshot_on_fetch_failure(self, monkeypatch):
         monkeypatch.setattr(_models_mod, "_openrouter_catalog_cache", None)
-        with patch("hermes_cli.models.urllib.request.urlopen", side_effect=OSError("boom")):
+        with patch("centurion_cli.models.urllib.request.urlopen", side_effect=OSError("boom")):
             models = fetch_openrouter_models(force_refresh=True)
 
         assert models == OPENROUTER_MODELS
@@ -92,7 +92,7 @@ class TestFetchOpenRouterModels:
     def test_filters_out_models_without_tool_support(self, monkeypatch):
         """Models whose supported_parameters omits 'tools' must not appear in the picker.
 
-        hermes-agent is tool-calling-first — surfacing a non-tool model leads to
+        centurion-os is tool-calling-first — surfacing a non-tool model leads to
         immediate runtime failures when the user selects it. Ported from
         Kilo-Org/kilocode#9068.
         """
@@ -129,7 +129,7 @@ class TestFetchOpenRouterModels:
             ],
         )
         monkeypatch.setattr(_models_mod, "_openrouter_catalog_cache", None)
-        with patch("hermes_cli.models.urllib.request.urlopen", return_value=_Resp()):
+        with patch("centurion_cli.models.urllib.request.urlopen", return_value=_Resp()):
             models = fetch_openrouter_models(force_refresh=True)
 
         ids = [mid for mid, _ in models]
@@ -163,7 +163,7 @@ class TestFetchOpenRouterModels:
                 )
 
         monkeypatch.setattr(_models_mod, "_openrouter_catalog_cache", None)
-        with patch("hermes_cli.models.urllib.request.urlopen", return_value=_Resp()):
+        with patch("centurion_cli.models.urllib.request.urlopen", return_value=_Resp()):
             models = fetch_openrouter_models(force_refresh=True)
 
         ids = [mid for mid, _ in models]
@@ -218,31 +218,31 @@ class TestOpenRouterToolSupportHelper:
 class TestFindOpenrouterSlug:
     def test_exact_match(self):
         from centurion_cli.models import _find_openrouter_slug
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             assert _find_openrouter_slug("anthropic/claude-opus-4.6") == "anthropic/claude-opus-4.6"
 
     def test_bare_name_match(self):
         from centurion_cli.models import _find_openrouter_slug
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             result = _find_openrouter_slug("claude-opus-4.6")
         assert result == "anthropic/claude-opus-4.6"
 
     def test_case_insensitive(self):
         from centurion_cli.models import _find_openrouter_slug
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             result = _find_openrouter_slug("Anthropic/Claude-Opus-4.6")
         assert result is not None
 
     def test_unknown_returns_none(self):
         from centurion_cli.models import _find_openrouter_slug
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             assert _find_openrouter_slug("totally-fake-model-xyz") is None
 
 
 class TestDetectProviderForModel:
     def test_anthropic_model_detected(self):
         """claude-opus-4-6 should resolve to anthropic provider."""
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             result = detect_provider_for_model("claude-opus-4-6", "openai-codex")
         assert result is not None
         assert result[0] == "anthropic"
@@ -261,7 +261,7 @@ class TestDetectProviderForModel:
     def test_short_alias_resolves_to_static_model(self):
         """Short aliases (e.g. sonnet) should resolve without network lookups."""
         with patch(
-            "hermes_cli.models.fetch_openrouter_models",
+            "centurion_cli.models.fetch_openrouter_models",
             side_effect=AssertionError("network lookup should not run"),
         ):
             result = detect_provider_for_model("sonnet", "auto")
@@ -271,7 +271,7 @@ class TestDetectProviderForModel:
 
     def test_openrouter_slug_match(self):
         """Models in the OpenRouter catalog should be found."""
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             result = detect_provider_for_model("anthropic/claude-opus-4.6", "openai-codex")
         assert result is not None
         assert result[0] == "openrouter"
@@ -286,7 +286,7 @@ class TestDetectProviderForModel:
         ):
             monkeypatch.delenv(env_var, raising=False)
         """Bare model names should get mapped to full OpenRouter slugs."""
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             result = detect_provider_for_model("claude-opus-4.6", "openai-codex")
         assert result is not None
         # Should find it on OpenRouter with full slug
@@ -294,12 +294,12 @@ class TestDetectProviderForModel:
 
     def test_unknown_model_returns_none(self):
         """Completely unknown model names should return None."""
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             assert detect_provider_for_model("nonexistent-model-xyz", "openai-codex") is None
 
     def test_aggregator_not_suggested(self):
         """nous/openrouter should never be auto-suggested as target provider."""
-        with patch("hermes_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
+        with patch("centurion_cli.models.fetch_openrouter_models", return_value=LIVE_OPENROUTER_MODELS):
             result = detect_provider_for_model("claude-opus-4-6", "openai-codex")
         assert result is not None
         assert result[0] not in {"nous",}  # nous has claude models but shouldn't be suggested
@@ -409,7 +409,7 @@ class TestUnionWithPortalFreeRecommendations:
         curated = ["anthropic/claude-opus-4.6"]
         pricing = {"anthropic/claude-opus-4.6": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=self._payload(["qwen/qwen3.6-plus"]),
         ):
             ids, p = union_with_portal_free_recommendations(curated, pricing, "")
@@ -429,7 +429,7 @@ class TestUnionWithPortalFreeRecommendations:
             "anthropic/claude-opus-4.6": self._PAID,
         }
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=self._payload(["qwen/qwen3.6-plus"]),
         ):
             ids, p = union_with_portal_free_recommendations(curated, pricing, "")
@@ -446,7 +446,7 @@ class TestUnionWithPortalFreeRecommendations:
         curated = ["qwen/qwen3.6-plus", "anthropic/claude-opus-4.6"]
         pricing = {"anthropic/claude-opus-4.6": self._PAID}  # qwen missing!
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=self._payload(["qwen/qwen3.6-plus"]),
         ):
             ids, p = union_with_portal_free_recommendations(curated, pricing, "")
@@ -458,7 +458,7 @@ class TestUnionWithPortalFreeRecommendations:
         """Empty Portal response leaves curated + pricing untouched."""
         curated = ["a", "b"]
         pricing = {"a": self._PAID}
-        with patch("hermes_cli.models.fetch_nous_recommended_models", return_value={}):
+        with patch("centurion_cli.models.fetch_nous_recommended_models", return_value={}):
             ids, p = union_with_portal_free_recommendations(curated, pricing, "")
         assert ids == curated
         assert p == pricing
@@ -468,7 +468,7 @@ class TestUnionWithPortalFreeRecommendations:
         curated = ["a"]
         pricing = {"a": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value={"paidRecommendedModels": [{"modelName": "x"}]},
         ):
             ids, p = union_with_portal_free_recommendations(curated, pricing, "")
@@ -480,7 +480,7 @@ class TestUnionWithPortalFreeRecommendations:
         curated = ["a"]
         pricing = {"a": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             side_effect=RuntimeError("network down"),
         ):
             ids, p = union_with_portal_free_recommendations(curated, pricing, "")
@@ -492,7 +492,7 @@ class TestUnionWithPortalFreeRecommendations:
         curated = ["a"]
         pricing = {"a": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value={
                 "freeRecommendedModels": [
                     "not-a-dict",
@@ -533,7 +533,7 @@ class TestUnionWithPortalPaidRecommendations:
         curated = ["anthropic/claude-opus-4.6"]
         pricing = {"anthropic/claude-opus-4.6": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=self._payload(["openai/gpt-5.4"]),
         ):
             ids, p = union_with_portal_paid_recommendations(curated, pricing, "")
@@ -555,7 +555,7 @@ class TestUnionWithPortalPaidRecommendations:
         curated = ["anthropic/claude-opus-4.6"]
         pricing = {"anthropic/claude-opus-4.6": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=self._payload(["openai/gpt-5.4"]),
         ):
             _, p = union_with_portal_paid_recommendations(curated, pricing, "")
@@ -571,7 +571,7 @@ class TestUnionWithPortalPaidRecommendations:
             "anthropic/claude-opus-4.6": self._PAID,
         }
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=self._payload(["openai/gpt-5.4"]),
         ):
             ids, p = union_with_portal_paid_recommendations(curated, pricing, "")
@@ -583,7 +583,7 @@ class TestUnionWithPortalPaidRecommendations:
         """Empty Portal response leaves curated + pricing untouched."""
         curated = ["a", "b"]
         pricing = {"a": self._PAID}
-        with patch("hermes_cli.models.fetch_nous_recommended_models", return_value={}):
+        with patch("centurion_cli.models.fetch_nous_recommended_models", return_value={}):
             ids, p = union_with_portal_paid_recommendations(curated, pricing, "")
         assert ids == curated
         assert p == pricing
@@ -593,7 +593,7 @@ class TestUnionWithPortalPaidRecommendations:
         curated = ["a"]
         pricing = {"a": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value={"freeRecommendedModels": [{"modelName": "x"}]},
         ):
             ids, p = union_with_portal_paid_recommendations(curated, pricing, "")
@@ -605,7 +605,7 @@ class TestUnionWithPortalPaidRecommendations:
         curated = ["a"]
         pricing = {"a": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             side_effect=RuntimeError("network down"),
         ):
             ids, p = union_with_portal_paid_recommendations(curated, pricing, "")
@@ -617,7 +617,7 @@ class TestUnionWithPortalPaidRecommendations:
         curated = ["a"]
         pricing = {"a": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value={
                 "paidRecommendedModels": [
                     "not-a-dict",
@@ -637,7 +637,7 @@ class TestUnionWithPortalPaidRecommendations:
         curated = ["anthropic/claude-opus-4.6"]
         pricing = {"anthropic/claude-opus-4.6": self._PAID}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=self._payload(["openai/gpt-5.4", "openai/gpt-5.5"]),
         ):
             ids, _ = union_with_portal_paid_recommendations(curated, pricing, "")
@@ -657,13 +657,13 @@ class TestCheckNousFreeTierCache:
     def teardown_method(self):
         _models_mod._free_tier_cache = None
 
-    @patch("hermes_cli.models.fetch_nous_account_tier")
-    @patch("hermes_cli.models.is_nous_free_tier", return_value=True)
+    @patch("centurion_cli.models.fetch_nous_account_tier")
+    @patch("centurion_cli.models.is_nous_free_tier", return_value=True)
     def test_result_is_cached(self, mock_is_free, mock_fetch):
         """Second call within TTL returns cached result without API call."""
         mock_fetch.return_value = {"subscription": {"monthly_charge": 0}}
-        with patch("hermes_cli.auth.get_provider_auth_state", return_value={"access_token": "tok"}), \
-             patch("hermes_cli.auth.resolve_nous_runtime_credentials"):
+        with patch("centurion_cli.auth.get_provider_auth_state", return_value={"access_token": "tok"}), \
+             patch("centurion_cli.auth.resolve_nous_runtime_credentials"):
             result1 = check_nous_free_tier()
             result2 = check_nous_free_tier()
 
@@ -671,13 +671,13 @@ class TestCheckNousFreeTierCache:
         assert result2 is True
         assert mock_fetch.call_count == 1
 
-    @patch("hermes_cli.models.fetch_nous_account_tier")
-    @patch("hermes_cli.models.is_nous_free_tier", return_value=False)
+    @patch("centurion_cli.models.fetch_nous_account_tier")
+    @patch("centurion_cli.models.is_nous_free_tier", return_value=False)
     def test_cache_expires_after_ttl(self, mock_is_free, mock_fetch):
         """After TTL expires, the API is called again."""
         mock_fetch.return_value = {"subscription": {"monthly_charge": 20}}
-        with patch("hermes_cli.auth.get_provider_auth_state", return_value={"access_token": "tok"}), \
-             patch("hermes_cli.auth.resolve_nous_runtime_credentials"):
+        with patch("centurion_cli.auth.get_provider_auth_state", return_value={"access_token": "tok"}), \
+             patch("centurion_cli.auth.resolve_nous_runtime_credentials"):
             result1 = check_nous_free_tier()
             assert mock_fetch.call_count == 1
 
@@ -764,7 +764,7 @@ class TestNousRecommendedModels:
     def test_get_aux_model_returns_vision_recommendation(self):
         from centurion_cli.models import get_nous_recommended_aux_model
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=self._SAMPLE_PAYLOAD,
         ):
             # Free tier → free vision recommendation.
@@ -776,7 +776,7 @@ class TestNousRecommendedModels:
         payload = dict(self._SAMPLE_PAYLOAD)
         payload["freeRecommendedCompactionModel"] = {"modelName": "minimax/minimax-m2.7"}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=payload,
         ):
             model = get_nous_recommended_aux_model(vision=False, free_tier=True)
@@ -787,7 +787,7 @@ class TestNousRecommendedModels:
         payload = dict(self._SAMPLE_PAYLOAD)
         payload["freeRecommendedCompactionModel"] = None
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=payload,
         ):
             model = get_nous_recommended_aux_model(vision=False, free_tier=True)
@@ -795,7 +795,7 @@ class TestNousRecommendedModels:
 
     def test_get_aux_model_returns_none_on_empty_payload(self):
         from centurion_cli.models import get_nous_recommended_aux_model
-        with patch("hermes_cli.models.fetch_nous_recommended_models", return_value={}):
+        with patch("centurion_cli.models.fetch_nous_recommended_models", return_value={}):
             assert get_nous_recommended_aux_model(vision=False, free_tier=True) is None
             assert get_nous_recommended_aux_model(vision=True, free_tier=False) is None
 
@@ -803,7 +803,7 @@ class TestNousRecommendedModels:
         from centurion_cli.models import get_nous_recommended_aux_model
         payload = {"freeRecommendedCompactionModel": {"modelName": "  "}}
         with patch(
-            "hermes_cli.models.fetch_nous_recommended_models",
+            "centurion_cli.models.fetch_nous_recommended_models",
             return_value=payload,
         ):
             assert get_nous_recommended_aux_model(vision=False, free_tier=True) is None
@@ -817,7 +817,7 @@ class TestNousRecommendedModels:
             "paidRecommendedVisionModel": {"modelName": "openai/gpt-5.4"},
             "freeRecommendedVisionModel": {"modelName": "google/gemini-3-flash-preview"},
         }
-        with patch("hermes_cli.models.fetch_nous_recommended_models", return_value=payload):
+        with patch("centurion_cli.models.fetch_nous_recommended_models", return_value=payload):
             text = get_nous_recommended_aux_model(vision=False, free_tier=False)
             vision = get_nous_recommended_aux_model(vision=True, free_tier=False)
         assert text == "anthropic/claude-opus-4.7"
@@ -832,7 +832,7 @@ class TestNousRecommendedModels:
             "paidRecommendedVisionModel": None,
             "freeRecommendedVisionModel": {"modelName": "google/gemini-3-flash-preview"},
         }
-        with patch("hermes_cli.models.fetch_nous_recommended_models", return_value=payload):
+        with patch("centurion_cli.models.fetch_nous_recommended_models", return_value=payload):
             text = get_nous_recommended_aux_model(vision=False, free_tier=False)
             vision = get_nous_recommended_aux_model(vision=True, free_tier=False)
         assert text == "google/gemini-3-flash-preview"
@@ -845,7 +845,7 @@ class TestNousRecommendedModels:
             "paidRecommendedCompactionModel": {"modelName": "anthropic/claude-opus-4.7"},
             "freeRecommendedCompactionModel": None,  # no free recommendation
         }
-        with patch("hermes_cli.models.fetch_nous_recommended_models", return_value=payload):
+        with patch("centurion_cli.models.fetch_nous_recommended_models", return_value=payload):
             model = get_nous_recommended_aux_model(vision=False, free_tier=True)
         # Free tier must return None — never leak the paid model.
         assert model is None
@@ -858,13 +858,13 @@ class TestNousRecommendedModels:
             "freeRecommendedCompactionModel": {"modelName": "free-model"},
         }
         with (
-            patch("hermes_cli.models.fetch_nous_recommended_models", return_value=payload),
-            patch("hermes_cli.models.check_nous_free_tier", return_value=True),
+            patch("centurion_cli.models.fetch_nous_recommended_models", return_value=payload),
+            patch("centurion_cli.models.check_nous_free_tier", return_value=True),
         ):
             assert get_nous_recommended_aux_model(vision=False) == "free-model"
         with (
-            patch("hermes_cli.models.fetch_nous_recommended_models", return_value=payload),
-            patch("hermes_cli.models.check_nous_free_tier", return_value=False),
+            patch("centurion_cli.models.fetch_nous_recommended_models", return_value=payload),
+            patch("centurion_cli.models.check_nous_free_tier", return_value=False),
         ):
             assert get_nous_recommended_aux_model(vision=False) == "paid-model"
 
@@ -876,7 +876,7 @@ class TestNousRecommendedModels:
             "freeRecommendedCompactionModel": {"modelName": "free-model"},
         }
         with (
-            patch("hermes_cli.models.fetch_nous_recommended_models", return_value=payload),
-            patch("hermes_cli.models.check_nous_free_tier", side_effect=RuntimeError("boom")),
+            patch("centurion_cli.models.fetch_nous_recommended_models", return_value=payload),
+            patch("centurion_cli.models.check_nous_free_tier", side_effect=RuntimeError("boom")),
         ):
             assert get_nous_recommended_aux_model(vision=False) == "paid-model"

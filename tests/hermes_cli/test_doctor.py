@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.doctor."""
+"""Tests for centurion_cli.doctor."""
 
 import os
 import sys
@@ -61,19 +61,19 @@ class TestDoctorEnvFileEncoding:
     ):
         import pathlib
 
-        hermes_home = tmp_path / ".centurion"
-        hermes_home.mkdir()
+        centurion_home = tmp_path / ".centurion"
+        centurion_home.mkdir()
         # Write a UTF-8 .env containing an em dash (U+2014 = e2 80 94). The
         # 0x94 byte is exactly the one the issue reporter hit: it's invalid
         # as a GBK trailing byte in this position, so locale-default reads
         # raise UnicodeDecodeError on Chinese Windows.
-        env_path = hermes_home / ".env"
+        env_path = centurion_home / ".env"
         env_path.write_text(
             "OPENAI_API_KEY=sk-test  # em-dash here — should not crash\n",
             encoding="utf-8",
         )
 
-        monkeypatch.setattr(doctor_mod, "CENTURION_HOME", hermes_home)
+        monkeypatch.setattr(doctor_mod, "CENTURION_HOME", centurion_home)
 
         orig_read_text = pathlib.Path.read_text
 
@@ -193,12 +193,12 @@ class TestHonchoDoctorConfigDetection:
 def test_run_doctor_sets_interactive_env_for_tool_checks(monkeypatch, tmp_path):
     """Doctor should present CLI-gated tools as available in CLI context."""
     project_root = tmp_path / "project"
-    hermes_home = tmp_path / ".centurion"
+    centurion_home = tmp_path / ".centurion"
     project_root.mkdir()
-    hermes_home.mkdir()
+    centurion_home.mkdir()
 
     monkeypatch.setattr(doctor_mod, "PROJECT_ROOT", project_root)
-    monkeypatch.setattr(doctor_mod, "CENTURION_HOME", hermes_home)
+    monkeypatch.setattr(doctor_mod, "CENTURION_HOME", centurion_home)
     monkeypatch.delenv("HERMES_INTERACTIVE", raising=False)
 
     seen = {}
@@ -291,7 +291,7 @@ def test_doctor_reports_vercel_backend_diagnostics(monkeypatch, tmp_path):
 class TestDoctorMemoryProviderSection:
     """The ◆ Memory Provider section should respect memory.provider config."""
 
-    def _make_hermes_home(self, tmp_path, provider=""):
+    def _make_centurion_home(self, tmp_path, provider=""):
         """Create a minimal CENTURION_HOME with config.yaml."""
         home = tmp_path / ".centurion"
         home.mkdir(parents=True, exist_ok=True)
@@ -302,7 +302,7 @@ class TestDoctorMemoryProviderSection:
 
     def _run_doctor_and_capture(self, monkeypatch, tmp_path, provider=""):
         """Run doctor and capture stdout."""
-        home = self._make_hermes_home(tmp_path, provider)
+        home = self._make_centurion_home(tmp_path, provider)
         monkeypatch.setattr(doctor_mod, "CENTURION_HOME", home)
         monkeypatch.setattr(doctor_mod, "PROJECT_ROOT", tmp_path / "project")
         monkeypatch.setattr(doctor_mod, "_DHH", str(home))
@@ -528,7 +528,7 @@ def test_run_doctor_flags_missing_credentials_for_active_openrouter_provider(mon
         ("kimi-coding", "kimi-k2"),
     ],
 )
-def test_run_doctor_accepts_hermes_provider_ids_that_catalog_aliases(
+def test_run_doctor_accepts_centurion_provider_ids_that_catalog_aliases(
     monkeypatch, tmp_path, provider, default_model
 ):
     home = tmp_path / ".centurion"
@@ -1040,9 +1040,9 @@ class TestHasHealthyOauthFallbackForXai:
     def test_returns_false_when_xai_import_unavailable(self, monkeypatch):
         import sys
         # Simulate get_xai_oauth_auth_status missing from auth module
-        monkeypatch.delattr("hermes_cli.auth.get_xai_oauth_auth_status", raising=False)
+        monkeypatch.delattr("centurion_cli.auth.get_xai_oauth_auth_status", raising=False)
         # Force doctor module to re-import the function
-        monkeypatch.delitem(sys.modules, "hermes_cli.doctor", raising=False)
+        monkeypatch.delitem(sys.modules, "centurion_cli.doctor", raising=False)
         from centurion_cli.doctor import _has_healthy_oauth_fallback_for_apikey_provider
         assert _has_healthy_oauth_fallback_for_apikey_provider("xai") is False
 
@@ -1052,7 +1052,7 @@ class TestHasHealthyOauthFallbackForXai:
         # xAI function missing, but Gemini is healthy
         monkeypatch.delattr(_auth_mod, "get_xai_oauth_auth_status", raising=False)
         monkeypatch.setattr(_auth_mod, "get_gemini_oauth_auth_status", lambda: {"logged_in": True})
-        monkeypatch.delitem(sys.modules, "hermes_cli.doctor", raising=False)
+        monkeypatch.delitem(sys.modules, "centurion_cli.doctor", raising=False)
         from centurion_cli.doctor import _has_healthy_oauth_fallback_for_apikey_provider
         assert _has_healthy_oauth_fallback_for_apikey_provider("gemini") is True
 

@@ -129,7 +129,7 @@ class TestOllamaCloudModelCatalog:
                 }
             }
         }
-        with patch("hermes_cli.models.fetch_api_models", return_value=["qwen3.5:397b"]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["qwen3.5:397b"]), \
              patch("agent.models_dev.fetch_models_dev", return_value=mock_mdev):
             result = provider_model_ids("ollama-cloud", force_refresh=True)
 
@@ -155,7 +155,7 @@ class TestOllamaCloudModelPicker:
                 }
             }
         }
-        with patch("hermes_cli.models.fetch_api_models", return_value=["qwen3.5:397b"]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["qwen3.5:397b"]), \
              patch("agent.models_dev.fetch_models_dev", return_value=mock_mdev):
             providers = list_authenticated_providers(current_provider="ollama-cloud")
 
@@ -193,7 +193,7 @@ class TestOllamaCloudMergedDiscovery:
                 }
             }
         }
-        with patch("hermes_cli.models.fetch_api_models", return_value=["qwen3.5:397b", "glm-5"]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["qwen3.5:397b", "glm-5"]), \
              patch("agent.models_dev.fetch_models_dev", return_value=mock_mdev):
             result = fetch_ollama_cloud_models(force_refresh=True)
 
@@ -230,7 +230,7 @@ class TestOllamaCloudMergedDiscovery:
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
         monkeypatch.setenv("OLLAMA_API_KEY", "test-key")
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["model-a"]) as mock_api, \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["model-a"]) as mock_api, \
              patch("agent.models_dev.fetch_models_dev", return_value={}):
             first = fetch_ollama_cloud_models(force_refresh=True)
             assert first == ["model-a"]
@@ -248,7 +248,7 @@ class TestOllamaCloudMergedDiscovery:
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
         monkeypatch.setenv("OLLAMA_API_KEY", "test-key")
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["model-a"]) as mock_api, \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["model-a"]) as mock_api, \
              patch("agent.models_dev.fetch_models_dev", return_value={}):
             fetch_ollama_cloud_models(force_refresh=True)
             fetch_ollama_cloud_models(force_refresh=True)
@@ -273,7 +273,7 @@ class TestOllamaCloudMergedDiscovery:
         with open(cache_path, "w") as f:
             json.dump(data, f)
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=None), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=None), \
              patch("agent.models_dev.fetch_models_dev", return_value={}):
             result = fetch_ollama_cloud_models(force_refresh=True)
 
@@ -461,7 +461,7 @@ class TestOllamaCloudSuffixStripping:
                 }
             }
         }
-        with patch("hermes_cli.models.fetch_api_models", return_value=["kimi-k2.6", "glm-5.1"]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["kimi-k2.6", "glm-5.1"]), \
              patch("agent.models_dev.fetch_models_dev", return_value=mock_mdev):
             result = fetch_ollama_cloud_models(force_refresh=True)
 

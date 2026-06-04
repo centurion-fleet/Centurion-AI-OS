@@ -319,7 +319,7 @@ class TestExecuteCodeModeIntegration(unittest.TestCase):
     def test_project_mode_interpreter_is_venv_python(self):
         """Project mode: sys.executable inside the child is the venv's python
         when VIRTUAL_ENV is set to a real venv."""
-        # The hermes-agent venv is always active during tests, so this also
+        # The centurion-os venv is always active during tests, so this also
         # happens to equal sys.executable of the parent. What we're asserting
         # is: resolver picked a venv-bin/python path, not that it differs
         # from sys.executable.
@@ -334,8 +334,8 @@ class TestExecuteCodeModeIntegration(unittest.TestCase):
                 f"project-mode python should be under VIRTUAL_ENV={ve} or sys.executable={sys.executable}, got {output}",
             )
 
-    def test_project_mode_can_still_import_hermes_tools(self):
-        """Regression: hermes_tools still importable from non-tmpdir CWD.
+    def test_project_mode_can_still_import_centurion_tools(self):
+        """Regression: centurion_tools still importable from non-tmpdir CWD.
 
         This is the PYTHONPATH fix — without it, switching to session CWD
         breaks `from centurion_tools import terminal`.
@@ -351,7 +351,7 @@ class TestExecuteCodeModeIntegration(unittest.TestCase):
             self.assertEqual(result["status"], "success")
             self.assertIn("mock", result["output"])
 
-    def test_strict_mode_can_still_import_hermes_tools(self):
+    def test_strict_mode_can_still_import_centurion_tools(self):
         """Regression: strict mode's tmpdir CWD still works for imports."""
         code = (
             "from centurion_tools import terminal\n"

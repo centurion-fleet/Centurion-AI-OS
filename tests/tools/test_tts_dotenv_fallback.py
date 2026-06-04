@@ -1,10 +1,10 @@
 """Regression tests for #17140.
 
-TTS provider tools must resolve API keys from ``~/.hermes/.env`` (via
-``hermes_cli.config.get_env_value``) and not only from ``os.environ`` —
+TTS provider tools must resolve API keys from ``~/.centurion/.env`` (via
+``centurion_cli.config.get_env_value``) and not only from ``os.environ`` —
 otherwise users who keep their keys in the dotenv file see "API key not set"
 errors even though the key is configured. Same class of bug as #15914 (auth)
-already addressed for ``agent/credential_pool`` and ``hermes_cli/auth``.
+already addressed for ``agent/credential_pool`` and ``centurion_cli/auth``.
 """
 
 from unittest.mock import MagicMock, patch
@@ -33,11 +33,11 @@ def isolate_env(monkeypatch):
 
 
 class TestDotenvFallbackPerProvider:
-    """For each affected provider, when only ``~/.hermes/.env`` carries the
+    """For each affected provider, when only ``~/.centurion/.env`` carries the
     key, the provider must find it. These per-provider tests model that
     dotenv-backed lookup by mocking ``tools.tts_tool.get_env_value`` directly;
     the separate regression-guard tests cover the lower-level
-    ``hermes_cli.config.load_env`` integration. Before the fix, ``os.getenv``
+    ``centurion_cli.config.load_env`` integration. Before the fix, ``os.getenv``
     returned ``None`` and the provider raised
     ``ValueError("X_API_KEY not set")``.
     """
@@ -175,12 +175,12 @@ class TestRegressionGuard:
     """Goal-backward proof that the old behaviour ('only check ``os.environ``')
     breaks reading from a dotenv-only key, and the new behaviour fixes it.
     Implemented as an end-to-end probe that patches
-    ``hermes_cli.config.load_env`` to simulate ``~/.hermes/.env`` carrying the
+    ``centurion_cli.config.load_env`` to simulate ``~/.centurion/.env`` carrying the
     key while ``os.environ`` does not.
     """
 
     def test_import_after_config_env_patch_uses_restored_dotenv_loader(self, tmp_path, monkeypatch):
-        """Importing TTS while hermes_cli.config.get_env_value is patched must
+        """Importing TTS while centurion_cli.config.get_env_value is patched must
         not freeze that temporary helper into this module forever.
         """
         import importlib
@@ -207,7 +207,7 @@ class TestRegressionGuard:
                 return response
 
             with patch(
-                "hermes_cli.config.load_env",
+                "centurion_cli.config.load_env",
                 return_value={"MINIMAX_API_KEY": "dotenv-secret"},
             ), patch("requests.post", side_effect=fake_post):
                 tts_tool._generate_minimax_tts(
@@ -223,11 +223,11 @@ class TestRegressionGuard:
 
         monkeypatch.delenv("MINIMAX_API_KEY", raising=False)
 
-        # Simulate ~/.hermes/.env carrying the key (load_env returns the dict
+        # Simulate ~/.centurion/.env carrying the key (load_env returns the dict
         # that get_env_value falls back to). The pre-fix ``os.getenv`` call
         # ignores this entirely and raises ValueError.
         with patch(
-            "hermes_cli.config.load_env",
+            "centurion_cli.config.load_env",
             return_value={"MINIMAX_API_KEY": "dotenv-secret"},
         ):
             # Sanity-check: get_env_value resolves through load_env when
@@ -260,14 +260,14 @@ class TestRegressionGuard:
         """``check_tts_requirements`` is the gate that decides whether
         ``/voice on`` is even offered. If it only checked ``os.environ`` it
         would say "no provider available" for users who keep MINIMAX_API_KEY
-        in ``~/.hermes/.env``, even though the dispatcher would later succeed.
+        in ``~/.centurion/.env``, even though the dispatcher would later succeed.
         """
         from tools import tts_tool
 
         monkeypatch.delenv("MINIMAX_API_KEY", raising=False)
 
         with patch(
-            "hermes_cli.config.load_env",
+            "centurion_cli.config.load_env",
             return_value={"MINIMAX_API_KEY": "dotenv-secret"},
         ), patch.object(tts_tool, "_import_edge_tts", side_effect=ImportError), \
              patch.object(tts_tool, "_import_elevenlabs", side_effect=ImportError), \

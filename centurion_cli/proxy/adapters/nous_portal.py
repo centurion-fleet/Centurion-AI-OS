@@ -1,13 +1,13 @@
 """Nous Portal upstream adapter.
 
-Reads the user's Nous OAuth state from ``~/.hermes/auth.json`` through the
+Reads the user's Nous OAuth state from ``~/.centurion/auth.json`` through the
 shared runtime resolver, refreshes the access token and resolves the
 ``agent_key`` compatibility credential when needed, then exposes the upstream
 base URL plus bearer for the proxy server to forward to.
 
 The ``agent_key`` field may hold either a NAS invoke JWT or the legacy
 opaque session key. The refresh helper handles both — see
-:func:`hermes_cli.auth.resolve_nous_runtime_credentials`.
+:func:`centurion_cli.auth.resolve_nous_runtime_credentials`.
 """
 
 from __future__ import annotations
@@ -152,7 +152,7 @@ class NousPortalAdapter(UpstreamAdapter):
 
     # ------------------------------------------------------------------
     # Internal helpers — auth.json access. Kept local rather than added
-    # to hermes_cli.auth to avoid expanding that module's public surface.
+    # to centurion_cli.auth to avoid expanding that module's public surface.
     # ------------------------------------------------------------------
 
     def _read_state(self) -> Optional[Dict[str, Any]]:

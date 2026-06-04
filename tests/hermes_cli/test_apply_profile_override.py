@@ -19,7 +19,7 @@ import pytest
 
 
 def _run_apply_profile_override(
-    tmp_path, monkeypatch, *, hermes_home: str | None, active_profile: str | None,
+    tmp_path, monkeypatch, *, centurion_home: str | None, active_profile: str | None,
     argv: list[str] | None = None,
 ):
     """Run _apply_profile_override in isolation.
@@ -37,12 +37,12 @@ def _run_apply_profile_override(
         (hermes_root / "profiles" / active_profile).mkdir(parents=True, exist_ok=True)
 
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    if hermes_home is not None:
-        monkeypatch.setenv("CENTURION_HOME", hermes_home)
+    if centurion_home is not None:
+        monkeypatch.setenv("CENTURION_HOME", centurion_home)
     else:
         monkeypatch.delenv("CENTURION_HOME", raising=False)
 
-    monkeypatch.setattr(sys, "argv", argv or ["hermes", "gateway", "start"])
+    monkeypatch.setattr(sys, "argv", argv or ["centurion", "gateway", "start"])
 
     from centurion_cli.main import _apply_profile_override
     _apply_profile_override()
@@ -58,7 +58,7 @@ class TestApplyProfileOverrideHermesHomeGuard:
     profile directory IS trusted as-is.
     """
 
-    def test_hermes_home_at_root_with_active_profile_is_redirected(
+    def test_centurion_home_at_root_with_active_profile_is_redirected(
         self, tmp_path, monkeypatch
     ):
         """CENTURION_HOME=/root/.hermes + active_profile=coder must redirect
@@ -74,7 +74,7 @@ class TestApplyProfileOverrideHermesHomeGuard:
         result = _run_apply_profile_override(
             tmp_path,
             monkeypatch,
-            hermes_home=str(hermes_root),
+            centurion_home=str(hermes_root),
             active_profile="coder",
         )
 
@@ -86,7 +86,7 @@ class TestApplyProfileOverrideHermesHomeGuard:
             f"Expected CENTURION_HOME to end with 'coder', got: {result!r}"
         )
 
-    def test_hermes_home_already_profile_dir_is_trusted(self, tmp_path, monkeypatch):
+    def test_centurion_home_already_profile_dir_is_trusted(self, tmp_path, monkeypatch):
         """CENTURION_HOME=.../profiles/coder must not be overridden even when
         active_profile says something different.
 
@@ -102,7 +102,7 @@ class TestApplyProfileOverrideHermesHomeGuard:
 
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(profile_dir))
-        monkeypatch.setattr(sys, "argv", ["hermes", "gateway", "start"])
+        monkeypatch.setattr(sys, "argv", ["centurion", "gateway", "start"])
 
         from centurion_cli.main import _apply_profile_override
         _apply_profile_override()
@@ -111,28 +111,28 @@ class TestApplyProfileOverrideHermesHomeGuard:
             "CENTURION_HOME must remain unchanged when already pointing to a profile dir"
         )
 
-    def test_hermes_home_unset_reads_active_profile(self, tmp_path, monkeypatch):
+    def test_centurion_home_unset_reads_active_profile(self, tmp_path, monkeypatch):
         """Classic case: CENTURION_HOME unset + active_profile=coder must set
         CENTURION_HOME to the profile directory (existing behaviour must not regress).
         """
         result = _run_apply_profile_override(
             tmp_path,
             monkeypatch,
-            hermes_home=None,
+            centurion_home=None,
             active_profile="coder",
         )
 
         assert result is not None
         assert "coder" in result
 
-    def test_hermes_home_unset_default_profile_no_redirect(self, tmp_path, monkeypatch):
+    def test_centurion_home_unset_default_profile_no_redirect(self, tmp_path, monkeypatch):
         """active_profile=default must not redirect CENTURION_HOME."""
         hermes_root = tmp_path / ".centurion"
         hermes_root.mkdir(parents=True, exist_ok=True)
 
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.delenv("CENTURION_HOME", raising=False)
-        monkeypatch.setattr(sys, "argv", ["hermes", "gateway", "start"])
+        monkeypatch.setattr(sys, "argv", ["centurion", "gateway", "start"])
         (hermes_root / "active_profile").write_text("default")
 
         from centurion_cli.main import _apply_profile_override

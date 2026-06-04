@@ -31,7 +31,7 @@ _SECRET_SOURCES: dict[str, str] = {}
 
 # CENTURION_HOME paths we've already pulled external secrets for during this
 # process.  ``load_centurion_dotenv()`` is called at module-import time from
-# several hot modules (cli.py, hermes_cli/main.py, run_agent.py,
+# several hot modules (cli.py, centurion_cli/main.py, run_agent.py,
 # trajectory_compressor.py, gateway/run.py, ...), so without this guard the
 # Bitwarden status line gets printed 3-5x per startup.  Bitwarden's own
 # in-process cache prevents redundant network calls, but the print, the
@@ -168,7 +168,7 @@ def _sanitize_env_file_if_needed(path: Path) -> None:
     with ``ValueError: embedded null byte`` — typically introduced by
     copy-pasting API keys from terminals or rich-text editors.
 
-    We delegate to ``hermes_cli.config._sanitize_env_lines`` which
+    We delegate to ``centurion_cli.config._sanitize_env_lines`` which
     already knows all valid Hermes env-var names and can split
     concatenated lines correctly.
     """
@@ -211,20 +211,20 @@ def _sanitize_env_file_if_needed(path: Path) -> None:
 
 def load_centurion_dotenv(
     *,
-    hermes_home: str | os.PathLike | None = None,
+    centurion_home: str | os.PathLike | None = None,
     project_env: str | os.PathLike | None = None,
 ) -> list[Path]:
     """Load Hermes environment files with user config taking precedence.
 
     Behavior:
-    - `~/.hermes/.env` overrides stale shell-exported values when present.
+    - `~/.centurion/.env` overrides stale shell-exported values when present.
     - project `.env` acts as a dev fallback and only fills missing values when
       the user env exists.
     - if no user env exists, the project `.env` also overrides stale shell vars.
     """
     loaded: list[Path] = []
 
-    home_path = Path(hermes_home or os.getenv("CENTURION_HOME", Path.home() / ".centurion"))
+    home_path = Path(centurion_home or os.getenv("CENTURION_HOME", Path.home() / ".centurion"))
     user_env = home_path / ".env"
     project_env_path = Path(project_env) if project_env else None
 
@@ -246,9 +246,6 @@ def load_centurion_dotenv(
 
     return loaded
 
-# Backward-compatible alias for migration compatibility
-load_hermes_dotenv = load_centurion_dotenv
-
 
 def _apply_external_secret_sources(home_path: Path) -> None:
     """Pull secrets from external sources (currently Bitwarden) into env.
@@ -260,11 +257,11 @@ def _apply_external_secret_sources(home_path: Path) -> None:
 
     Idempotent within a process: subsequent calls for the same
     ``home_path`` are no-ops.  ``load_centurion_dotenv()`` runs at import
-    time from several hot modules (cli.py, hermes_cli/main.py,
+    time from several hot modules (cli.py, centurion_cli/main.py,
     run_agent.py, trajectory_compressor.py, ...), so without this guard
     the Bitwarden status line would print 3-5x per CLI startup.  Use
     ``reset_secret_source_cache()`` if you need to force a re-pull
-    (tests, future ``hermes secrets bitwarden sync`` from a long-running
+    (tests, future ``centurion secrets bitwarden sync`` from a long-running
     process).
     """
     home_key = str(Path(home_path).resolve())

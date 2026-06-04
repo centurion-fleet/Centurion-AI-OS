@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.cron command handling."""
+"""Tests for centurion_cli.cron command handling."""
 
 from argparse import Namespace
 

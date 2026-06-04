@@ -241,7 +241,7 @@ def main():
 
         # Fresh module state per sequence to avoid cached init paths.
         for m in list(sys.modules.keys()):
-            if m.startswith("hermes_cli"):
+            if m.startswith("centurion_cli"):
                 del sys.modules[m]
         from centurion_cli import kanban_db as kb
 

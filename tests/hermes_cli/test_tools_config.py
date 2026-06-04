@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.tools_config platform tool persistence."""
+"""Tests for centurion_cli.tools_config platform tool persistence."""
 
 from unittest.mock import patch
 
@@ -132,13 +132,13 @@ def test_get_platform_tools_x_search_auto_enabled_when_xai_oauth_present(monkeyp
     tokens are present, mirroring the HASS_TOKEN → homeassistant rule.
 
     The user already authenticated via SuperGrok OAuth; they shouldn't have
-    to also click through `hermes tools` → X (Twitter) Search to flip the
+    to also click through `centurion tools` → X (Twitter) Search to flip the
     toolset on. Tool's check_fn still gates schema registration if creds
     later go missing.
     """
     monkeypatch.delenv("XAI_API_KEY", raising=False)
     monkeypatch.setattr(
-        "hermes_cli.tools_config._xai_credentials_present", lambda: True
+        "centurion_cli.tools_config._xai_credentials_present", lambda: True
     )
 
     for plat in ("cli", "cron", "telegram"):
@@ -160,7 +160,7 @@ def test_get_platform_tools_x_search_off_when_no_xai_credentials(monkeypatch):
     "don't ship the schema to users who can't use it" default."""
     monkeypatch.delenv("XAI_API_KEY", raising=False)
     monkeypatch.setattr(
-        "hermes_cli.tools_config._xai_credentials_present", lambda: False
+        "centurion_cli.tools_config._xai_credentials_present", lambda: False
     )
 
     cli_enabled = _get_platform_tools({}, "cli")
@@ -168,15 +168,15 @@ def test_get_platform_tools_x_search_off_when_no_xai_credentials(monkeypatch):
 
 
 def test_get_platform_tools_x_search_respects_explicit_config(monkeypatch):
-    """Once the user has saved an explicit toolset list via `hermes tools`,
+    """Once the user has saved an explicit toolset list via `centurion tools`,
     that list is authoritative — x_search auto-enable does NOT fire even
     when xAI creds exist. The saved list represents deliberate choices."""
     monkeypatch.delenv("XAI_API_KEY", raising=False)
     monkeypatch.setattr(
-        "hermes_cli.tools_config._xai_credentials_present", lambda: True
+        "centurion_cli.tools_config._xai_credentials_present", lambda: True
     )
 
-    # User explicitly opted into spotify but not x_search via `hermes tools`.
+    # User explicitly opted into spotify but not x_search via `centurion tools`.
     config = {"platform_toolsets": {"cli": ["hermes-cli", "spotify"]}}
     enabled = _get_platform_tools(config, "cli")
     assert "x_search" not in enabled
@@ -250,7 +250,7 @@ def test_get_platform_tools_preserves_explicit_empty_selection():
     # terminal, memory, …). Non-configurable platform toolsets that ride
     # along on the platform's default composite (e.g. `kanban`, whose tools
     # live in _HERMES_CORE_TOOLS but aren't user-toggleable) are still
-    # auto-recovered by _get_platform_tools so saving via `hermes tools`
+    # auto-recovered by _get_platform_tools so saving via `centurion tools`
     # doesn't silently drop them. The contract this test guards is the
     # configurable side: nothing the user could have checked in the TUI
     # checklist should reappear here.
@@ -264,7 +264,7 @@ def test_apply_toolset_change_from_default_does_not_enable_default_off_toolsets(
     """
     config = {}
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _apply_toolset_change(config, "cli", ["memory"], "disable")
 
     saved = set(config["platform_toolsets"]["cli"])
@@ -276,7 +276,7 @@ def test_apply_toolset_change_from_default_does_not_enable_default_off_toolsets(
 def test_apply_toolset_change_can_enable_default_off_toolset_from_default():
     config = {}
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _apply_toolset_change(config, "cli", ["homeassistant"], "enable")
 
     saved = set(config["platform_toolsets"]["cli"])
@@ -398,7 +398,7 @@ def test_toolset_has_keys_for_vision_accepts_codex_auth(tmp_path, monkeypatch):
 def test_save_platform_tools_preserves_mcp_server_names():
     """Ensure MCP server names are preserved when saving platform tools.
 
-    Regression test for https://github.com/NousResearch/hermes-agent/issues/1247
+    Regression test for https://github.com/NousResearch/centurion-os/issues/1247
     """
     config = {
         "platform_toolsets": {
@@ -408,7 +408,7 @@ def test_save_platform_tools_preserves_mcp_server_names():
 
     new_selection = {"web", "browser"}
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "cli", new_selection)
 
     saved_toolsets = config["platform_toolsets"]["cli"]
@@ -425,7 +425,7 @@ def test_save_platform_tools_handles_empty_existing_config():
     """Saving platform tools works when no existing config exists."""
     config = {}
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "telegram", {"web", "terminal"})
 
     saved_toolsets = config["platform_toolsets"]["telegram"]
@@ -441,7 +441,7 @@ def test_save_platform_tools_handles_invalid_existing_config():
         }
     }
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "cli", {"web"})
 
     saved_toolsets = config["platform_toolsets"]["cli"]
@@ -459,7 +459,7 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
     (like MCP server names), causing them to be kept unconditionally.
 
     Regression test: user unchecks image_gen and homeassistant via
-    ``hermes tools``, but hermes-cli stays in the config and re-enables
+    ``centurion tools``, but hermes-cli stays in the config and re-enables
     everything on the next read.
     """
     config = {
@@ -480,7 +480,7 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
         "skills", "terminal", "todo", "tts", "vision", "web",
     }
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "cli", new_selection)
 
     saved = config["platform_toolsets"]["cli"]
@@ -499,7 +499,7 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
     assert "moa" not in saved
 
 
-def test_save_platform_tools_does_not_preserve_hermes_telegram():
+def test_save_platform_tools_does_not_preserve_centurion_telegram():
     """Same bug for Telegram — hermes-telegram must not be preserved."""
     config = {
         "platform_toolsets": {
@@ -511,7 +511,7 @@ def test_save_platform_tools_does_not_preserve_hermes_telegram():
 
     new_selection = {"browser", "file", "terminal", "web"}
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "telegram", new_selection)
 
     saved = config["platform_toolsets"]["telegram"]
@@ -532,7 +532,7 @@ def test_save_platform_tools_still_preserves_mcp_with_platform_default_present()
 
     new_selection = {"web", "browser"}
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "cli", new_selection)
 
     saved = config["platform_toolsets"]["cli"]
@@ -553,11 +553,11 @@ def test_save_platform_tools_still_preserves_mcp_with_platform_default_present()
 
 
 def test_visible_providers_include_nous_subscription_when_logged_in(monkeypatch):
-    monkeypatch.setattr("hermes_cli.tools_config.managed_nous_tools_enabled", lambda: True)
+    monkeypatch.setattr("centurion_cli.tools_config.managed_nous_tools_enabled", lambda: True)
     config = {"model": {"provider": "nous"}}
 
     monkeypatch.setattr(
-        "hermes_cli.nous_subscription.get_nous_auth_status",
+        "centurion_cli.nous_subscription.get_nous_auth_status",
         lambda: {"logged_in": True},
     )
 
@@ -567,11 +567,11 @@ def test_visible_providers_include_nous_subscription_when_logged_in(monkeypatch)
 
 
 def test_visible_providers_hide_nous_subscription_when_feature_flag_is_off(monkeypatch):
-    monkeypatch.setattr("hermes_cli.tools_config.managed_nous_tools_enabled", lambda: False)
+    monkeypatch.setattr("centurion_cli.tools_config.managed_nous_tools_enabled", lambda: False)
     config = {"model": {"provider": "nous"}}
 
     monkeypatch.setattr(
-        "hermes_cli.nous_subscription.get_nous_auth_status",
+        "centurion_cli.nous_subscription.get_nous_auth_status",
         lambda: {"logged_in": True},
     )
 
@@ -587,7 +587,7 @@ def test_local_browser_provider_is_saved_explicitly(monkeypatch):
         for provider in TOOL_CATEGORIES["browser"]["providers"]
         if provider.get("browser_provider") == "local"
     )
-    monkeypatch.setattr("hermes_cli.tools_config._run_post_setup", lambda key: None)
+    monkeypatch.setattr("centurion_cli.tools_config._run_post_setup", lambda key: None)
 
     _configure_provider(local_provider, config)
 
@@ -600,7 +600,7 @@ def test_reconfigure_lists_enabled_web_without_existing_provider_config(monkeypa
     configured = []
 
     monkeypatch.setattr(
-        "hermes_cli.tools_config._toolset_has_keys",
+        "centurion_cli.tools_config._toolset_has_keys",
         lambda ts_key, config=None: False,
     )
 
@@ -608,12 +608,12 @@ def test_reconfigure_lists_enabled_web_without_existing_provider_config(monkeypa
         seen["choices"] = choices
         return 0
 
-    monkeypatch.setattr("hermes_cli.tools_config._prompt_choice", fake_prompt_choice)
+    monkeypatch.setattr("centurion_cli.tools_config._prompt_choice", fake_prompt_choice)
     monkeypatch.setattr(
-        "hermes_cli.tools_config._configure_tool_category_for_reconfig",
+        "centurion_cli.tools_config._configure_tool_category_for_reconfig",
         lambda ts_key, cat, config: configured.append(ts_key),
     )
-    monkeypatch.setattr("hermes_cli.tools_config.save_config", lambda config: None)
+    monkeypatch.setattr("centurion_cli.tools_config.save_config", lambda config: None)
 
     _reconfigure_tool(config)
 
@@ -622,8 +622,8 @@ def test_reconfigure_lists_enabled_web_without_existing_provider_config(monkeypa
 
 
 def test_first_install_nous_auto_configures_managed_defaults(monkeypatch):
-    monkeypatch.setattr("hermes_cli.tools_config.managed_nous_tools_enabled", lambda: True)
-    monkeypatch.setattr("hermes_cli.nous_subscription.managed_nous_tools_enabled", lambda: True)
+    monkeypatch.setattr("centurion_cli.tools_config.managed_nous_tools_enabled", lambda: True)
+    monkeypatch.setattr("centurion_cli.nous_subscription.managed_nous_tools_enabled", lambda: True)
     config = {
         "model": {"provider": "nous"},
         "platform_toolsets": {"cli": []},
@@ -644,26 +644,26 @@ def test_first_install_nous_auto_configures_managed_defaults(monkeypatch):
         monkeypatch.delenv(env_var, raising=False)
 
     monkeypatch.setattr(
-        "hermes_cli.tools_config._prompt_toolset_checklist",
+        "centurion_cli.tools_config._prompt_toolset_checklist",
         lambda *args, **kwargs: {"web", "image_gen", "tts", "browser"},
     )
-    monkeypatch.setattr("hermes_cli.tools_config.save_config", lambda config: None)
+    monkeypatch.setattr("centurion_cli.tools_config.save_config", lambda config: None)
     # Prevent leaked platform tokens (e.g. DISCORD_BOT_TOKEN from gateway.run
     # import) from adding extra platforms. The loop in tools_command runs
     # apply_nous_managed_defaults per platform; a second iteration sees values
     # set by the first as "explicit" and skips them.
     monkeypatch.setattr(
-        "hermes_cli.tools_config._get_enabled_platforms",
+        "centurion_cli.tools_config._get_enabled_platforms",
         lambda: ["cli"],
     )
     monkeypatch.setattr(
-        "hermes_cli.nous_subscription.get_nous_auth_status",
+        "centurion_cli.nous_subscription.get_nous_auth_status",
         lambda: {"logged_in": True},
     )
 
     configured = []
     monkeypatch.setattr(
-        "hermes_cli.tools_config._configure_toolset",
+        "centurion_cli.tools_config._configure_toolset",
         lambda ts_key, config: configured.append(ts_key),
     )
 
@@ -730,7 +730,7 @@ def test_numeric_mcp_server_name_does_not_crash_sorted():
     _get_platform_tools must normalise them to str so that sorted()
     on the returned set never raises TypeError on mixed int/str.
 
-    Regression test for https://github.com/NousResearch/hermes-agent/issues/6901
+    Regression test for https://github.com/NousResearch/centurion-os/issues/6901
     """
     config = {
         "platform_toolsets": {"cli": ["web", 12306]},
@@ -763,7 +763,7 @@ def test_toolset_has_keys_treats_no_key_providers_as_configured():
 def test_computer_use_needs_configuration_when_cua_driver_post_setup_pending():
     """No-key providers can still need setup when their post_setup is unsatisfied.
 
-    Returning users enabling Computer Use through `hermes tools` must reach the
+    Returning users enabling Computer Use through `centurion tools` must reach the
     cua-driver post-setup installer even though the provider has no API keys.
     """
     with patch("shutil.which", return_value=None):
@@ -873,7 +873,7 @@ class TestImagegenModelPicker:
         from centurion_cli.tools_config import _configure_imagegen_model
         config = {}
         # Force _prompt_choice to pick index 1 (second-in-ordered-list).
-        with patch("hermes_cli.tools_config._prompt_choice", return_value=1):
+        with patch("centurion_cli.tools_config._prompt_choice", return_value=1):
             _configure_imagegen_model("fal", config)
         # ordered[0] == current (default klein), ordered[1] == first non-default
         assert config["image_gen"]["model"] != "fal-ai/flux-2/klein/9b"
@@ -898,7 +898,7 @@ class TestImagegenModelPicker:
             return gpt_idx
 
         config = {}
-        with patch("hermes_cli.tools_config._prompt_choice", side_effect=fake_prompt):
+        with patch("centurion_cli.tools_config._prompt_choice", side_effect=fake_prompt):
             _configure_imagegen_model("fal", config)
 
         assert call_count["n"] == 1, (
@@ -918,7 +918,7 @@ class TestImagegenModelPicker:
         replace it with a fresh dict rather than crash."""
         from centurion_cli.tools_config import _configure_imagegen_model
         config = {"image_gen": "some-garbage-string"}
-        with patch("hermes_cli.tools_config._prompt_choice", return_value=0):
+        with patch("centurion_cli.tools_config._prompt_choice", return_value=0):
             _configure_imagegen_model("fal", config)
         assert isinstance(config["image_gen"], dict)
         assert config["image_gen"]["model"] == "fal-ai/flux-2/klein/9b"
@@ -934,7 +934,7 @@ def test_save_platform_tools_normalizes_numeric_entries():
         }
     }
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "cli", {"web", "browser"})
 
     saved = config["platform_toolsets"]["cli"]
@@ -943,7 +943,7 @@ def test_save_platform_tools_normalizes_numeric_entries():
 
 
 def test_save_platform_tools_clears_no_mcp_sentinel():
-    """`hermes tools` has no UI for no_mcp, so saving from the picker clears
+    """`centurion tools` has no UI for no_mcp, so saving from the picker clears
     the sentinel unconditionally — otherwise a user who once set no_mcp by
     hand could never re-enable MCP servers through the UI.
     """
@@ -953,7 +953,7 @@ def test_save_platform_tools_clears_no_mcp_sentinel():
         }
     }
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "cli", {"web", "browser"})
 
     saved = config["platform_toolsets"]["cli"]
@@ -970,7 +970,7 @@ def test_save_platform_tools_preserves_mcp_server_names():
         }
     }
 
-    with patch("hermes_cli.tools_config.save_config"):
+    with patch("centurion_cli.tools_config.save_config"):
         _save_platform_tools(config, "cli", {"web", "browser"})
 
     saved = config["platform_toolsets"]["cli"]
@@ -1002,7 +1002,7 @@ def test_get_platform_tools_recovers_non_configurable_toolsets_from_composite():
         "_test_platform": {"label": "Test", "default_toolset": "hermes-_test_platform"},
     }
 
-    with mock_patch("hermes_cli.tools_config.PLATFORMS", {**PLATFORMS, **test_platforms}):
+    with mock_patch("centurion_cli.tools_config.PLATFORMS", {**PLATFORMS, **test_platforms}):
         with mock_patch("toolsets.TOOLSETS", fake_toolsets):
             enabled = _get_platform_tools({}, "_test_platform")
 
@@ -1013,7 +1013,7 @@ def test_get_platform_tools_recovers_non_configurable_toolsets_from_composite():
 
 def test_get_platform_tools_second_pass_skips_fully_claimed_toolsets():
     """Toolsets whose tools are fully covered by configurable keys should NOT
-    be added by the second pass (prevents 'search', 'hermes-acp' noise).
+    be added by the second pass (prevents 'search', 'centurion-acp' noise).
     """
     enabled = _get_platform_tools({}, "cli")
 
@@ -1021,7 +1021,7 @@ def test_get_platform_tools_second_pass_skips_fully_claimed_toolsets():
 
 
 def test_get_platform_tools_discord_both_off_by_default():
-    """Both `discord` and `discord_admin` are opt-in via `hermes tools`,
+    """Both `discord` and `discord_admin` are opt-in via `centurion tools`,
     even on the Discord platform itself.  Users shouldn't auto-inherit 19
     extra tools just because DISCORD_BOT_TOKEN is set."""
     enabled = _get_platform_tools({}, "discord")
@@ -1056,7 +1056,7 @@ def test_discord_toolsets_not_available_on_other_platforms():
 
 
 def test_discord_toolsets_user_enabled_are_honored():
-    """When the user opts in via `hermes tools`, the toolset appears."""
+    """When the user opts in via `centurion tools`, the toolset appears."""
     config = {"platform_toolsets": {"discord": ["web", "terminal", "discord"]}}
     enabled = _get_platform_tools(config, "discord")
     assert "discord" in enabled
@@ -1092,7 +1092,7 @@ def test_get_platform_tools_feishu_tools_not_on_other_platforms():
 def test_get_effective_configurable_toolsets_dedupes_bundled_plugins():
     """Bundled plugins (plugins/spotify) share their toolset key with the
     built-in CONFIGURABLE_TOOLSETS entry. The effective list must not list
-    them twice — otherwise `hermes tools` → "reconfigure existing" shows
+    them twice — otherwise `centurion tools` → "reconfigure existing" shows
     the same toolset two rows in a row.
     """
     from centurion_cli.tools_config import _get_effective_configurable_toolsets
@@ -1143,10 +1143,10 @@ def test_reconfigure_provider_runs_post_setup_for_env_var_providers(
     """_reconfigure_provider() must call _run_post_setup() for providers that have
     both env_vars and post_setup — parity with _configure_provider() line 2286."""
     called = []
-    monkeypatch.setattr("hermes_cli.tools_config._run_post_setup", lambda key: called.append(key))
-    monkeypatch.setattr("hermes_cli.tools_config.get_env_value", lambda k: None)
-    monkeypatch.setattr("hermes_cli.tools_config._prompt", lambda *a, **kw: "")
-    monkeypatch.setattr("hermes_cli.tools_config.save_env_value", lambda k, v: None)
+    monkeypatch.setattr("centurion_cli.tools_config._run_post_setup", lambda key: called.append(key))
+    monkeypatch.setattr("centurion_cli.tools_config.get_env_value", lambda k: None)
+    monkeypatch.setattr("centurion_cli.tools_config._prompt", lambda *a, **kw: "")
+    monkeypatch.setattr("centurion_cli.tools_config.save_env_value", lambda k, v: None)
 
     provider = next(
         p

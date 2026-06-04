@@ -241,10 +241,10 @@ def test_load_website_blocklist_wraps_shared_file_read_errors(tmp_path, monkeypa
     assert result["rules"] == []  # shared file rules skipped
 
 
-def test_check_website_access_uses_dynamic_hermes_home(monkeypatch, tmp_path):
-    hermes_home = tmp_path / "hermes-home"
-    hermes_home.mkdir()
-    (hermes_home / "config.yaml").write_text(
+def test_check_website_access_uses_dynamic_centurion_home(monkeypatch, tmp_path):
+    centurion_home = tmp_path / "hermes-home"
+    centurion_home.mkdir()
+    (centurion_home / "config.yaml").write_text(
         yaml.safe_dump(
             {
                 "security": {
@@ -259,11 +259,11 @@ def test_check_website_access_uses_dynamic_hermes_home(monkeypatch, tmp_path):
         encoding="utf-8",
     )
 
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     # Invalidate the module-level cache so the new CENTURION_HOME is picked up.
     # A prior test may have cached a default policy (enabled=False) under the
-    # old CENTURION_HOME set by the autouse _isolate_hermes_home fixture.
+    # old CENTURION_HOME set by the autouse _isolate_centurion_home fixture.
     from tools.website_policy import invalidate_cache
     invalidate_cache()
 

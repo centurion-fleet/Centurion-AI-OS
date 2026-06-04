@@ -1,4 +1,4 @@
-"""Tests for placeholder API key detection in hermes_cli.auth."""
+"""Tests for placeholder API key detection in centurion_cli.auth."""
 
 from centurion_cli.auth import has_usable_secret
 

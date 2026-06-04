@@ -17,14 +17,14 @@ def test_gateway_config_stt_disabled_from_dict_nested():
 
 
 def test_load_gateway_config_bridges_stt_enabled_from_config_yaml(tmp_path, monkeypatch):
-    hermes_home = tmp_path / ".centurion"
-    hermes_home.mkdir()
-    (hermes_home / "config.yaml").write_text(
+    centurion_home = tmp_path / ".centurion"
+    centurion_home.mkdir()
+    (centurion_home / "config.yaml").write_text(
         yaml.dump({"stt": {"enabled": False}}),
         encoding="utf-8",
     )
 
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
     config = load_gateway_config()

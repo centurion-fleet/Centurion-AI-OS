@@ -1,7 +1,7 @@
-"""Tests for hermes_bootstrap — Windows UTF-8 stdio shim.
+"""Tests for centurion_bootstrap — Windows UTF-8 stdio shim.
 
 The bootstrap module is imported at the top of every Hermes entry point
-(hermes, hermes-agent, hermes-acp, gateway, batch_runner, cli.py).  It
+(hermes, centurion-os, centurion-acp, gateway, batch_runner, cli.py).  It
 fixes Python's Windows UTF-8 defaults so print("café") doesn't crash and
 subprocess children inherit UTF-8 mode.
 
@@ -12,7 +12,7 @@ Key invariants covered by these tests:
   3. Idempotent: safe to call multiple times
   4. Respects user opt-out: if the user explicitly sets PYTHONUTF8=0 or
      PYTHONIOENCODING=something-else, we leave those alone
-  5. Load order: every Hermes entry point imports hermes_bootstrap as its
+  5. Load order: every Hermes entry point imports centurion_bootstrap as its
      first non-docstring import (before anything that might do file I/O
      or print to stdout)
 """
@@ -33,14 +33,14 @@ import pytest
 # We need to be able to reset its state between tests, so we import it
 # fresh in each test that manipulates _IS_WINDOWS.
 def _fresh_import():
-    """Return a freshly-imported hermes_bootstrap module.
+    """Return a freshly-imported centurion_bootstrap module.
 
     Drops any cached copy from sys.modules first so module-level code
     runs again and the platform check re-evaluates.
     """
-    sys.modules.pop("hermes_bootstrap", None)
+    sys.modules.pop("centurion_bootstrap", None)
     import centurion_bootstrap  # noqa: WPS433
-    return hermes_bootstrap
+    return centurion_bootstrap
 
 
 class TestWindowsBehavior:
@@ -241,9 +241,9 @@ class TestEntryPointsImportBootstrap:
     # Entry points that invoke Hermes as a process.  Each one must
     # import centurion_bootstrap before doing any file I/O or stdout writes.
     ENTRY_POINTS = [
-        "hermes_cli/main.py",   # hermes CLI (console_script)
-        "run_agent.py",          # hermes-agent (console_script)
-        "acp_adapter/entry.py",  # hermes-acp (console_script)
+        "centurion_cli/main.py",   # hermes CLI (console_script)
+        "run_agent.py",          # centurion-os (console_script)
+        "acp_adapter/entry.py",  # centurion-acp (console_script)
         "gateway/run.py",        # gateway
         "batch_runner.py",       # batch mode
         "cli.py",                # legacy direct-launch CLI
@@ -260,15 +260,15 @@ class TestEntryPointsImportBootstrap:
 
         Also lenient about a try/except wrapper around the import: entry
         points may guard the import against ``ModuleNotFoundError`` so a
-        half-finished ``hermes update`` (git-reset landed new code but
+        half-finished ``centurion update`` (git-reset landed new code but
         ``uv pip install -e .`` didn't finish re-registering
-        ``hermes_bootstrap`` as a top-level module) leaves hermes
+        ``centurion_bootstrap`` as a top-level module) leaves hermes
         recoverable instead of crashing on every invocation.  When the
         first top-level node is such a guarded-import block, we peek
         inside it to verify bootstrap is the imported module.
         """
-        # Resolve relative to the hermes-agent repo root.  Tests live
-        # at tests/test_hermes_bootstrap.py, so go up one dir.
+        # Resolve relative to the centurion-os repo root.  Tests live
+        # at tests/test_centurion_bootstrap.py, so go up one dir.
         import pathlib
         here = pathlib.Path(__file__).resolve()
         repo_root = here.parent.parent  # tests/ -> repo root
@@ -289,7 +289,7 @@ class TestEntryPointsImportBootstrap:
                 break
             # Accept a guarded-import Try block where the body is a lone
             # Import node — this is the recovery-friendly form that lets
-            # hermes start even when hermes_bootstrap hasn't been
+            # hermes start even when centurion_bootstrap hasn't been
             # re-registered in the venv yet.
             if isinstance(node, ast.Try) and len(node.body) == 1 and isinstance(
                 node.body[0], (ast.Import, ast.ImportFrom)
@@ -306,9 +306,9 @@ class TestEntryPointsImportBootstrap:
         else:  # ImportFrom
             first_import_name = first_import_node.module or ""
 
-        assert first_import_name == "hermes_bootstrap", (
+        assert first_import_name == "centurion_bootstrap", (
             f"{path}: first top-level import is {first_import_name!r}, "
-            f"but it must be 'hermes_bootstrap' so UTF-8 stdio is "
+            f"but it must be 'centurion_bootstrap' so UTF-8 stdio is "
             f"configured before anything else initializes.  Move the "
             f"'import centurion_bootstrap' line to be the first import."
         )

@@ -705,7 +705,7 @@ class GeminiCloudCodeClient:
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": f"Bearer {access_token}",
-            "User-Agent": "hermes-agent (gemini-cli-compat)",
+            "User-Agent": "centurion-os (gemini-cli-compat)",
             "X-Goog-Api-Client": "gl-python/hermes",
             "x-activity-request-id": str(uuid.uuid4()),
         }
@@ -885,7 +885,7 @@ def _gemini_http_error(response: httpx.Response) -> CodeAssistError:
         message = (
             f"Code Assist 404: {target} is not available at "
             f"cloudcode-pa.googleapis.com. It may have been renamed or "
-            f"retired. Check hermes_cli/models.py for the current list."
+            f"retired. Check centurion_cli/models.py for the current list."
         )
     elif err_message:
         # Generic fallback with the parsed message.

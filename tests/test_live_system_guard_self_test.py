@@ -180,25 +180,25 @@ def test_asyncio_create_subprocess_shell_systemctl_blocked():
 # ──────────────────── pkill / killall / taskkill ───────────────
 
 
-def test_subprocess_pkill_hermes_blocked():
+def test_subprocess_pkill_centurion_blocked():
     with pytest.raises(RuntimeError, match="live-system guard"):
-        subprocess.run(["pkill", "-f", "hermes"])
+        subprocess.run(["pkill", "-f", "centurion"])
 
 
-def test_subprocess_pkill_hermes_gateway_blocked():
+def test_subprocess_pkill_centurion_gateway_blocked():
     with pytest.raises(RuntimeError, match="live-system guard"):
         subprocess.run(["pkill", "-f", "hermes-gateway"])
 
 
 def test_subprocess_pkill_python_dash_f_blocked():
-    """``pkill -f python`` matches the gateway's "python -m hermes_cli.main"."""
+    """``pkill -f python`` matches the gateway's "python -m centurion_cli.main"."""
     with pytest.raises(RuntimeError, match="live-system guard"):
         subprocess.run(["pkill", "-f", "python"])
 
 
-def test_subprocess_killall_hermes_blocked():
+def test_subprocess_killall_centurion_blocked():
     with pytest.raises(RuntimeError, match="live-system guard"):
-        subprocess.run(["killall", "hermes"])
+        subprocess.run(["killall", "centurion"])
 
 
 # ──────────────────── pass-through cases (must NOT raise) ──────

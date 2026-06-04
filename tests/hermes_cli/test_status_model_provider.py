@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.status model/provider display."""
+"""Tests for centurion_cli.status model/provider display."""
 
 from types import SimpleNamespace
 
@@ -9,7 +9,7 @@ def _patch_common_status_deps(monkeypatch, status_mod, tmp_path, *, openai_base_
     import centurion_cli.auth as auth_mod
 
     monkeypatch.setattr(status_mod, "get_env_path", lambda: tmp_path / ".env", raising=False)
-    monkeypatch.setattr(status_mod, "get_hermes_home", lambda: tmp_path, raising=False)
+    monkeypatch.setattr(status_mod, "get_centurion_home", lambda: tmp_path, raising=False)
 
     def _get_env_value(name: str):
         if name == "OPENAI_BASE_URL":
@@ -64,7 +64,7 @@ def test_show_status_displays_legacy_string_model_and_custom_endpoint(monkeypatc
 
 
 def test_show_status_reports_managed_nous_features(monkeypatch, capsys, tmp_path):
-    monkeypatch.setattr("hermes_cli.status.managed_nous_tools_enabled", lambda: True)
+    monkeypatch.setattr("centurion_cli.status.managed_nous_tools_enabled", lambda: True)
     from centurion_cli import status as status_mod
 
     _patch_common_status_deps(monkeypatch, status_mod, tmp_path)
@@ -104,7 +104,7 @@ def test_show_status_reports_managed_nous_features(monkeypatch, capsys, tmp_path
 
 
 def test_show_status_hides_nous_subscription_section_when_feature_flag_is_off(monkeypatch, capsys, tmp_path):
-    monkeypatch.setattr("hermes_cli.status.managed_nous_tools_enabled", lambda: False)
+    monkeypatch.setattr("centurion_cli.status.managed_nous_tools_enabled", lambda: False)
     from centurion_cli import status as status_mod
 
     _patch_common_status_deps(monkeypatch, status_mod, tmp_path)
@@ -144,7 +144,7 @@ def test_show_status_reports_empty_lmstudio_listing_as_reachable(monkeypatch, ca
     monkeypatch.setattr(status_mod, "resolve_provider", lambda requested=None, **kwargs: "lmstudio", raising=False)
     monkeypatch.setattr(status_mod, "provider_label", lambda provider: "LM Studio", raising=False)
     monkeypatch.setattr(
-        "hermes_cli.models.probe_lmstudio_models",
+        "centurion_cli.models.probe_lmstudio_models",
         lambda api_key=None, base_url=None, timeout=5.0: [],
     )
 

@@ -52,7 +52,7 @@ def test_clamp_collision_emits_warning_naming_both_skills(
         },
     }
 
-    with caplog.at_level(logging.WARNING, logger="hermes_cli.commands"), (
+    with caplog.at_level(logging.WARNING, logger="centurion_cli.commands"), (
         patch("agent.skill_commands.get_skill_commands", return_value=fake_cmds)
     ), patch("tools.skills_tool.SKILLS_DIR", skills_dir):
         categories, uncategorized, hidden = discord_skill_commands_by_category(
@@ -108,7 +108,7 @@ def test_clamp_collision_with_reserved_name_emits_distinct_warning(
         },
     }
 
-    with caplog.at_level(logging.WARNING, logger="hermes_cli.commands"), (
+    with caplog.at_level(logging.WARNING, logger="centurion_cli.commands"), (
         patch("agent.skill_commands.get_skill_commands", return_value=fake_cmds)
     ), patch("tools.skills_tool.SKILLS_DIR", skills_dir):
         categories, uncategorized, hidden = discord_skill_commands_by_category(
@@ -154,7 +154,7 @@ def test_no_collision_no_warning(tmp_path: Path, caplog) -> None:
         },
     }
 
-    with caplog.at_level(logging.WARNING, logger="hermes_cli.commands"), (
+    with caplog.at_level(logging.WARNING, logger="centurion_cli.commands"), (
         patch("agent.skill_commands.get_skill_commands", return_value=fake_cmds)
     ), patch("tools.skills_tool.SKILLS_DIR", skills_dir):
         categories, uncategorized, hidden = discord_skill_commands_by_category(

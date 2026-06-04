@@ -147,7 +147,7 @@ class XAIImageGenProvider(ImageGenProvider):
 
     def get_setup_schema(self) -> Dict[str, Any]:
         # Auth resolution is delegated to the shared ``xai_grok`` post_setup
-        # hook (``hermes_cli/tools_config.py``); identical to the TTS / video
+        # hook (``centurion_cli/tools_config.py``); identical to the TTS / video
         # gen entries so users see the same OAuth-or-API-key choice for every
         # xAI service.
         return {

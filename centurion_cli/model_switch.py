@@ -58,9 +58,9 @@ _HERMES_MODEL_WARNING = (
 )
 
 # Match only the real Nous Research Hermes 3 / Hermes 4 chat families.
-# The previous substring check (`"hermes" in name.lower()`) false-positived on
+# The previous substring check (`"centurion" in name.lower()`) false-positived on
 # unrelated local Modelfiles like ``hermes-brain:qwen3-14b-ctx16k`` that just
-# happen to carry "hermes" in their tag but are fully tool-capable.
+# happen to carry "centurion" in their tag but are fully tool-capable.
 #
 # Positive examples the regex must match:
 #   NousResearch/Hermes-3-Llama-3.1-70B, hermes-4-405b, openrouter/hermes3:70b
@@ -72,7 +72,7 @@ _NOUS_HERMES_NON_AGENTIC_RE = re.compile(
 )
 
 
-def is_nous_hermes_non_agentic(model_name: str) -> bool:
+def is_nous_centurion_non_agentic(model_name: str) -> bool:
     """Return True if *model_name* is a real Nous Hermes 3/4 chat model.
 
     Used to decide whether to surface the non-agentic warning at startup.
@@ -84,9 +84,9 @@ def is_nous_hermes_non_agentic(model_name: str) -> bool:
     return bool(_NOUS_HERMES_NON_AGENTIC_RE.search(model_name))
 
 
-def _check_hermes_model_warning(model_name: str) -> str:
+def _check_centurion_model_warning(model_name: str) -> str:
     """Return a warning string if *model_name* is a Nous Hermes 3/4 chat model."""
-    if is_nous_hermes_non_agentic(model_name):
+    if is_nous_centurion_non_agentic(model_name):
         return _HERMES_MODEL_WARNING
     return ""
 
@@ -1018,7 +1018,7 @@ def switch_model(
     warnings: list[str] = []
     if validation.get("message"):
         warnings.append(validation["message"])
-    hermes_warn = _check_hermes_model_warning(new_model)
+    hermes_warn = _check_centurion_model_warning(new_model)
     if hermes_warn:
         warnings.append(hermes_warn)
 
@@ -1162,7 +1162,7 @@ def list_authenticated_providers(
     curated: dict[str, list[str]] = dict(_PROVIDER_MODELS)
     curated["openrouter"] = [mid for mid, _ in OPENROUTER_MODELS]
     # "nous" pulls from the remote model-catalog manifest published at
-    # https://hermes-agent.nousresearch.com/docs/api/model-catalog.json so
+    # https://centurion-os.nousresearch.com/docs/api/model-catalog.json so
     # newly added Portal models surface in the /model picker without
     # requiring a Hermes release. Falls back to the in-repo
     # _PROVIDER_MODELS["nous"] snapshot when the manifest is unreachable.
@@ -1334,9 +1334,9 @@ def list_authenticated_providers(
             try:
                 from agent.anthropic_adapter import (
                     read_claude_code_credentials,
-                    read_hermes_oauth_credentials,
+                    read_centurion_oauth_credentials,
                 )
-                hermes_creds = read_hermes_oauth_credentials()
+                hermes_creds = read_centurion_oauth_credentials()
                 cc_creds = read_claude_code_credentials()
                 if (hermes_creds and hermes_creds.get("accessToken")) or \
                    (cc_creds and cc_creds.get("accessToken")):
@@ -1380,7 +1380,7 @@ def list_authenticated_providers(
             "is_user_defined": False,
             "models": top,
             "total_models": total,
-            "source": "hermes",
+            "source": "centurion",
         })
         seen_slugs.add(pid.lower())
         seen_slugs.add(hermes_slug.lower())

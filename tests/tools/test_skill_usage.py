@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 
 
-def _bump_view_many(hermes_home: str, skill_name: str, iterations: int) -> None:
-    os.environ["CENTURION_HOME"] = hermes_home
+def _bump_view_many(centurion_home: str, skill_name: str, iterations: int) -> None:
+    os.environ["CENTURION_HOME"] = centurion_home
     from tools.skill_usage import bump_view
 
     for _ in range(iterations):

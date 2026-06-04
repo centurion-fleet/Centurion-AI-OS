@@ -210,8 +210,8 @@ class TestAddCommand:
             }
             save_config(cfg)
 
-        with patch("hermes_cli.main.select_provider_and_model", side_effect=fake_picker), \
-                patch("hermes_cli.main._require_tty"):
+        with patch("centurion_cli.main.select_provider_and_model", side_effect=fake_picker), \
+                patch("centurion_cli.main._require_tty"):
             from centurion_cli.fallback_cmd import cmd_fallback_add
             cmd_fallback_add(types.SimpleNamespace())
 
@@ -245,8 +245,8 @@ class TestAddCommand:
             cfg["model"] = {"provider": "openrouter", "default": "gpt-5.4"}
             save_config(cfg)
 
-        with patch("hermes_cli.main.select_provider_and_model", side_effect=fake_picker), \
-                patch("hermes_cli.main._require_tty"):
+        with patch("centurion_cli.main.select_provider_and_model", side_effect=fake_picker), \
+                patch("centurion_cli.main._require_tty"):
             from centurion_cli.fallback_cmd import cmd_fallback_add
             cmd_fallback_add(types.SimpleNamespace())
 
@@ -268,8 +268,8 @@ class TestAddCommand:
             cfg["model"] = {"provider": "openrouter", "default": "gpt-5.4"}
             save_config(cfg)
 
-        with patch("hermes_cli.main.select_provider_and_model", side_effect=fake_picker), \
-                patch("hermes_cli.main._require_tty"):
+        with patch("centurion_cli.main.select_provider_and_model", side_effect=fake_picker), \
+                patch("centurion_cli.main._require_tty"):
             from centurion_cli.fallback_cmd import cmd_fallback_add
             cmd_fallback_add(types.SimpleNamespace())
 
@@ -300,8 +300,8 @@ class TestAddCommand:
             }
             save_config(cfg)
 
-        with patch("hermes_cli.main.select_provider_and_model", side_effect=fake_picker), \
-                patch("hermes_cli.main._require_tty"):
+        with patch("centurion_cli.main.select_provider_and_model", side_effect=fake_picker), \
+                patch("centurion_cli.main._require_tty"):
             from centurion_cli.fallback_cmd import cmd_fallback_add
             cmd_fallback_add(types.SimpleNamespace())
 
@@ -324,8 +324,8 @@ class TestAddCommand:
             # User cancelled — no change to config
             pass
 
-        with patch("hermes_cli.main.select_provider_and_model", side_effect=fake_picker), \
-                patch("hermes_cli.main._require_tty"):
+        with patch("centurion_cli.main.select_provider_and_model", side_effect=fake_picker), \
+                patch("centurion_cli.main._require_tty"):
             from centurion_cli.fallback_cmd import cmd_fallback_add
             cmd_fallback_add(types.SimpleNamespace())
 
@@ -348,8 +348,8 @@ class TestAddCommand:
             cfg["model"] = {"provider": "", "default": ""}
             save_config(cfg)
 
-        with patch("hermes_cli.main.select_provider_and_model", side_effect=fake_picker), \
-                patch("hermes_cli.main._require_tty"):
+        with patch("centurion_cli.main.select_provider_and_model", side_effect=fake_picker), \
+                patch("centurion_cli.main._require_tty"):
             from centurion_cli.fallback_cmd import cmd_fallback_add
             cmd_fallback_add(types.SimpleNamespace())
 
@@ -379,7 +379,7 @@ class TestRemoveCommand:
         })
 
         # Picker returns index 1 (the middle entry, "nous / Hermes-4")
-        with patch("hermes_cli.setup._curses_prompt_choice", return_value=1):
+        with patch("centurion_cli.setup._curses_prompt_choice", return_value=1):
             from centurion_cli.fallback_cmd import cmd_fallback_remove
             cmd_fallback_remove(types.SimpleNamespace())
 
@@ -400,7 +400,7 @@ class TestRemoveCommand:
         })
 
         # Cancel = last item (index == len(chain) == 1 in our menu)
-        with patch("hermes_cli.setup._curses_prompt_choice", return_value=1):
+        with patch("centurion_cli.setup._curses_prompt_choice", return_value=1):
             from centurion_cli.fallback_cmd import cmd_fallback_remove
             cmd_fallback_remove(types.SimpleNamespace())
 
@@ -496,7 +496,7 @@ class TestArgparseWiring:
         import subprocess
         import sys
         result = subprocess.run(
-            [sys.executable, "-m", "hermes_cli.main", "fallback", "--help"],
+            [sys.executable, "-m", "centurion_cli.main", "fallback", "--help"],
             capture_output=True,
             text=True,
             timeout=30,

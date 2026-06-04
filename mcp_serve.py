@@ -19,8 +19,8 @@ Usage:
 MCP client config (e.g. claude_desktop_config.json):
     {
         "mcpServers": {
-            "hermes": {
-                "command": "hermes",
+            "centurion": {
+                "command": "centurion",
                 "args": ["mcp", "serve"]
             }
         }
@@ -62,8 +62,8 @@ except ImportError:
 def _get_sessions_dir() -> Path:
     """Return the sessions directory using CENTURION_HOME."""
     try:
-        from centurion_constants import get_hermes_home
-        return get_hermes_home() / "sessions"
+        from centurion_constants import get_centurion_home
+        return get_centurion_home() / "sessions"
     except ImportError:
         return Path(os.environ.get("CENTURION_HOME", Path.home() / ".centurion")) / "sessions"
 
@@ -98,8 +98,8 @@ def _load_sessions_index() -> dict:
 def _load_channel_directory() -> dict:
     """Load the cached channel directory for available targets."""
     try:
-        from centurion_constants import get_hermes_home
-        directory_file = get_hermes_home() / "channel_directory.json"
+        from centurion_constants import get_centurion_home
+        directory_file = get_centurion_home() / "channel_directory.json"
     except ImportError:
         directory_file = Path(
             os.environ.get("CENTURION_HOME", Path.home() / ".centurion")
@@ -362,8 +362,8 @@ class EventBridge:
 
         # Check if state.db has changed
         try:
-            from centurion_constants import get_hermes_home
-            db_file = get_hermes_home() / "state.db"
+            from centurion_constants import get_centurion_home
+            db_file = get_centurion_home() / "state.db"
         except ImportError:
             db_file = Path(os.environ.get("CENTURION_HOME", Path.home() / ".centurion")) / "state.db"
 
@@ -456,7 +456,7 @@ def create_mcp_server(event_bridge: Optional[EventBridge] = None) -> "FastMCP":
         )
 
     mcp = FastMCP(
-        "hermes",
+        "centurion",
         instructions=(
             "Hermes Agent messaging bridge. Use these tools to interact with "
             "conversations across Telegram, Discord, Slack, WhatsApp, Signal, "

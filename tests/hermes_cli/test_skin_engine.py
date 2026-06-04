@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.skin_engine — the data-driven skin/theme system."""
+"""Tests for centurion_cli.skin_engine — the data-driven skin/theme system."""
 
 import json
 import os
@@ -201,7 +201,7 @@ class TestUserSkins:
         skin_file.write_text(yaml.dump(skin_data))
 
         # Patch skins dir
-        monkeypatch.setattr("hermes_cli.skin_engine._skins_dir", lambda: skins_dir)
+        monkeypatch.setattr("centurion_cli.skin_engine._skins_dir", lambda: skins_dir)
 
         skin = load_skin("custom")
         assert skin.name == "custom"
@@ -231,7 +231,7 @@ class TestUserSkins:
             ),
             encoding="utf-8",
         )
-        monkeypatch.setattr("hermes_cli.skin_engine._skins_dir", lambda: skins_dir)
+        monkeypatch.setattr("centurion_cli.skin_engine._skins_dir", lambda: skins_dir)
 
         skin = load_skin("broken")
 
@@ -251,7 +251,7 @@ class TestUserSkins:
             "name": "pirate",
             "description": "Arr matey",
         }))
-        monkeypatch.setattr("hermes_cli.skin_engine._skins_dir", lambda: skins_dir)
+        monkeypatch.setattr("centurion_cli.skin_engine._skins_dir", lambda: skins_dir)
 
         skins = list_skins()
         names = [s["name"] for s in skins]

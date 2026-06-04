@@ -1,4 +1,4 @@
-"""Tests for hermes_cli/skills_config.py and skills_tool disabled filtering."""
+"""Tests for centurion_cli/skills_config.py and skills_tool disabled filtering."""
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -45,7 +45,7 @@ class TestGetDisabledSkills:
 # ---------------------------------------------------------------------------
 
 class TestSaveDisabledSkills:
-    @patch("hermes_cli.skills_config.save_config")
+    @patch("centurion_cli.skills_config.save_config")
     def test_saves_global_sorted(self, mock_save):
         from centurion_cli.skills_config import save_disabled_skills
         config = {}
@@ -53,21 +53,21 @@ class TestSaveDisabledSkills:
         assert config["skills"]["disabled"] == ["skill-a", "skill-z"]
         mock_save.assert_called_once()
 
-    @patch("hermes_cli.skills_config.save_config")
+    @patch("centurion_cli.skills_config.save_config")
     def test_saves_platform_disabled(self, mock_save):
         from centurion_cli.skills_config import save_disabled_skills
         config = {}
         save_disabled_skills(config, {"skill-x"}, platform="telegram")
         assert config["skills"]["platform_disabled"]["telegram"] == ["skill-x"]
 
-    @patch("hermes_cli.skills_config.save_config")
+    @patch("centurion_cli.skills_config.save_config")
     def test_saves_empty(self, mock_save):
         from centurion_cli.skills_config import save_disabled_skills
         config = {"skills": {"disabled": ["skill-a"]}}
         save_disabled_skills(config, set())
         assert config["skills"]["disabled"] == []
 
-    @patch("hermes_cli.skills_config.save_config")
+    @patch("centurion_cli.skills_config.save_config")
     def test_creates_skills_key(self, mock_save):
         from centurion_cli.skills_config import save_disabled_skills
         config = {}
@@ -81,19 +81,19 @@ class TestSaveDisabledSkills:
 # ---------------------------------------------------------------------------
 
 class TestIsSkillDisabled:
-    @patch("hermes_cli.config.load_config")
+    @patch("centurion_cli.config.load_config")
     def test_globally_disabled(self, mock_load):
         mock_load.return_value = {"skills": {"disabled": ["bad-skill"]}}
         from tools.skills_tool import _is_skill_disabled
         assert _is_skill_disabled("bad-skill") is True
 
-    @patch("hermes_cli.config.load_config")
+    @patch("centurion_cli.config.load_config")
     def test_globally_enabled(self, mock_load):
         mock_load.return_value = {"skills": {"disabled": ["other"]}}
         from tools.skills_tool import _is_skill_disabled
         assert _is_skill_disabled("good-skill") is False
 
-    @patch("hermes_cli.config.load_config")
+    @patch("centurion_cli.config.load_config")
     def test_platform_disabled(self, mock_load):
         mock_load.return_value = {"skills": {
             "disabled": [],
@@ -102,7 +102,7 @@ class TestIsSkillDisabled:
         from tools.skills_tool import _is_skill_disabled
         assert _is_skill_disabled("tg-skill", platform="telegram") is True
 
-    @patch("hermes_cli.config.load_config")
+    @patch("centurion_cli.config.load_config")
     def test_platform_enabled_overrides_global(self, mock_load):
         mock_load.return_value = {"skills": {
             "disabled": ["skill-a"],
@@ -112,26 +112,26 @@ class TestIsSkillDisabled:
         # telegram has explicit empty list -> skill-a is NOT disabled for telegram
         assert _is_skill_disabled("skill-a", platform="telegram") is False
 
-    @patch("hermes_cli.config.load_config")
+    @patch("centurion_cli.config.load_config")
     def test_platform_falls_back_to_global(self, mock_load):
         mock_load.return_value = {"skills": {"disabled": ["skill-a"]}}
         from tools.skills_tool import _is_skill_disabled
         # no platform_disabled for cli -> global
         assert _is_skill_disabled("skill-a", platform="cli") is True
 
-    @patch("hermes_cli.config.load_config")
+    @patch("centurion_cli.config.load_config")
     def test_empty_config(self, mock_load):
         mock_load.return_value = {}
         from tools.skills_tool import _is_skill_disabled
         assert _is_skill_disabled("any-skill") is False
 
-    @patch("hermes_cli.config.load_config")
+    @patch("centurion_cli.config.load_config")
     def test_exception_returns_false(self, mock_load):
         mock_load.side_effect = Exception("config error")
         from tools.skills_tool import _is_skill_disabled
         assert _is_skill_disabled("any-skill") is False
 
-    @patch("hermes_cli.config.load_config")
+    @patch("centurion_cli.config.load_config")
     @patch.dict("os.environ", {"HERMES_PLATFORM": "discord"})
     def test_env_var_platform(self, mock_load):
         mock_load.return_value = {"skills": {
@@ -186,7 +186,7 @@ class TestGetDisabledSkillNames:
         result = get_disabled_skill_names()
         assert result == {"discord-skill"}
 
-    def test_hermes_platform_takes_precedence(self, tmp_path, monkeypatch):
+    def test_centurion_platform_takes_precedence(self, tmp_path, monkeypatch):
         """HERMES_PLATFORM should win over HERMES_SESSION_PLATFORM."""
         config = tmp_path / "config.yaml"
         config.write_text(

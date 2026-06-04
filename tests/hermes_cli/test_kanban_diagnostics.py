@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.kanban_diagnostics — rule-engine that produces
+"""Tests for centurion_cli.kanban_diagnostics — rule-engine that produces
 structured distress signals (diagnostics) for kanban tasks.
 
 These tests exercise each rule in isolation using minimal in-memory

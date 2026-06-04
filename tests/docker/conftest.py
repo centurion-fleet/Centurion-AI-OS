@@ -21,7 +21,7 @@ from collections.abc import Iterator
 
 import pytest
 
-IMAGE_TAG = os.environ.get("HERMES_TEST_IMAGE", "hermes-agent-harness:latest")
+IMAGE_TAG = os.environ.get("HERMES_TEST_IMAGE", "centurion-os-harness:latest")
 
 
 def _docker_available() -> bool:
@@ -91,7 +91,7 @@ def container_name(request) -> Iterator[str]:
 # ---------------------------------------------------------------------------
 #
 # Background: every Hermes runtime path inside the container drops to UID
-# 10000 (the ``hermes`` user) via ``s6-setuidgid hermes``. ``docker exec``
+# 10000 (the ``centurion`` user) via ``s6-setuidgid hermes``. ``docker exec``
 # without ``-u`` runs as root, which is **not** representative of how
 # production code executes. PR #30136 review caught a real regression
 # this way — ``Path('/proc/1/exe').resolve()`` works as root and silently
@@ -108,7 +108,7 @@ def container_name(request) -> Iterator[str]:
 def docker_exec(
     container: str,
     *args: str,
-    user: str = "hermes",
+    user: str = "centurion",
     timeout: int = 30,
     extra_docker_args: tuple[str, ...] = (),
 ) -> subprocess.CompletedProcess[str]:
@@ -130,7 +130,7 @@ def docker_exec_sh(
     container: str,
     command: str,
     *,
-    user: str = "hermes",
+    user: str = "centurion",
     timeout: int = 30,
 ) -> subprocess.CompletedProcess[str]:
     """Run ``sh -c <command>`` inside the container as ``user``."""

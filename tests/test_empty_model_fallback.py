@@ -5,7 +5,7 @@ import pytest
 
 
 class TestGetDefaultModelForProvider:
-    """Unit tests for hermes_cli.models.get_default_model_for_provider."""
+    """Unit tests for centurion_cli.models.get_default_model_for_provider."""
 
     def test_known_provider_returns_first_model(self):
         from centurion_cli.models import get_default_model_for_provider

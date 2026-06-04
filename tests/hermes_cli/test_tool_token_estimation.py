@@ -98,7 +98,7 @@ def test_prompt_toolset_checklist_passes_status_fn(monkeypatch):
         captured_kwargs["title"] = title
         return selected  # Return pre-selected unchanged
 
-    monkeypatch.setattr("hermes_cli.curses_ui.curses_checklist", fake_checklist)
+    monkeypatch.setattr("centurion_cli.curses_ui.curses_checklist", fake_checklist)
 
     tc._prompt_toolset_checklist("CLI", {"web", "terminal"})
 
@@ -120,7 +120,7 @@ def test_status_fn_returns_formatted_token_count(monkeypatch):
         captured["status_fn"] = status_fn
         return selected
 
-    monkeypatch.setattr("hermes_cli.curses_ui.curses_checklist", fake_checklist)
+    monkeypatch.setattr("centurion_cli.curses_ui.curses_checklist", fake_checklist)
 
     tc._prompt_toolset_checklist("CLI", {"web", "terminal"})
 
@@ -148,7 +148,7 @@ def test_status_fn_deduplicates_overlapping_tools(monkeypatch):
         captured["status_fn"] = status_fn
         return selected
 
-    monkeypatch.setattr("hermes_cli.curses_ui.curses_checklist", fake_checklist)
+    monkeypatch.setattr("centurion_cli.curses_ui.curses_checklist", fake_checklist)
 
     tc._prompt_toolset_checklist("CLI", {"web"})
 

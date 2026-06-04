@@ -59,9 +59,9 @@ def test_get_adapter_unknown_provider_raises():
 # ---------------------------------------------------------------------------
 
 
-def _write_auth_store(hermes_home: Path, nous_state: Dict[str, Any]) -> Path:
+def _write_auth_store(centurion_home: Path, nous_state: Dict[str, Any]) -> Path:
     """Write an auth.json with the given nous state into a hermetic CENTURION_HOME."""
-    auth_path = hermes_home / "auth.json"
+    auth_path = centurion_home / "auth.json"
     auth_path.write_text(json.dumps({
         "version": 1,
         "providers": {"nous": nous_state},
@@ -132,7 +132,7 @@ def test_nous_adapter_get_credential_uses_runtime_resolver(tmp_path, monkeypatch
     }
 
     with patch(
-        "hermes_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
+        "centurion_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
         return_value=refreshed_state,
     ) as mock_resolve:
         adapter = NousPortalAdapter()
@@ -163,7 +163,7 @@ def test_nous_adapter_retry_credential_forces_legacy_mint(tmp_path, monkeypatch)
     }
 
     with patch(
-        "hermes_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
+        "centurion_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
         return_value=refreshed_state,
     ) as mock_resolve:
         adapter = NousPortalAdapter()
@@ -189,7 +189,7 @@ def test_nous_adapter_retry_credential_skips_opaque_bearer(tmp_path, monkeypatch
     })
 
     with patch(
-        "hermes_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
+        "centurion_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
     ) as mock_resolve:
         adapter = NousPortalAdapter()
         cred = adapter.get_retry_credential(
@@ -219,7 +219,7 @@ def test_nous_adapter_get_credential_raises_on_refresh_failure(tmp_path, monkeyp
     })
 
     with patch(
-        "hermes_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
+        "centurion_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
         side_effect=RuntimeError("Refresh session has been revoked"),
     ):
         adapter = NousPortalAdapter()
@@ -240,7 +240,7 @@ def test_nous_adapter_quarantines_terminal_refresh_failure(tmp_path, monkeypatch
     assert load_pool("nous").select() is not None
 
     with patch(
-        "hermes_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
+        "centurion_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
         side_effect=AuthError(
             "Refresh session has been revoked",
             provider="nous",
@@ -270,7 +270,7 @@ def test_nous_adapter_get_credential_raises_when_no_agent_key_returned(tmp_path,
     })
 
     with patch(
-        "hermes_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
+        "centurion_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
         return_value={"access_token": "a", "refresh_token": "r"},
     ):
         adapter = NousPortalAdapter()
@@ -323,7 +323,7 @@ def test_nous_adapter_concurrent_refresh_serialized(tmp_path, monkeypatch):
             errors.append(exc)
 
     with patch(
-        "hermes_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
+        "centurion_cli.proxy.adapters.nous_portal.resolve_nous_runtime_credentials",
         side_effect=serializing_refresh,
     ):
         threads = [threading.Thread(target=worker) for _ in range(3)]
@@ -345,7 +345,7 @@ def test_nous_adapter_concurrent_refresh_serialized(tmp_path, monkeypatch):
 
 
 def _write_xai_pool_entry(
-    hermes_home: Path,
+    centurion_home: Path,
     *,
     access_token: str = "xai-access-token",
     refresh_token: str = "xai-refresh-token",
@@ -353,7 +353,7 @@ def _write_xai_pool_entry(
     source: str = "manual:xai_pkce",
 ) -> Path:
     """Write an xai-oauth pool entry into a hermetic CENTURION_HOME."""
-    auth_path = hermes_home / "auth.json"
+    auth_path = centurion_home / "auth.json"
     auth_path.write_text(json.dumps({
         "version": 1,
         "providers": {},
@@ -437,7 +437,7 @@ def test_xai_adapter_retry_refreshes_current_pool_entry(tmp_path, monkeypatch):
             "last_refresh": "2026-05-19T00:00:00Z",
         }
 
-    monkeypatch.setattr("hermes_cli.auth.refresh_xai_oauth_pure", fake_refresh)
+    monkeypatch.setattr("centurion_cli.auth.refresh_xai_oauth_pure", fake_refresh)
 
     adapter = XAIGrokAdapter()
     failed = adapter.get_credential()

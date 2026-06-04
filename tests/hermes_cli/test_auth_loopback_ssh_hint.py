@@ -1,4 +1,4 @@
-"""Unit tests for _print_loopback_ssh_hint() in hermes_cli/auth.py.
+"""Unit tests for _print_loopback_ssh_hint() in centurion_cli/auth.py.
 
 The helper exists to warn users that loopback OAuth flows (xAI Grok OAuth,
 Spotify) don't work over SSH unless they set up an `ssh -L` port forward

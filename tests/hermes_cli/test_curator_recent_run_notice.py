@@ -1,11 +1,11 @@
 """Tests for `_print_curator_recent_run_notice`.
 
-The notice prints the most recent curator run summary on `hermes update`,
+The notice prints the most recent curator run summary on `centurion update`,
 exactly once per run. Show-once is enforced by stamping
 `last_run_summary_shown_at` in curator state after printing.
 
 Why this matters: the curator runs in the background (gateway tick + CLI
-session start) so users normally never see the rename map. `hermes update`
+session start) so users normally never see the rename map. `centurion update`
 is the high-attention surface where consolidations should land.
 """
 
@@ -31,12 +31,12 @@ def curator_env(tmp_path, monkeypatch, capsys):
     importlib.reload(hermes_constants)
     from agent import curator
     importlib.reload(curator)
-    from centurion_cli import main as hermes_main
-    importlib.reload(hermes_main)
+    from centurion_cli import main as centurion_main
+    importlib.reload(centurion_main)
 
     yield {
         "curator": curator,
-        "main": hermes_main,
+        "main": centurion_main,
         "capsys": capsys,
     }
 

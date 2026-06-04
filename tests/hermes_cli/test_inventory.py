@@ -1,4 +1,4 @@
-"""Behavior tests for hermes_cli.inventory.
+"""Behavior tests for centurion_cli.inventory.
 
 Locks the invariants the three migrated consumers (web_server.py
 /api/model/options, tui_gateway model.options, tui_gateway model.save_key)
@@ -51,7 +51,7 @@ def test_load_picker_context_full_dict():
         providers={"openrouter": {}},
         custom_providers=[{"name": "Ollama", "base_url": "http://localhost:11434/v1"}],
     )
-    with patch("hermes_cli.config.load_config", return_value=cfg):
+    with patch("centurion_cli.config.load_config", return_value=cfg):
         ctx = load_picker_context()
     assert ctx.current_model == "anthropic/claude-sonnet-4.6"
     assert ctx.current_provider == "openrouter"
@@ -65,7 +65,7 @@ def test_load_picker_context_full_dict():
 
 def test_load_picker_context_falls_back_to_name_when_default_missing():
     cfg = _cfg(model={"name": "gpt-5.4", "provider": "openai"})
-    with patch("hermes_cli.config.load_config", return_value=cfg):
+    with patch("centurion_cli.config.load_config", return_value=cfg):
         ctx = load_picker_context()
     assert ctx.current_model == "gpt-5.4"
     assert ctx.current_provider == "openai"
@@ -74,7 +74,7 @@ def test_load_picker_context_falls_back_to_name_when_default_missing():
 def test_load_picker_context_string_model_legacy_shape():
     """config.model can be a bare string in older configs."""
     cfg = {"model": "some-model", "providers": {}, "custom_providers": []}
-    with patch("hermes_cli.config.load_config", return_value=cfg):
+    with patch("centurion_cli.config.load_config", return_value=cfg):
         ctx = load_picker_context()
     assert ctx.current_model == "some-model"
     assert ctx.current_provider == ""
@@ -83,7 +83,7 @@ def test_load_picker_context_string_model_legacy_shape():
 
 def test_load_picker_context_empty_config():
     cfg = _cfg()
-    with patch("hermes_cli.config.load_config", return_value=cfg):
+    with patch("centurion_cli.config.load_config", return_value=cfg):
         ctx = load_picker_context()
     assert ctx.current_provider == ""
     assert ctx.current_model == ""
@@ -137,7 +137,7 @@ def test_with_overrides_no_args_returns_self_or_equivalent():
 def _list_auth_returning(rows: list[dict]):
     """Patch list_authenticated_providers to return a fixed row list."""
     return patch(
-        "hermes_cli.model_switch.list_authenticated_providers",
+        "centurion_cli.model_switch.list_authenticated_providers",
         return_value=rows,
     )
 
@@ -166,7 +166,7 @@ def test_build_models_payload_does_not_call_provider_model_ids():
              "source": "built-in"}]
     ctx = _empty_ctx()
     with _list_auth_returning(rows), \
-         patch("hermes_cli.models.provider_model_ids") as mock_pm:
+         patch("centurion_cli.models.provider_model_ids") as mock_pm:
         build_models_payload(ctx)
     mock_pm.assert_not_called()
 
@@ -346,7 +346,7 @@ def test_end_to_end_with_real_context_no_credentials_leak(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", canary)
     monkeypatch.setenv("ANTHROPIC_API_KEY", canary)
     cfg = _cfg(model={"provider": "openrouter"})
-    with patch("hermes_cli.config.load_config", return_value=cfg):
+    with patch("centurion_cli.config.load_config", return_value=cfg):
         ctx = load_picker_context()
     payload = build_models_payload(
         ctx, include_unconfigured=True, picker_hints=True,

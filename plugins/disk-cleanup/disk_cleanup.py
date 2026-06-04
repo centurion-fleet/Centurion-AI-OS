@@ -16,7 +16,7 @@ Rules:
   - >500 MB files → prompt always (deep only)
 
 Scope: strictly CENTURION_HOME and /tmp/hermes-*
-Never touches: ~/.hermes/logs/ or any system directory.
+Never touches: ~/.centurion/logs/ or any system directory.
 """
 
 from __future__ import annotations
@@ -29,11 +29,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
-    from centurion_constants import get_hermes_home
+    from centurion_constants import get_centurion_home
 except Exception:  # pragma: no cover — plugin may load before constants resolves
     import os
 
-    def get_hermes_home() -> Path:  # type: ignore[no-redef]
+    def get_centurion_home() -> Path:  # type: ignore[no-redef]
         val = (os.environ.get("CENTURION_HOME") or "").strip()
         return Path(val).resolve() if val else (Path.home() / ".centurion").resolve()
 
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 def get_state_dir() -> Path:
     """State dir — separate from ``$CENTURION_HOME/logs/``."""
-    return get_hermes_home() / "disk-cleanup"
+    return get_centurion_home() / "disk-cleanup"
 
 
 def get_tracked_file() -> Path:
@@ -68,9 +68,9 @@ def is_safe_path(path: Path) -> bool:
 
     Rejects Windows mounts (``/mnt/c`` etc.) and any system directory.
     """
-    hermes_home = get_hermes_home()
+    centurion_home = get_centurion_home()
     try:
-        path.resolve().relative_to(hermes_home)
+        path.resolve().relative_to(centurion_home)
         return True
     except (ValueError, OSError):
         pass
@@ -294,19 +294,19 @@ def quick() -> Dict[str, Any]:
     # Remove empty dirs under CENTURION_HOME (but leave CENTURION_HOME itself and
     # a short list of well-known top-level state dirs alone — a fresh install
     # has these empty, and deleting them would surprise the user).
-    hermes_home = get_hermes_home()
+    centurion_home = get_centurion_home()
     _PROTECTED_TOP_LEVEL = {
         "logs", "memories", "sessions", "cron", "cronjobs",
         "cache", "skills", "plugins", "disk-cleanup", "optional-skills",
-        "hermes-agent", "backups", "profiles", ".worktrees",
+        "centurion-os", "backups", "profiles", ".worktrees",
     }
     empty_removed = 0
     try:
-        for dirpath in sorted(hermes_home.rglob("*"), reverse=True):
-            if not dirpath.is_dir() or dirpath == hermes_home:
+        for dirpath in sorted(centurion_home.rglob("*"), reverse=True):
+            if not dirpath.is_dir() or dirpath == centurion_home:
                 continue
             try:
-                rel_parts = dirpath.relative_to(hermes_home).parts
+                rel_parts = dirpath.relative_to(centurion_home).parts
             except ValueError:
                 continue
             # Skip the well-known top-level state dirs themselves.
@@ -470,14 +470,14 @@ def guess_category(path: Path) -> Optional[str]:
         return None
 
     # Skip the state dir itself, logs, memory files, sessions, config.
-    hermes_home = get_hermes_home()
+    centurion_home = get_centurion_home()
     try:
-        rel = path.resolve().relative_to(hermes_home)
+        rel = path.resolve().relative_to(centurion_home)
         top = rel.parts[0] if rel.parts else ""
         if top in {
             "disk-cleanup", "logs", "memories", "sessions", "config.yaml",
             "skills", "plugins", ".env", "USER.md", "MEMORY.md", "SOUL.md",
-            "auth.json", "hermes-agent",
+            "auth.json", "centurion-os",
         }:
             return None
         if top == "cron" or top == "cronjobs":

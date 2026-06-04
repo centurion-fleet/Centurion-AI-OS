@@ -6,7 +6,7 @@ default) and "codex_app_server" (= hand turns to a codex subprocess).
 Both CLI (cli.py) and gateway (gateway/run.py) call into this module so the
 behavior stays identical across surfaces.
 
-The actual runtime resolution happens in hermes_cli.runtime_provider's
+The actual runtime resolution happens in centurion_cli.runtime_provider's
 _maybe_apply_codex_app_server_runtime() helper, which reads the persisted
 config value. This module just persists the value and reports the change.
 """
@@ -50,7 +50,7 @@ def parse_args(arg_string: str) -> tuple[Optional[str], list[str]]:
     # Accept human-friendly synonyms
     if raw in {"on", "codex", "enable"}:
         return "codex_app_server", []
-    if raw in {"off", "default", "disable", "hermes"}:
+    if raw in {"off", "default", "disable", "centurion"}:
         return "auto", []
     if raw in VALID_RUNTIMES:
         return raw, []
@@ -200,10 +200,10 @@ def apply(
         try:
             from centurion_cli.codex_runtime_plugin_migration import migrate
             mig_report = migrate(config)
-            # Tools/MCP servers (excluding the hermes-tools callback,
+            # Tools/MCP servers (excluding the centurion-tools callback,
             # which is internal plumbing — surface separately).
             user_servers = [
-                s for s in mig_report.migrated if s != "hermes-tools"
+                s for s in mig_report.migrated if s != "centurion-tools"
             ]
             if user_servers:
                 msg_lines.append(
@@ -228,7 +228,7 @@ def apply(
                     f"Default sandbox: {mig_report.wrote_permissions_default} "
                     f"(no approval prompt on every write)"
                 )
-            if "hermes-tools" in mig_report.migrated:
+            if "centurion-tools" in mig_report.migrated:
                 msg_lines.append(
                     "Hermes tool callback registered: codex can now use "
                     "web_search, web_extract, browser_*, vision_analyze, "

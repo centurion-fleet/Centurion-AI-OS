@@ -42,7 +42,7 @@ class TestNonInteractiveSetup:
         args = _make_setup_args(non_interactive=True)
 
         with (
-            patch("hermes_cli.setup.run_setup_wizard") as mock_run_setup,
+            patch("centurion_cli.setup.run_setup_wizard") as mock_run_setup,
             patch("sys.stdin") as mock_stdin,
         ):
             mock_stdin.isatty.return_value = False
@@ -57,7 +57,7 @@ class TestNonInteractiveSetup:
         args = _make_setup_args(non_interactive=False)
 
         with (
-            patch("hermes_cli.setup.run_setup_wizard") as mock_run_setup,
+            patch("centurion_cli.setup.run_setup_wizard") as mock_run_setup,
             patch("sys.stdin") as mock_stdin,
         ):
             mock_stdin.isatty.return_value = False
@@ -72,10 +72,10 @@ class TestNonInteractiveSetup:
         args = _make_setup_args(non_interactive=True)
 
         with (
-            patch("hermes_cli.setup.ensure_hermes_home"),
-            patch("hermes_cli.setup.load_config", return_value={}),
-            patch("hermes_cli.setup.get_hermes_home", return_value="/tmp/.hermes"),
-            patch("hermes_cli.auth.get_active_provider", side_effect=AssertionError("wizard continued")),
+            patch("centurion_cli.setup.ensure_centurion_home"),
+            patch("centurion_cli.setup.load_config", return_value={}),
+            patch("centurion_cli.setup.get_centurion_home", return_value="/tmp/.hermes"),
+            patch("centurion_cli.auth.get_active_provider", side_effect=AssertionError("wizard continued")),
             patch("builtins.input", side_effect=AssertionError("input should not be called")),
         ):
             run_setup_wizard(args)
@@ -90,10 +90,10 @@ class TestNonInteractiveSetup:
         args = _make_setup_args(non_interactive=False)
 
         with (
-            patch("hermes_cli.setup.ensure_hermes_home"),
-            patch("hermes_cli.setup.load_config", return_value={}),
-            patch("hermes_cli.setup.get_hermes_home", return_value="/tmp/.hermes"),
-            patch("hermes_cli.auth.get_active_provider", side_effect=AssertionError("wizard continued")),
+            patch("centurion_cli.setup.ensure_centurion_home"),
+            patch("centurion_cli.setup.load_config", return_value={}),
+            patch("centurion_cli.setup.get_centurion_home", return_value="/tmp/.hermes"),
+            patch("centurion_cli.auth.get_active_provider", side_effect=AssertionError("wizard continued")),
             patch("sys.stdin") as mock_stdin,
             patch("builtins.input", side_effect=AssertionError("input should not be called")),
         ):
@@ -124,14 +124,14 @@ class TestNonInteractiveSetup:
         assert "Configuration reset to defaults." in out
 
     def test_chat_first_run_headless_skips_setup_prompt(self, capsys):
-        """Bare `hermes` should not prompt for input when no provider exists and stdin is headless."""
+        """Bare `centurion` should not prompt for input when no provider exists and stdin is headless."""
         from centurion_cli.main import cmd_chat
 
         args = _make_chat_args()
 
         with (
-            patch("hermes_cli.main._has_any_provider_configured", return_value=False),
-            patch("hermes_cli.main.cmd_setup") as mock_setup,
+            patch("centurion_cli.main._has_any_provider_configured", return_value=False),
+            patch("centurion_cli.main.cmd_setup") as mock_setup,
             patch("sys.stdin") as mock_stdin,
             patch("builtins.input", side_effect=AssertionError("input should not be called")),
         ):
@@ -154,7 +154,7 @@ class TestNonInteractiveSetup:
             received["section"] = args.section
 
         monkeypatch.setattr(main_mod, "cmd_setup", fake_cmd_setup)
-        monkeypatch.setattr("sys.argv", ["hermes", "setup", "tts"])
+        monkeypatch.setattr("sys.argv", ["centurion", "setup", "tts"])
 
         main_mod.main()
 

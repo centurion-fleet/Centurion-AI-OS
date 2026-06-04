@@ -1,4 +1,4 @@
-"""Unit tests for hermes_cli/dingtalk_auth.py (QR device-flow registration)."""
+"""Unit tests for centurion_cli/dingtalk_auth.py (QR device-flow registration)."""
 from __future__ import annotations
 
 import sys
@@ -18,10 +18,10 @@ class TestApiPost:
         import requests
         from centurion_cli.dingtalk_auth import _api_post, RegistrationError
 
-        with patch("hermes_cli.dingtalk_auth.requests.post",
+        with patch("centurion_cli.dingtalk_auth.requests.post",
                    side_effect=requests.ConnectionError("nope")):
             with pytest.raises(RegistrationError, match="Network error"):
-                _api_post("/app/registration/init", {"source": "hermes"})
+                _api_post("/app/registration/init", {"source": "centurion"})
 
     def test_raises_on_nonzero_errcode(self):
         from centurion_cli.dingtalk_auth import _api_post, RegistrationError
@@ -30,9 +30,9 @@ class TestApiPost:
         mock_resp.raise_for_status = MagicMock()
         mock_resp.json.return_value = {"errcode": 42, "errmsg": "boom"}
 
-        with patch("hermes_cli.dingtalk_auth.requests.post", return_value=mock_resp):
+        with patch("centurion_cli.dingtalk_auth.requests.post", return_value=mock_resp):
             with pytest.raises(RegistrationError, match=r"boom \(errcode=42\)"):
-                _api_post("/app/registration/init", {"source": "hermes"})
+                _api_post("/app/registration/init", {"source": "centurion"})
 
     def test_returns_data_on_success(self):
         from centurion_cli.dingtalk_auth import _api_post
@@ -41,8 +41,8 @@ class TestApiPost:
         mock_resp.raise_for_status = MagicMock()
         mock_resp.json.return_value = {"errcode": 0, "nonce": "abc"}
 
-        with patch("hermes_cli.dingtalk_auth.requests.post", return_value=mock_resp):
-            result = _api_post("/app/registration/init", {"source": "hermes"})
+        with patch("centurion_cli.dingtalk_auth.requests.post", return_value=mock_resp):
+            result = _api_post("/app/registration/init", {"source": "centurion"})
             assert result["nonce"] == "abc"
 
 
@@ -66,7 +66,7 @@ class TestBeginRegistration:
                 "interval": 2,
             },
         ]
-        with patch("hermes_cli.dingtalk_auth._api_post", side_effect=responses):
+        with patch("centurion_cli.dingtalk_auth._api_post", side_effect=responses):
             result = begin_registration()
 
         assert result["device_code"] == "dev-xyz"
@@ -77,7 +77,7 @@ class TestBeginRegistration:
     def test_missing_nonce_raises(self):
         from centurion_cli.dingtalk_auth import begin_registration, RegistrationError
 
-        with patch("hermes_cli.dingtalk_auth._api_post",
+        with patch("centurion_cli.dingtalk_auth._api_post",
                    return_value={"errcode": 0, "nonce": ""}):
             with pytest.raises(RegistrationError, match="missing nonce"):
                 begin_registration()
@@ -89,7 +89,7 @@ class TestBeginRegistration:
             {"errcode": 0, "nonce": "n1"},
             {"errcode": 0, "verification_uri_complete": "http://x"},  # no device_code
         ]
-        with patch("hermes_cli.dingtalk_auth._api_post", side_effect=responses):
+        with patch("centurion_cli.dingtalk_auth._api_post", side_effect=responses):
             with pytest.raises(RegistrationError, match="missing device_code"):
                 begin_registration()
 
@@ -100,7 +100,7 @@ class TestBeginRegistration:
             {"errcode": 0, "nonce": "n1"},
             {"errcode": 0, "device_code": "dev"},  # no verification_uri_complete
         ]
-        with patch("hermes_cli.dingtalk_auth._api_post", side_effect=responses):
+        with patch("centurion_cli.dingtalk_auth._api_post", side_effect=responses):
             with pytest.raises(RegistrationError,
                                match="missing verification_uri_complete"):
                 begin_registration()
@@ -121,8 +121,8 @@ class TestWaitForSuccess:
             {"status": "WAITING"},
             {"status": "SUCCESS", "client_id": "cid-1", "client_secret": "sec-1"},
         ]
-        with patch("hermes_cli.dingtalk_auth.poll_registration", side_effect=responses), \
-             patch("hermes_cli.dingtalk_auth.time.sleep"):
+        with patch("centurion_cli.dingtalk_auth.poll_registration", side_effect=responses), \
+             patch("centurion_cli.dingtalk_auth.time.sleep"):
             cid, secret = wait_for_registration_success(
                 device_code="dev", interval=0, expires_in=60
             )
@@ -132,9 +132,9 @@ class TestWaitForSuccess:
     def test_success_without_credentials_raises(self):
         from centurion_cli.dingtalk_auth import wait_for_registration_success, RegistrationError
 
-        with patch("hermes_cli.dingtalk_auth.poll_registration",
+        with patch("centurion_cli.dingtalk_auth.poll_registration",
                    return_value={"status": "SUCCESS", "client_id": "", "client_secret": ""}), \
-             patch("hermes_cli.dingtalk_auth.time.sleep"):
+             patch("centurion_cli.dingtalk_auth.time.sleep"):
             with pytest.raises(RegistrationError, match="credentials are missing"):
                 wait_for_registration_success(
                     device_code="dev", interval=0, expires_in=60
@@ -149,8 +149,8 @@ class TestWaitForSuccess:
             {"status": "WAITING"},
             {"status": "SUCCESS", "client_id": "cid", "client_secret": "sec"},
         ]
-        with patch("hermes_cli.dingtalk_auth.poll_registration", side_effect=responses), \
-             patch("hermes_cli.dingtalk_auth.time.sleep"):
+        with patch("centurion_cli.dingtalk_auth.poll_registration", side_effect=responses), \
+             patch("centurion_cli.dingtalk_auth.time.sleep"):
             wait_for_registration_success(
                 device_code="dev", interval=0, expires_in=60, on_waiting=callback
             )

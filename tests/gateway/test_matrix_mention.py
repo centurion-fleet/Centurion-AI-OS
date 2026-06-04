@@ -108,7 +108,7 @@ class TestIsBotMentioned:
         assert not self.adapter._is_bot_mentioned("")
 
     def test_partial_localpart_no_match(self):
-        # "hermesbot" should not match word-boundary check for "hermes"
+        # "hermesbot" should not match word-boundary check for "centurion"
         assert not self.adapter._is_bot_mentioned("hermesbot is here")
 
     # m.mentions.user_ids — MSC3952 / Matrix v1.7 authoritative mentions

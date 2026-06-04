@@ -251,7 +251,7 @@ def handle_computer_use(args: Dict[str, Any], **kwargs) -> Any:
     except Exception as e:
         return json.dumps({
             "error": f"computer_use backend unavailable: {e}",
-            "hint": "Run `hermes tools` and enable Computer Use to install cua-driver.",
+            "hint": "Run `centurion tools` and enable Computer Use to install cua-driver.",
         })
 
     try:
@@ -596,7 +596,7 @@ def _route_capture_through_aux_vision(
         import os as _os
         import uuid as _uuid
 
-        from centurion_constants import get_hermes_dir
+        from centurion_constants import get_centurion_dir
         from model_tools import _run_async
         from tools.vision_tools import vision_analyze_tool
     except Exception as exc:  # pragma: no cover - defensive
@@ -614,7 +614,7 @@ def _route_capture_through_aux_vision(
         # Pick an extension that matches the on-disk bytes so vision_analyze's
         # MIME sniffing returns the right content-type.
         ext = ".jpg" if cap.png_b64[:8].startswith("/9j/") else ".png"
-        cache_dir = get_hermes_dir("cache/vision", "temp_vision_images")
+        cache_dir = get_centurion_dir("cache/vision", "temp_vision_images")
         temp_image_path = cache_dir / f"computer_use_{_uuid.uuid4().hex}{ext}"
         temp_image_path.write_bytes(raw)
 

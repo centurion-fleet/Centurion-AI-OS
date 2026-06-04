@@ -127,7 +127,7 @@ _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 # (e.g. nix-built hermes — no local git history to count against).
 UPDATE_AVAILABLE_NO_COUNT = -1
 
-_UPSTREAM_REPO_URL = "https://github.com/NousResearch/hermes-agent.git"
+_UPSTREAM_REPO_URL = "https://github.com/NousResearch/centurion-os.git"
 
 
 def _check_via_rev(local_rev: str) -> Optional[int]:
@@ -186,7 +186,7 @@ def _version_tuple(v: str) -> tuple[int, ...]:
     return tuple(parts)
 
 
-def _fetch_pypi_latest(package: str = "hermes-agent") -> Optional[str]:
+def _fetch_pypi_latest(package: str = "centurion-os") -> Optional[str]:
     """Fetch the latest version of a package from PyPI. Returns None on failure."""
     try:
         import urllib.request
@@ -228,8 +228,8 @@ def check_for_updates() -> Optional[int]:
     if behind but the count is unknown, ``0`` if up-to-date, or ``None`` if
     the check failed or doesn't apply. Cached for 6 hours.
     """
-    hermes_home = get_centurion_home()
-    cache_file = hermes_home / ".update_check"
+    centurion_home = get_centurion_home()
+    cache_file = centurion_home / ".update_check"
     embedded_rev = os.environ.get("HERMES_REVISION") or None
 
     # Read cache — invalidate if the embedded rev has changed since last check
@@ -249,11 +249,11 @@ def check_for_updates() -> Optional[int]:
         behind = _check_via_rev(embedded_rev)
     else:
         # Prefer the running code's location over the profile-scoped path.
-        # $CENTURION_HOME/hermes-agent/ may be a stale copy from --clone-all;
+        # $CENTURION_HOME/centurion-os/ may be a stale copy from --clone-all;
         # Path(__file__) always resolves to the actual installed checkout.
         repo_dir = Path(__file__).parent.parent.resolve()
         if not (repo_dir / ".git").exists():
-            repo_dir = hermes_home / "hermes-agent"
+            repo_dir = centurion_home / "centurion-os"
         if not (repo_dir / ".git").exists():
             behind = check_via_pypi()
         else:
@@ -271,13 +271,13 @@ def _resolve_repo_dir() -> Optional[Path]:
     """Return the active Hermes git checkout, or None if this isn't a git install.
 
     Prefers the running code's location over the profile-scoped path
-    because ``$CENTURION_HOME/hermes-agent/`` may be a stale copy carried
+    because ``$CENTURION_HOME/centurion-os/`` may be a stale copy carried
     over by ``--clone-all``.
     """
     repo_dir = Path(__file__).parent.parent.resolve()
     if not (repo_dir / ".git").exists():
-        hermes_home = get_centurion_home()
-        repo_dir = hermes_home / "hermes-agent"
+        centurion_home = get_centurion_home()
+        repo_dir = centurion_home / "centurion-os"
     return repo_dir if (repo_dir / ".git").exists() else None
 
 
@@ -327,7 +327,7 @@ def get_git_banner_state(repo_dir: Optional[Path] = None) -> Optional[dict]:
     return {"upstream": upstream, "local": local, "ahead": max(ahead, 0)}
 
 
-_RELEASE_URL_BASE = "https://github.com/NousResearch/hermes-agent/releases/tag"
+_RELEASE_URL_BASE = "https://github.com/NousResearch/centurion-os/releases/tag"
 _latest_release_cache: Optional[tuple] = None  # (tag, url) once resolved
 
 
@@ -336,7 +336,7 @@ def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
 
     Local-only — runs ``git describe --tags --abbrev=0`` against the
     Hermes checkout. Cached per-process. Release URL always points at the
-    canonical NousResearch/hermes-agent repo (forks don't get a link).
+    canonical NousResearch/centurion-os repo (forks don't get a link).
     """
     global _latest_release_cache
     if _latest_release_cache is not None:

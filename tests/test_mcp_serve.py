@@ -26,12 +26,12 @@ import pytest
 # ---------------------------------------------------------------------------
 
 @pytest.fixture(autouse=True)
-def _isolate_hermes_home(tmp_path, monkeypatch):
+def _isolate_centurion_home(tmp_path, monkeypatch):
     """Redirect CENTURION_HOME to a temp directory."""
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     try:
         import centurion_constants
-        monkeypatch.setattr(hermes_constants, "get_hermes_home", lambda: tmp_path)
+        monkeypatch.setattr(hermes_constants, "get_centurion_home", lambda: tmp_path)
     except (ImportError, AttributeError):
         pass
     return tmp_path

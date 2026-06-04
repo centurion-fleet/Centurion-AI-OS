@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.gateway_windows."""
+"""Tests for centurion_cli.gateway_windows."""
 
 from pathlib import Path
 
@@ -55,12 +55,12 @@ def test_build_gateway_argv_uses_base_pythonw_for_uv_venv_launcher(monkeypatch, 
     monkeypatch.setattr(gateway_windows.sys, "platform", "win32")
     monkeypatch.setattr(gateway, "PROJECT_ROOT", project)
     monkeypatch.setattr(gateway, "get_python_path", lambda: str(venv_python))
-    monkeypatch.setattr(gateway, "_profile_arg", lambda hermes_home: "")
-    monkeypatch.setattr("hermes_cli.config.get_hermes_home", lambda: str(tmp_path / "hermes-home"))
+    monkeypatch.setattr(gateway, "_profile_arg", lambda centurion_home: "")
+    monkeypatch.setattr("centurion_cli.config.get_centurion_home", lambda: str(tmp_path / "hermes-home"))
 
     argv, cwd, env_overlay = gateway_windows._build_gateway_argv()
 
-    assert argv[:3] == [str(base_pythonw), "-m", "hermes_cli.main"]
+    assert argv[:3] == [str(base_pythonw), "-m", "centurion_cli.main"]
     assert cwd == str(project)
     assert env_overlay["VIRTUAL_ENV"] == str(project / "venv")
     assert str(project) in env_overlay["PYTHONPATH"].split(gateway_windows.os.pathsep)
@@ -110,8 +110,8 @@ def test_gateway_cmd_script_uses_pythonw_without_replace_or_start_churn(monkeypa
     monkeypatch.setattr(gateway_windows, "_derive_venv_pythonw", lambda exe: exe.replace("python.exe", "pythonw.exe"))
 
     content = gateway_windows._build_gateway_cmd_script(
-        r"C:\\Hermes\\hermes-agent\\venv\\Scripts\\python.exe",
-        r"C:\\Hermes\\hermes-agent",
+        r"C:\\Hermes\\centurion-os\\venv\\Scripts\\python.exe",
+        r"C:\\Hermes\\centurion-os",
         r"C:\\HermesHome\\profiles\\alice",
         "--profile alice",
     )

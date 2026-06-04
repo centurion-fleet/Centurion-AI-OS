@@ -15,7 +15,7 @@ import pytest
 @pytest.fixture
 def config_home(tmp_path, monkeypatch):
     """Isolated CENTURION_HOME with a minimal string-format config."""
-    home = tmp_path / "hermes"
+    home = tmp_path / "centurion"
     home.mkdir()
     config_yaml = home / "config.yaml"
     # Start with model as a plain string — the format that triggered the bug
@@ -86,7 +86,7 @@ class TestProviderPersistsAfterModelSave:
             assert kwargs["sort_keys"] is False
             raise OSError("simulated atomic write failure")
 
-        with patch("hermes_cli.auth.atomic_yaml_write", side_effect=_boom) as mock_write:
+        with patch("centurion_cli.auth.atomic_yaml_write", side_effect=_boom) as mock_write:
             with pytest.raises(OSError, match="simulated atomic write failure"):
                 _update_config_for_provider(
                     "nous",
@@ -114,8 +114,8 @@ class TestProviderPersistsAfterModelSave:
 
         # Mock the model selection prompt to return "kimi-k2.5"
         # Also mock input() for the base URL prompt and builtins.input
-        with patch("hermes_cli.auth._prompt_model_selection", return_value="kimi-k2.5"), \
-             patch("hermes_cli.auth.deactivate_provider"), \
+        with patch("centurion_cli.auth._prompt_model_selection", return_value="kimi-k2.5"), \
+             patch("centurion_cli.auth.deactivate_provider"), \
              patch("builtins.input", return_value=""):
             _model_flow_api_key_provider(load_config(), "kimi-coding", "old-model")
 
@@ -134,7 +134,7 @@ class TestProviderPersistsAfterModelSave:
         from centurion_cli.config import load_config
 
         with patch(
-            "hermes_cli.auth.resolve_api_key_provider_credentials",
+            "centurion_cli.auth.resolve_api_key_provider_credentials",
             return_value={
                 "provider": "copilot",
                 "api_key": "gh-cli-token",
@@ -142,7 +142,7 @@ class TestProviderPersistsAfterModelSave:
                 "source": "gh auth token",
             },
         ), patch(
-            "hermes_cli.models.fetch_github_model_catalog",
+            "centurion_cli.models.fetch_github_model_catalog",
             return_value=[
                 {
                     "id": "gpt-4.1",
@@ -156,13 +156,13 @@ class TestProviderPersistsAfterModelSave:
                 },
             ],
         ), patch(
-            "hermes_cli.auth._prompt_model_selection",
+            "centurion_cli.auth._prompt_model_selection",
             return_value="gpt-5.4",
         ), patch(
-            "hermes_cli.main._prompt_reasoning_effort_selection",
+            "centurion_cli.main._prompt_reasoning_effort_selection",
             return_value="high",
         ), patch(
-            "hermes_cli.auth.deactivate_provider",
+            "centurion_cli.auth.deactivate_provider",
         ):
             _model_flow_copilot(load_config(), "old-model")
 
@@ -197,9 +197,9 @@ class TestProviderPersistsAfterModelSave:
         from unittest.mock import MagicMock
         fake_menu_module = MagicMock()
         fake_menu_module.TerminalMenu.side_effect = OSError("no tty in test")
-        with patch("hermes_cli.auth._save_model_choice"), \
-             patch("hermes_cli.auth.deactivate_provider"), \
-             patch("hermes_cli.models.fetch_api_models", return_value=["gpt-5.4"]), \
+        with patch("centurion_cli.auth._save_model_choice"), \
+             patch("centurion_cli.auth.deactivate_provider"), \
+             patch("centurion_cli.models.fetch_api_models", return_value=["gpt-5.4"]), \
              patch.dict("sys.modules", {"simple_term_menu": fake_menu_module}), \
              patch("builtins.input", return_value="1"):
             _model_flow_named_custom({}, provider_info)
@@ -217,14 +217,14 @@ class TestProviderPersistsAfterModelSave:
         from centurion_cli.config import load_config
 
         with patch(
-            "hermes_cli.auth.get_external_process_provider_status",
+            "centurion_cli.auth.get_external_process_provider_status",
             return_value={
                 "resolved_command": "/usr/local/bin/copilot",
                 "command": "copilot",
                 "base_url": "acp://copilot",
             },
         ), patch(
-            "hermes_cli.auth.resolve_external_process_provider_credentials",
+            "centurion_cli.auth.resolve_external_process_provider_credentials",
             return_value={
                 "provider": "copilot-acp",
                 "api_key": "copilot-acp",
@@ -234,7 +234,7 @@ class TestProviderPersistsAfterModelSave:
                 "source": "process",
             },
         ), patch(
-            "hermes_cli.auth.resolve_api_key_provider_credentials",
+            "centurion_cli.auth.resolve_api_key_provider_credentials",
             return_value={
                 "provider": "copilot",
                 "api_key": "gh-cli-token",
@@ -242,7 +242,7 @@ class TestProviderPersistsAfterModelSave:
                 "source": "gh auth token",
             },
         ), patch(
-            "hermes_cli.models.fetch_github_model_catalog",
+            "centurion_cli.models.fetch_github_model_catalog",
             return_value=[
                 {
                     "id": "gpt-4.1",
@@ -256,10 +256,10 @@ class TestProviderPersistsAfterModelSave:
                 },
             ],
         ), patch(
-            "hermes_cli.auth._prompt_model_selection",
+            "centurion_cli.auth._prompt_model_selection",
             return_value="gpt-5.4",
         ), patch(
-            "hermes_cli.auth.deactivate_provider",
+            "centurion_cli.auth.deactivate_provider",
         ):
             _model_flow_copilot_acp(load_config(), "old-model")
 
@@ -279,9 +279,9 @@ class TestProviderPersistsAfterModelSave:
 
         monkeypatch.setenv("OPENCODE_GO_API_KEY", "test-key")
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["opencode-go/kimi-k2.5", "opencode-go/minimax-m2.7"]), \
-             patch("hermes_cli.auth._prompt_model_selection", return_value="kimi-k2.5"), \
-             patch("hermes_cli.auth.deactivate_provider"), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["opencode-go/kimi-k2.5", "opencode-go/minimax-m2.7"]), \
+             patch("centurion_cli.auth._prompt_model_selection", return_value="kimi-k2.5"), \
+             patch("centurion_cli.auth.deactivate_provider"), \
              patch("builtins.input", return_value=""):
             _model_flow_api_key_provider(load_config(), "opencode-go", "opencode-go/kimi-k2.5")
 
@@ -306,9 +306,9 @@ class TestProviderPersistsAfterModelSave:
             "  api_mode: chat_completions\n"
         )
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["opencode-go/kimi-k2.5", "opencode-go/minimax-m2.5"]), \
-             patch("hermes_cli.auth._prompt_model_selection", return_value="minimax-m2.5"), \
-             patch("hermes_cli.auth.deactivate_provider"), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["opencode-go/kimi-k2.5", "opencode-go/minimax-m2.5"]), \
+             patch("centurion_cli.auth._prompt_model_selection", return_value="minimax-m2.5"), \
+             patch("centurion_cli.auth.deactivate_provider"), \
              patch("builtins.input", return_value=""):
             _model_flow_api_key_provider(load_config(), "opencode-go", "kimi-k2.5")
 
@@ -339,9 +339,9 @@ class TestBaseUrlValidation:
         from centurion_cli.config import load_config, get_env_value
 
         # User types a shell command instead of a URL at the base URL prompt
-        with patch("hermes_cli.auth._prompt_model_selection", return_value="glm-5"), \
-             patch("hermes_cli.auth.deactivate_provider"), \
-             patch("builtins.input", return_value="nano ~/.hermes/.env"):
+        with patch("centurion_cli.auth._prompt_model_selection", return_value="glm-5"), \
+             patch("centurion_cli.auth.deactivate_provider"), \
+             patch("builtins.input", return_value="nano ~/.centurion/.env"):
             _model_flow_api_key_provider(load_config(), "zai", "old-model")
 
         # The garbage value should NOT have been saved
@@ -364,8 +364,8 @@ class TestBaseUrlValidation:
         from centurion_cli.main import _model_flow_api_key_provider
         from centurion_cli.config import load_config, get_env_value
 
-        with patch("hermes_cli.auth._prompt_model_selection", return_value="glm-5"), \
-             patch("hermes_cli.auth.deactivate_provider"), \
+        with patch("centurion_cli.auth._prompt_model_selection", return_value="glm-5"), \
+             patch("centurion_cli.auth.deactivate_provider"), \
              patch("builtins.input", return_value="https://custom.z.ai/api/paas/v4"):
             _model_flow_api_key_provider(load_config(), "zai", "old-model")
 
@@ -386,8 +386,8 @@ class TestBaseUrlValidation:
         from centurion_cli.main import _model_flow_api_key_provider
         from centurion_cli.config import load_config, get_env_value
 
-        with patch("hermes_cli.auth._prompt_model_selection", return_value="glm-5"), \
-             patch("hermes_cli.auth.deactivate_provider"), \
+        with patch("centurion_cli.auth._prompt_model_selection", return_value="glm-5"), \
+             patch("centurion_cli.auth.deactivate_provider"), \
              patch("builtins.input", return_value=""):
             _model_flow_api_key_provider(load_config(), "zai", "old-model")
 

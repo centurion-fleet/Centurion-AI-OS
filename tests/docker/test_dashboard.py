@@ -6,7 +6,7 @@ it is restarted under supervision. The restart-after-crash test lives in
 Phase 2 Task 2.5; this file only locks the opt-in surface (which must
 not change between tini and s6).
 
-Every ``docker exec`` here runs as the unprivileged ``hermes`` user
+Every ``docker exec`` here runs as the unprivileged ``centurion`` user
 (via :func:`docker_exec`/:func:`docker_exec_sh` in conftest), matching
 the realistic runtime context. See the conftest module docstring.
 """
@@ -45,7 +45,7 @@ def test_dashboard_not_running_by_default(
     # Give the entrypoint enough time to finish bootstrap; if a dashboard
     # were going to start it'd be visible by now.
     time.sleep(5)
-    r = docker_exec(container_name, "pgrep", "-f", "hermes dashboard")
+    r = docker_exec(container_name, "pgrep", "-f", "centurion dashboard")
     # pgrep exits non-zero when no match found
     assert r.returncode != 0, (
         "Dashboard should not be running without HERMES_DASHBOARD"
@@ -119,7 +119,7 @@ def test_dashboard_opt_in_starts(
     # backgrounds it and bootstrap (skills sync etc.) can take a few
     # seconds before the python process actually launches.
     ok, _ = _poll(
-        container_name, "pgrep -f 'hermes dashboard'", deadline_s=30.0,
+        container_name, "pgrep -f 'centurion dashboard'", deadline_s=30.0,
     )
     assert ok, "Dashboard should be running with HERMES_DASHBOARD=1"
 
@@ -165,7 +165,7 @@ def test_dashboard_restarts_after_crash(
     )
     # Wait for the first dashboard to come up.
     ok, _ = _poll(
-        container_name, "pgrep -f 'hermes dashboard'", deadline_s=30.0,
+        container_name, "pgrep -f 'centurion dashboard'", deadline_s=30.0,
     )
     assert ok, "Dashboard never started initially"
 
@@ -175,7 +175,7 @@ def test_dashboard_restarts_after_crash(
     first_pid: str | None = None
     for _attempt in range(10):
         first_pid_result = docker_exec(
-            container_name, "pgrep", "-f", "hermes dashboard",
+            container_name, "pgrep", "-f", "centurion dashboard",
         )
         first_pids = first_pid_result.stdout.strip().split()
         if first_pids:
@@ -192,7 +192,7 @@ def test_dashboard_restarts_after_crash(
     # process to appear with a different PID.
     deadline = time.monotonic() + 15.0
     while time.monotonic() < deadline:
-        r = docker_exec(container_name, "pgrep", "-f", "hermes dashboard")
+        r = docker_exec(container_name, "pgrep", "-f", "centurion dashboard")
         pids = r.stdout.strip().split() if r.returncode == 0 else []
         if pids and pids[0] != first_pid:
             return  # success

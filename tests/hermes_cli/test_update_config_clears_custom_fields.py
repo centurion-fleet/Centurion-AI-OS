@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.auth._update_config_for_provider clearing stale fields.
+"""Tests for centurion_cli.auth._update_config_for_provider clearing stale fields.
 
 When the user switches from a custom provider (e.g. MiniMax with
 ``api_mode: anthropic_messages``, ``api_key: mxp-...``) to a built-in

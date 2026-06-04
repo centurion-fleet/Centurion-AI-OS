@@ -349,11 +349,11 @@ class TestTeamsPluginRegistration:
 class TestTeamsInteractiveSetup:
     def test_interactive_setup_persists_credentials(self, tmp_path, monkeypatch):
         """Regression for #19173: interactive_setup must import prompt helpers
-        from centurion_cli.cli_output (not hermes_cli.config) and persist
+        from centurion_cli.cli_output (not centurion_cli.config) and persist
         credentials to .env without crashing.
         """
-        hermes_home = tmp_path / "hermes"
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        centurion_home = tmp_path / "centurion"
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
         import centurion_cli.cli_output as cli_output_mod
 
@@ -366,7 +366,7 @@ class TestTeamsInteractiveSetup:
 
         _teams_mod.interactive_setup()
 
-        env_text = (hermes_home / ".env").read_text(encoding="utf-8")
+        env_text = (centurion_home / ".env").read_text(encoding="utf-8")
         assert "TEAMS_CLIENT_ID=client-id" in env_text
         assert "TEAMS_TENANT_ID=tenant-id" in env_text
 

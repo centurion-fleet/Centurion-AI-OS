@@ -1,4 +1,4 @@
-"""Tests for hermes_cli/webhook.py — webhook subscription CLI."""
+"""Tests for centurion_cli/webhook.py — webhook subscription CLI."""
 
 import json
 import os
@@ -21,7 +21,7 @@ def _isolate(tmp_path, monkeypatch):
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     # Default: webhooks enabled (most tests need this)
     monkeypatch.setattr(
-        "hermes_cli.webhook._is_webhook_enabled", lambda: True
+        "centurion_cli.webhook._is_webhook_enabled", lambda: True
     )
 
 
@@ -174,7 +174,7 @@ class TestPersistence:
 
 class TestWebhookEnabledGate:
     def test_blocks_when_disabled(self, capsys, monkeypatch):
-        monkeypatch.setattr("hermes_cli.webhook._is_webhook_enabled", lambda: False)
+        monkeypatch.setattr("centurion_cli.webhook._is_webhook_enabled", lambda: False)
         webhook_command(_make_args(webhook_action="subscribe", name="blocked"))
         out = capsys.readouterr().out
         assert "not enabled" in out.lower()
@@ -182,7 +182,7 @@ class TestWebhookEnabledGate:
         assert _load_subscriptions() == {}
 
     def test_blocks_list_when_disabled(self, capsys, monkeypatch):
-        monkeypatch.setattr("hermes_cli.webhook._is_webhook_enabled", lambda: False)
+        monkeypatch.setattr("centurion_cli.webhook._is_webhook_enabled", lambda: False)
         webhook_command(_make_args(webhook_action="list"))
         out = capsys.readouterr().out
         assert "not enabled" in out.lower()
@@ -196,11 +196,11 @@ class TestWebhookEnabledGate:
 
     def test_real_check_disabled(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.webhook._get_webhook_config",
+            "centurion_cli.webhook._get_webhook_config",
             lambda: {},
         )
         monkeypatch.setattr(
-            "hermes_cli.webhook._is_webhook_enabled",
+            "centurion_cli.webhook._is_webhook_enabled",
             lambda: bool({}.get("enabled")),
         )
         import centurion_cli.webhook as wh_mod
@@ -208,7 +208,7 @@ class TestWebhookEnabledGate:
 
     def test_real_check_enabled(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.webhook._is_webhook_enabled",
+            "centurion_cli.webhook._is_webhook_enabled",
             lambda: True,
         )
         import centurion_cli.webhook as wh_mod

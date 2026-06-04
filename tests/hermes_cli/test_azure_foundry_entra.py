@@ -93,7 +93,7 @@ class TestResolveAzureFoundryRuntimeEntra:
         """GPT-5.x / o-series / codex models on Azure are Responses-API-only.
         The runtime auto-upgrades api_mode regardless of auth mode — this is
         the same behaviour as the static-key path (see
-        ``hermes_cli/models.py::azure_foundry_model_api_mode``)."""
+        ``centurion_cli/models.py::azure_foundry_model_api_mode``)."""
         from centurion_cli.runtime_provider import _resolve_azure_foundry_runtime
         runtime = _resolve_azure_foundry_runtime(
             requested_provider="azure-foundry",
@@ -328,7 +328,7 @@ class TestAzureFoundryAuthStatus:
         from centurion_cli import auth as _auth
         # Force load_config to return our entra config.
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: {
                 "model": {
                     "provider": "azure-foundry",
@@ -353,7 +353,7 @@ class TestAzureFoundryAuthStatus:
     def test_entra_status_reports_missing_package(self, monkeypatch):
         from centurion_cli import auth as _auth
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: {
                 "model": {
                     "provider": "azure-foundry",
@@ -374,7 +374,7 @@ class TestAzureFoundryAuthStatus:
     def test_api_key_status_uses_env_var(self, monkeypatch):
         from centurion_cli import auth as _auth
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: {
                 "model": {
                     "provider": "azure-foundry",
@@ -391,7 +391,7 @@ class TestAzureFoundryAuthStatus:
     def test_api_key_status_false_when_missing(self, monkeypatch):
         from centurion_cli import auth as _auth
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: {
                 "model": {
                     "provider": "azure-foundry",

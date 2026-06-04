@@ -39,11 +39,11 @@ def fake_hermes(tmp_path, monkeypatch):
     monkeypatch.setenv("CENTURION_HOME", str(sec_home))
 
     import centurion_constants
-    monkeypatch.setattr(hermes_constants, "get_default_hermes_root", lambda: root)
+    monkeypatch.setattr(hermes_constants, "get_default_centurion_root", lambda: root)
 
     import agent.file_safety as fs
-    monkeypatch.setattr(fs, "_hermes_home_path", lambda: sec_home)
-    monkeypatch.setattr(fs, "_hermes_root_path", lambda: root)
+    monkeypatch.setattr(fs, "_centurion_home_path", lambda: sec_home)
+    monkeypatch.setattr(fs, "_centurion_root_path", lambda: root)
 
     return {
         "root": root,
@@ -94,7 +94,7 @@ class TestWriteFileCrossProfileGuard:
         assert not result.get("error"), f"cross_profile=True must succeed: {result}"
         assert target.read_text() == "user-directed override"
 
-    def test_non_hermes_path_unaffected(self, fake_hermes, tmp_path):
+    def test_non_centurion_path_unaffected(self, fake_hermes, tmp_path):
         from tools.file_tools import write_file_tool
         target = tmp_path / "outside" / "main.py"
         target.parent.mkdir()
@@ -230,11 +230,11 @@ class TestSkillManageCrossProfileErrorUX:
 class TestSystemPromptActiveProfile:
     def test_default_profile_line_in_prompt(self, tmp_path, monkeypatch):
         """When active profile is 'default', the prompt names it and warns
-        about ~/.hermes/profiles/<name>/."""
+        about ~/.centurion/profiles/<name>/."""
         # Don't set CENTURION_HOME — falls back to default.
         import agent.file_safety as fs
-        monkeypatch.setattr(fs, "_hermes_home_path", lambda: tmp_path / "fake")
-        monkeypatch.setattr(fs, "_hermes_root_path", lambda: tmp_path / "fake")
+        monkeypatch.setattr(fs, "_centurion_home_path", lambda: tmp_path / "fake")
+        monkeypatch.setattr(fs, "_centurion_root_path", lambda: tmp_path / "fake")
 
         from agent.file_safety import _resolve_active_profile_name
         assert _resolve_active_profile_name() == "default"
@@ -253,7 +253,7 @@ class TestSystemPromptActiveProfile:
         src = Path("agent/system_prompt.py").read_text()
         assert "Active Hermes profile" in src
         assert "cross_profile=True" in src
-        assert "~/.hermes/profiles/" in src
+        assert "~/.centurion/profiles/" in src
         # Both branches present (default and named profile).
         assert "Active Hermes profile: default" in src
         assert "Active Hermes profile: {active_profile}" in src

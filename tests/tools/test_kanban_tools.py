@@ -19,7 +19,7 @@ import pytest
 # ---------------------------------------------------------------------------
 
 def test_kanban_tools_hidden_without_env_var(monkeypatch, tmp_path):
-    """Normal `hermes chat` sessions (no HERMES_KANBAN_TASK) must have
+    """Normal `centurion chat` sessions (no HERMES_KANBAN_TASK) must have
     zero kanban_* tools in their schema."""
     monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
     home = tmp_path / ".centurion"
@@ -316,7 +316,7 @@ def test_complete_metadata_round_trips_through_show(worker_env):
     from tools import kanban_tools as kt
 
     handoff = {
-        "changed_files": ["hermes_cli/kanban.py"],
+        "changed_files": ["centurion_cli/kanban.py"],
         "verification": ["pytest tests/tools/test_kanban_tools.py -q"],
         "dependencies": [],
         "blocked_reason": None,

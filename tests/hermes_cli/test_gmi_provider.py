@@ -94,7 +94,7 @@ class TestGmiModelCatalog:
 
     def test_provider_model_ids_prefers_live_api(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.auth.resolve_api_key_provider_credentials",
+            "centurion_cli.auth.resolve_api_key_provider_credentials",
             lambda provider_id: {
                 "provider": provider_id,
                 "api_key": "gmi-live-key",
@@ -103,7 +103,7 @@ class TestGmiModelCatalog:
             },
         )
         monkeypatch.setattr(
-            "hermes_cli.models.fetch_api_models",
+            "centurion_cli.models.fetch_api_models",
             lambda api_key, base_url: [
                 "openai/gpt-5.4-mini",
                 "zai-org/GLM-5.1-FP8",
@@ -117,7 +117,7 @@ class TestGmiModelCatalog:
 
     def test_provider_model_ids_falls_back_to_static_models(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.auth.resolve_api_key_provider_credentials",
+            "centurion_cli.auth.resolve_api_key_provider_credentials",
             lambda provider_id: {
                 "provider": provider_id,
                 "api_key": "gmi-live-key",
@@ -125,7 +125,7 @@ class TestGmiModelCatalog:
                 "source": "GMI_API_KEY",
             },
         )
-        monkeypatch.setattr("hermes_cli.models.fetch_api_models", lambda api_key, base_url: None)
+        monkeypatch.setattr("centurion_cli.models.fetch_api_models", lambda api_key, base_url: None)
 
         assert provider_model_ids("gmi") == list(_PROVIDER_MODELS["gmi"])
 
@@ -290,7 +290,7 @@ class TestGmiAuxiliary:
         headers = mock_openai.call_args.kwargs.get("default_headers", {})
         assert headers.get("User-Agent", "").startswith("HermesAgent/")
 
-    def test_gmi_profile_declares_hermes_user_agent(self):
+    def test_gmi_profile_declares_centurion_user_agent(self):
         """The GMI plugin sets a HermesAgent/<ver> User-Agent on its profile."""
         from providers import get_provider_profile
 
@@ -316,12 +316,12 @@ class TestGmiMainFlow:
     def test_chat_parser_accepts_gmi_provider(self, monkeypatch):
         recorded: dict[str, str] = {}
 
-        monkeypatch.setattr("hermes_cli.config.get_container_exec_info", lambda: None)
+        monkeypatch.setattr("centurion_cli.config.get_container_exec_info", lambda: None)
         monkeypatch.setattr(
-            "hermes_cli.main.cmd_chat",
+            "centurion_cli.main.cmd_chat",
             lambda args: recorded.setdefault("provider", args.provider),
         )
-        monkeypatch.setattr(sys, "argv", ["hermes", "chat", "--provider", "gmi"])
+        monkeypatch.setattr(sys, "argv", ["centurion", "chat", "--provider", "gmi"])
 
         from centurion_cli.main import main
 
@@ -332,7 +332,7 @@ class TestGmiMainFlow:
     def test_select_provider_and_model_routes_gmi_to_generic_flow(self, monkeypatch):
         recorded: dict[str, str] = {}
 
-        monkeypatch.setattr("hermes_cli.auth.resolve_provider", lambda *args, **kwargs: None)
+        monkeypatch.setattr("centurion_cli.auth.resolve_provider", lambda *args, **kwargs: None)
 
         def fake_prompt_provider_choice(choices, default=0):
             return next(i for i, label in enumerate(choices) if label.startswith("GMI Cloud"))
@@ -340,8 +340,8 @@ class TestGmiMainFlow:
         def fake_model_flow_api_key_provider(config, provider_id, current_model=""):
             recorded["provider_id"] = provider_id
 
-        monkeypatch.setattr("hermes_cli.main._prompt_provider_choice", fake_prompt_provider_choice)
-        monkeypatch.setattr("hermes_cli.main._model_flow_api_key_provider", fake_model_flow_api_key_provider)
+        monkeypatch.setattr("centurion_cli.main._prompt_provider_choice", fake_prompt_provider_choice)
+        monkeypatch.setattr("centurion_cli.main._model_flow_api_key_provider", fake_model_flow_api_key_provider)
 
         from centurion_cli.main import select_provider_and_model
 
@@ -353,13 +353,13 @@ class TestGmiMainFlow:
         monkeypatch.setenv("GMI_API_KEY", "gmi-test-key")
 
         with patch(
-            "hermes_cli.models.fetch_api_models",
+            "centurion_cli.models.fetch_api_models",
             return_value=["zai-org/GLM-5.1-FP8", "openai/gpt-5.4-mini"],
         ), patch(
-            "hermes_cli.auth._prompt_model_selection",
+            "centurion_cli.auth._prompt_model_selection",
             return_value="openai/gpt-5.4-mini",
         ), patch(
-            "hermes_cli.auth.deactivate_provider",
+            "centurion_cli.auth.deactivate_provider",
         ), patch(
             "builtins.input",
             return_value="",
@@ -369,9 +369,9 @@ class TestGmiMainFlow:
             _model_flow_api_key_provider(load_config(), "gmi", "old-model")
 
         import yaml
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
 
-        config = yaml.safe_load((get_hermes_home() / "config.yaml").read_text()) or {}
+        config = yaml.safe_load((get_centurion_home() / "config.yaml").read_text()) or {}
         model_cfg = config.get("model")
         assert isinstance(model_cfg, dict)
         assert model_cfg["provider"] == "gmi"

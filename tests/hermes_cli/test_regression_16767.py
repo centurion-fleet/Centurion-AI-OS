@@ -32,8 +32,8 @@ def test_chat_provider_argparse_acceptance(monkeypatch):
     def mock_cmd_chat(args):
         recorded["provider"] = args.provider
 
-    monkeypatch.setattr("hermes_cli.main.cmd_chat", mock_cmd_chat)
-    monkeypatch.setattr(sys, "argv", ["hermes", "chat", "--provider", "my-custom-key"])
+    monkeypatch.setattr("centurion_cli.main.cmd_chat", mock_cmd_chat)
+    monkeypatch.setattr(sys, "argv", ["centurion", "chat", "--provider", "my-custom-key"])
 
     from centurion_cli.main import main
     main()
@@ -43,7 +43,7 @@ def test_chat_provider_argparse_acceptance(monkeypatch):
 def test_resolve_named_custom_runtime_honors_explicit_base_url(monkeypatch):
     """_resolve_named_custom_runtime honors (provider='custom', explicit_base_url=...)."""
     # Mock has_usable_secret to recognize our test key
-    monkeypatch.setattr("hermes_cli.runtime_provider.has_usable_secret", lambda x: x == "test-api-key")
+    monkeypatch.setattr("centurion_cli.runtime_provider.has_usable_secret", lambda x: x == "test-api-key")
     
     result = _resolve_named_custom_runtime(
         requested_provider="custom",

@@ -26,7 +26,7 @@ def _build_parser():
     Since main() is a large function that does much more than parse args,
     we replicate just the parser structure here to avoid side effects.
     """
-    parser = argparse.ArgumentParser(prog="hermes")
+    parser = argparse.ArgumentParser(prog="centurion")
     parser.add_argument("--resume", "-r", metavar="SESSION", default=None)
     parser.add_argument(
         "--continue", "-c", dest="continue_last", nargs="?",
@@ -93,13 +93,13 @@ class TestChatVerboseArg:
             captured.update(kwargs)
 
         setattr(fake_cli, "main", fake_main)
-        fake_banner = types.ModuleType("hermes_cli.banner")
+        fake_banner = types.ModuleType("centurion_cli.banner")
         setattr(fake_banner, "prefetch_update_check", lambda: None)
         fake_skills_sync = types.ModuleType("tools.skills_sync")
         setattr(fake_skills_sync, "sync_skills", lambda quiet=True: None)
 
         monkeypatch.setitem(sys.modules, "cli", fake_cli)
-        monkeypatch.setitem(sys.modules, "hermes_cli.banner", fake_banner)
+        monkeypatch.setitem(sys.modules, "centurion_cli.banner", fake_banner)
         monkeypatch.setitem(sys.modules, "tools.skills_sync", fake_skills_sync)
         monkeypatch.setattr(main_mod, "_has_any_provider_configured", lambda: True)
         monkeypatch.setattr(main_mod, "_pin_kanban_board_env", lambda: None)
@@ -172,7 +172,7 @@ class TestAcceptHooksOnAgentSubparsers:
         failing with `unrecognized arguments`."""
         import subprocess
         result = subprocess.run(
-            [sys.executable, "-m", "hermes_cli.main", *argv],
+            [sys.executable, "-m", "centurion_cli.main", *argv],
             capture_output=True,
             text=True,
             timeout=15,

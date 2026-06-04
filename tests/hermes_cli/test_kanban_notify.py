@@ -275,7 +275,7 @@ async def test_notifier_does_not_call_init_db(kanban_home):
         return real_init_db(*args, **kwargs)
 
     with patch("gateway.run.asyncio.sleep", side_effect=_fast_sleep), \
-         patch("hermes_cli.kanban_db.init_db", side_effect=_spy_init_db):
+         patch("centurion_cli.kanban_db.init_db", side_effect=_spy_init_db):
         await asyncio.wait_for(
             runner._kanban_notifier_watcher(interval=1),
             timeout=10.0,

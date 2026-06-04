@@ -30,9 +30,9 @@ RUN_DURATION_S = 30
 WT = str(Path(__file__).resolve().parents[2])
 
 
-def worker_loop(worker_id: int, hermes_home: str, result_file: str) -> None:
-    os.environ["CENTURION_HOME"] = hermes_home
-    os.environ["HOME"] = hermes_home
+def worker_loop(worker_id: int, centurion_home: str, result_file: str) -> None:
+    os.environ["CENTURION_HOME"] = centurion_home
+    os.environ["HOME"] = centurion_home
     sys.path.insert(0, WT)
     from centurion_cli import kanban_db as kb
 
@@ -141,10 +141,10 @@ def worker_loop(worker_id: int, hermes_home: str, result_file: str) -> None:
         json.dump(events, f)
 
 
-def reclaimer_loop(hermes_home: str, result_file: str) -> None:
+def reclaimer_loop(centurion_home: str, result_file: str) -> None:
     """Background dispatcher-like loop that reclaims stale tasks."""
-    os.environ["CENTURION_HOME"] = hermes_home
-    os.environ["HOME"] = hermes_home
+    os.environ["CENTURION_HOME"] = centurion_home
+    os.environ["HOME"] = centurion_home
     sys.path.insert(0, WT)
     from centurion_cli import kanban_db as kb
 

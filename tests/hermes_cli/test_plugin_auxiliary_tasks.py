@@ -235,7 +235,7 @@ def test_all_aux_tasks_swallows_plugin_discovery_failure(monkeypatch):
         raise RuntimeError("plugin scan exploded")
 
     monkeypatch.setattr(
-        "hermes_cli.plugins.get_plugin_auxiliary_tasks", _broken
+        "centurion_cli.plugins.get_plugin_auxiliary_tasks", _broken
     )
 
     merged = main_mod._all_aux_tasks()
