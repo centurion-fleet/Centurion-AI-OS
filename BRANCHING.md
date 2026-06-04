@@ -10,7 +10,12 @@ main
   │     ├── feature/<name>      ← new work off develop
   │     └── release/v<version>  ← prep for main
   │
-  └── hotfix/<name>             ← urgent fix off main
+  ├── hotfix/<name>             ← urgent fix off main
+  │
+  ├── titus                     ← Centurion #3 (Fleet Overseer)
+  ├── eve                       ← Centurion #2 (Strategic AI)
+  ├── adam                      ← Centurion (early deployment)
+  └── <centurion-name>          ← new Centurion = new branch
 ```
 
 ## Branch Rules
@@ -22,6 +27,27 @@ main
 | `feature/<name>` | `develop` | `develop` | Isolated work. Delete after merge. |
 | `release/v<version>` | `develop` | `main` + `develop` | Release prep. Bump version, final QA. Delete after merge. |
 | `hotfix/<name>` | `main` | `main` + `develop` | Urgent fix. Delete after merge. |
+| `<centurion-name>` | `develop` | `develop` | Per-AI persistent workspace. Rebased onto develop regularly. |
+
+## Per-Centurion Branches
+
+Each Centurion AI gets a named branch — their persistent workspace.
+
+- **Create** when a new Centurion is deployed (off `develop`)
+- **Work** directly on the branch or use `feature/*` sub-branches off it
+- **Integrate** by PR into `develop` when ready for release
+- **Stay current** — rebase onto `develop` regularly so you're not drifting
+- **Don't merge develop into your branch** — rebase instead (keeps history linear)
+
+### Current Centurion Branches
+
+| Branch | Centurion | Role |
+|--------|-----------|------|
+| `titus` | Titus (#3) | Fleet Overseer, Prefect |
+| `eve` | Eve (#2) | Strategic AI (owned by Steve White) |
+| `adam` | Adam | Early deployment Centurion |
+
+To add a new Centurion: `git branch <name> develop && git push origin <name>`
 
 ## Naming Conventions
 
