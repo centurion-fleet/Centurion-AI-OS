@@ -375,7 +375,13 @@ def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
 
 def format_banner_version_label() -> str:
     """Return the version label shown in the startup banner title."""
-    base = f"Hermes Agent v{VERSION} ({RELEASE_DATE})"
+    # Use skin branding if available
+    try:
+        from centurion_cli.skin_engine import get_active_skin
+        name = get_active_skin().get_branding("agent_name", "Centurion AI OS")
+    except Exception:
+        name = "Centurion AI OS"
+    base = f"{name} v{VERSION} ({RELEASE_DATE})"
     state = get_git_banner_state()
     if not state:
         return base

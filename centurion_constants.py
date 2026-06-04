@@ -102,7 +102,7 @@ def get_centurion_home() -> Path:
 
 
 def get_default_centurion_root() -> Path:
-    """Return the root Hermes directory for profile-level operations.
+    """Return the root Centurion directory for profile-level operations.
 
     In standard deployments this is ``~/.centurion``.
 
@@ -112,6 +112,7 @@ def get_default_centurion_root() -> Path:
 
     In profile mode where ``CENTURION_HOME`` is ``<root>/profiles/<name>``,
     returns ``<root>`` so that ``profile list`` can see all profiles.
+
     Works both for standard (``~/.centurion/profiles/coder``) and Docker
     (``/opt/data/profiles/coder``) layouts.
 
@@ -138,6 +139,10 @@ def get_default_centurion_root() -> Path:
 
     # Not a profile path — CENTURION_HOME itself is the root
     return env_path
+
+# Backward-compatible alias for migration compatibility
+get_default_hermes_root = get_default_centurion_root
+get_hermes_home = get_centurion_home
 
 
 def _get_packaged_data_dir(name: str) -> Path | None:
@@ -233,6 +238,9 @@ def display_centurion_home() -> str:
         return "~/" + str(home.relative_to(Path.home()))
     except ValueError:
         return str(home)
+
+# Backward-compatible alias for migration compatibility
+display_hermes_home = display_centurion_home
 
 
 def secure_parent_dir(path: Path) -> None:

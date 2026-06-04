@@ -225,7 +225,7 @@ def _apply_profile_override() -> None:
     # 2. If no flag, check active_profile in the hermes root
     if profile_name is None:
         try:
-            from centurion_constants import get_default_hermes_root
+            from centurion_constants import get_default_centurion_root as get_default_hermes_root
 
             active_path = get_default_hermes_root() / "active_profile"
             if active_path.exists():
@@ -7571,7 +7571,7 @@ def _invalidate_update_cache():
     """
     homes = []
     # Default profile home (Docker-aware — uses /opt/data in Docker)
-    from centurion_constants import get_default_hermes_root
+    from centurion_constants import get_default_centurion_root as get_default_hermes_root
 
     default_home = get_default_hermes_root()
     homes.append(default_home)

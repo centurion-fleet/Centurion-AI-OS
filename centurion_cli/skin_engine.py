@@ -770,7 +770,13 @@ def get_active_skin() -> SkinConfig:
     """Get the currently active skin config (cached)."""
     global _active_skin
     if _active_skin is None:
-        _active_skin = load_skin(_active_skin_name)
+        # Auto-init from config.yaml so display.skin setting works
+        try:
+            from centurion_cli.config import load_config
+            cfg = load_config()
+            init_skin_from_config(cfg)
+        except Exception:
+            _active_skin = load_skin(_active_skin_name)
     return _active_skin
 
 

@@ -14,7 +14,7 @@ import tempfile
 import time
 from typing import Optional
 
-from centurion_cli.config import get_hermes_home
+from centurion_constants import get_hermes_home
 
 
 CACHE_PATH = get_hermes_home() / "sticker_cache.json"
