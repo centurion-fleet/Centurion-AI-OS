@@ -19,7 +19,7 @@ from centurion_cli.model_switch import list_authenticated_providers
 # -- Copilot slug resolution (env var path) ----------------------------------
 
 @patch.dict(os.environ, {"COPILOT_GITHUB_TOKEN": "fake-ghu"}, clear=False)
-def test_copilot_uses_hermes_slug():
+def test_copilot_uses_centurion_slug():
     """github-copilot overlay should resolve to slug='copilot' with curated models."""
     providers = list_authenticated_providers(current_provider="copilot")
 
@@ -57,7 +57,7 @@ def test_kimi_for_coding_alias():
 # -- Generic slug mismatch providers -----------------------------------------
 
 @patch.dict(os.environ, {"KIMI_API_KEY": "fake-key"}, clear=False)
-def test_kimi_for_coding_overlay_uses_hermes_slug():
+def test_kimi_for_coding_overlay_uses_centurion_slug():
     """kimi-for-coding overlay should resolve to slug='kimi-coding'."""
     providers = list_authenticated_providers(current_provider="kimi-coding")
 
@@ -71,7 +71,7 @@ def test_kimi_for_coding_overlay_uses_hermes_slug():
 
 
 @patch.dict(os.environ, {"KILOCODE_API_KEY": "fake-key"}, clear=False)
-def test_kilo_overlay_uses_hermes_slug():
+def test_kilo_overlay_uses_centurion_slug():
     """kilo overlay should resolve to slug='kilocode'."""
     providers = list_authenticated_providers(current_provider="kilocode")
 
@@ -89,7 +89,7 @@ def test_mapped_provider_credential_pool_visibility(monkeypatch):
     monkeypatch.setattr("agent.models_dev.fetch_models_dev", lambda: {"google-ai-studio": {"env": ["GEMINI_API_KEY"]}})
     monkeypatch.setattr("agent.models_dev.PROVIDER_TO_MODELS_DEV", {"gemini": "google-ai-studio"})
     monkeypatch.setattr(
-        "hermes_cli.auth._load_auth_store",
+        "centurion_cli.auth._load_auth_store",
         lambda: {"providers": {}, "credential_pool": {"gemini": {"token": "fake"}}},
     )
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)

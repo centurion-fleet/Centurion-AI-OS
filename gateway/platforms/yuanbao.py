@@ -1588,11 +1588,11 @@ class AutoSetHomeMiddleware(InboundMiddleware):
                 adapter._auto_sethome_done = True  # DM seen — no further upgrades needed
             if _should_set:
                 try:
-                    from centurion_constants import get_hermes_home
+                    from centurion_constants import get_centurion_home
                     from utils import atomic_yaml_write
                     import yaml
 
-                    _home = get_hermes_home()
+                    _home = get_centurion_home()
                     config_path = _home / "config.yaml"
                     user_config: dict = {}
                     if config_path.exists():

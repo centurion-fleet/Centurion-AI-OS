@@ -8,11 +8,11 @@ Nous can attribute usage to Hermes Agent and bucket it by client release.
 Tag shape (sent in OpenAI-compatible ``extra_body['tags']``):
 
     [
-        "product=hermes-agent",
+        "product=centurion-os",
         "client=hermes-client-v<__version__>",
     ]
 
-The version is sourced live from ``hermes_cli.__version__`` so it auto-aligns
+The version is sourced live from ``centurion_cli.__version__`` so it auto-aligns
 to whatever release is installed; the release script
 (``scripts/release.py``) regex-bumps that single string, and every Portal
 request picks up the new tag on the next process start.
@@ -26,7 +26,7 @@ Why one helper instead of inlining the literal at each site:
 
 Do NOT pre-compute these as module-level constants in the consumers. The
 version can change at runtime (editable installs, hot-reload tooling), and
-``hermes_cli.__version__`` is the canonical source of truth.
+``centurion_cli.__version__`` is the canonical source of truth.
 """
 
 from __future__ import annotations
@@ -34,10 +34,10 @@ from __future__ import annotations
 from typing import List
 
 
-def _hermes_version() -> str:
+def _centurion_version() -> str:
     """Return the current Hermes release version, e.g. ``"0.13.0"``.
 
-    Falls back to ``"unknown"`` if ``hermes_cli`` cannot be imported (should
+    Falls back to ``"unknown"`` if ``centurion_cli`` cannot be imported (should
     never happen in a real install — guarded for defensive testing).
     """
     try:
@@ -47,12 +47,12 @@ def _hermes_version() -> str:
         return "unknown"
 
 
-def hermes_client_tag() -> str:
+def centurion_client_tag() -> str:
     """Return the ``client=...`` tag for Nous Portal requests.
 
     Format: ``client=hermes-client-v<MAJOR>.<MINOR>.<PATCH>``.
     """
-    return f"client=hermes-client-v{_hermes_version()}"
+    return f"client=hermes-client-v{_centurion_version()}"
 
 
 def nous_portal_tags() -> List[str]:
@@ -61,4 +61,4 @@ def nous_portal_tags() -> List[str]:
     Always returns a fresh list so callers can mutate it freely
     (e.g. ``merged_extra.setdefault("tags", []).extend(nous_portal_tags())``).
     """
-    return ["product=hermes-agent", hermes_client_tag()]
+    return ["product=centurion-os", centurion_client_tag()]

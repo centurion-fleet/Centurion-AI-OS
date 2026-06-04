@@ -176,14 +176,14 @@ class TestCmdUpdateBranchFallback:
         with patch("shutil.which", return_value=None), patch(
             "subprocess.run"
         ) as mock_run, patch("builtins.input") as mock_input, patch(
-            "hermes_cli.config.get_missing_env_vars", return_value=["MISSING_KEY"]
+            "centurion_cli.config.get_missing_env_vars", return_value=["MISSING_KEY"]
         ), patch(
-            "hermes_cli.config.get_missing_config_fields",
+            "centurion_cli.config.get_missing_config_fields",
             return_value=[{"key": "new.option", "default": True}],
-        ), patch("hermes_cli.config.check_config_version", return_value=(1, 2)), patch(
-            "hermes_cli.config.migrate_config",
+        ), patch("centurion_cli.config.check_config_version", return_value=(1, 2)), patch(
+            "centurion_cli.config.migrate_config",
             return_value={"env_added": [], "config_added": ["new.option"]},
-        ), patch("hermes_cli.main.sys") as mock_sys:
+        ), patch("centurion_cli.main.sys") as mock_sys:
             mock_sys.stdin.isatty.return_value = False
             mock_sys.stdout.isatty.return_value = False
             mock_run.side_effect = _make_run_side_effect(
@@ -233,8 +233,8 @@ class TestCmdUpdateProfileSkillSync:
         empty_sync = {"copied": [], "updated": [], "user_modified": [], "cleaned": []}
 
         with (
-            patch("hermes_cli.profiles.list_profiles", return_value=all_profiles),
-            patch("hermes_cli.profiles.seed_profile_skills", side_effect=fake_seed),
+            patch("centurion_cli.profiles.list_profiles", return_value=all_profiles),
+            patch("centurion_cli.profiles.seed_profile_skills", side_effect=fake_seed),
             patch("tools.skills_sync.sync_skills", return_value=empty_sync),
         ):
             cmd_update(mock_args)
@@ -267,8 +267,8 @@ class TestCmdUpdateProfileSkillSync:
         empty_sync = {"copied": [], "updated": [], "user_modified": [], "cleaned": []}
 
         with (
-            patch("hermes_cli.profiles.list_profiles", return_value=[default_p]),
-            patch("hermes_cli.profiles.seed_profile_skills", side_effect=fake_seed),
+            patch("centurion_cli.profiles.list_profiles", return_value=[default_p]),
+            patch("centurion_cli.profiles.seed_profile_skills", side_effect=fake_seed),
             patch("tools.skills_sync.sync_skills", return_value=empty_sync),
         ):
             cmd_update(mock_args)

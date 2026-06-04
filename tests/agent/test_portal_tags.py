@@ -3,19 +3,19 @@
 from __future__ import annotations
 
 
-def test_hermes_client_tag_includes_current_version():
-    """The client tag must reflect hermes_cli.__version__ verbatim."""
+def test_centurion_client_tag_includes_current_version():
+    """The client tag must reflect centurion_cli.__version__ verbatim."""
     from centurion_cli import __version__
     from agent.portal_tags import centurion_client_tag
 
-    assert hermes_client_tag() == f"client=hermes-client-v{__version__}"
+    assert centurion_client_tag() == f"client=hermes-client-v{__version__}"
 
 
-def test_hermes_client_tag_format():
+def test_centurion_client_tag_format():
     """The client tag has the exact shape Nous Portal expects."""
     from agent.portal_tags import centurion_client_tag
 
-    tag = hermes_client_tag()
+    tag = centurion_client_tag()
     assert tag.startswith("client=hermes-client-v")
     # No spaces, no commas — single tag value
     assert " " not in tag
@@ -27,8 +27,8 @@ def test_nous_portal_tags_contains_product_and_client():
     from agent.portal_tags import centurion_client_tag, nous_portal_tags
 
     tags = nous_portal_tags()
-    assert "product=hermes-agent" in tags
-    assert hermes_client_tag() in tags
+    assert "product=centurion-os" in tags
+    assert centurion_client_tag() in tags
     assert len(tags) == 2
 
 

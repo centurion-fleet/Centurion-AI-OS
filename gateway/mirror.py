@@ -14,11 +14,11 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from centurion_constants import get_hermes_home
+from centurion_constants import get_centurion_home
 
 logger = logging.getLogger(__name__)
 
-_SESSIONS_DIR = get_hermes_home() / "sessions"
+_SESSIONS_DIR = get_centurion_home() / "sessions"
 _SESSIONS_INDEX = _SESSIONS_DIR / "sessions.json"
 
 

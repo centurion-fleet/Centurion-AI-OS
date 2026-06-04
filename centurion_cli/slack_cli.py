@@ -106,7 +106,7 @@ def _build_full_manifest(bot_name: str, bot_description: str) -> dict:
 def slack_manifest_command(args) -> int:
     """Print or write a Slack app manifest JSON.
 
-    Flags (all parsed in ``hermes_cli/main.py``):
+    Flags (all parsed in ``centurion_cli/main.py``):
       --write [PATH]  Write to file instead of stdout (default path:
                       ``$CENTURION_HOME/slack-manifest.json``)
       --name NAME     Override the bot display name (default: "Hermes")

@@ -9,7 +9,7 @@ import pytest
 import centurion_constants
 from centurion_constants import (
     VALID_REASONING_EFFORTS,
-    get_default_hermes_root,
+    get_default_centurion_root,
     is_container,
     parse_reasoning_effort,
     secure_parent_dir,
@@ -17,47 +17,47 @@ from centurion_constants import (
 
 
 class TestGetDefaultHermesRoot:
-    """Tests for get_default_hermes_root() — Docker/custom deployment awareness."""
+    """Tests for get_default_centurion_root() — Docker/custom deployment awareness."""
 
-    def test_no_hermes_home_returns_native(self, tmp_path, monkeypatch):
-        """When CENTURION_HOME is not set, returns ~/.hermes."""
+    def test_no_centurion_home_returns_native(self, tmp_path, monkeypatch):
+        """When CENTURION_HOME is not set, returns ~/.centurion."""
         monkeypatch.delenv("CENTURION_HOME", raising=False)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-        assert get_default_hermes_root() == tmp_path / ".centurion"
+        assert get_default_centurion_root() == tmp_path / ".centurion"
 
-    def test_hermes_home_is_native(self, tmp_path, monkeypatch):
-        """When CENTURION_HOME = ~/.hermes, returns ~/.hermes."""
+    def test_centurion_home_is_native(self, tmp_path, monkeypatch):
+        """When CENTURION_HOME = ~/.centurion, returns ~/.centurion."""
         native = tmp_path / ".centurion"
         native.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(native))
-        assert get_default_hermes_root() == native
+        assert get_default_centurion_root() == native
 
-    def test_hermes_home_is_profile(self, tmp_path, monkeypatch):
-        """When CENTURION_HOME is a profile under ~/.hermes, returns ~/.hermes."""
+    def test_centurion_home_is_profile(self, tmp_path, monkeypatch):
+        """When CENTURION_HOME is a profile under ~/.centurion, returns ~/.centurion."""
         native = tmp_path / ".centurion"
         profile = native / "profiles" / "coder"
         profile.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(profile))
-        assert get_default_hermes_root() == native
+        assert get_default_centurion_root() == native
 
-    def test_hermes_home_is_docker(self, tmp_path, monkeypatch):
-        """When CENTURION_HOME points outside ~/.hermes (Docker), returns CENTURION_HOME."""
+    def test_centurion_home_is_docker(self, tmp_path, monkeypatch):
+        """When CENTURION_HOME points outside ~/.centurion (Docker), returns CENTURION_HOME."""
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(docker_home))
-        assert get_default_hermes_root() == docker_home
+        assert get_default_centurion_root() == docker_home
 
-    def test_hermes_home_is_custom_path(self, tmp_path, monkeypatch):
-        """Any CENTURION_HOME outside ~/.hermes is treated as the root."""
+    def test_centurion_home_is_custom_path(self, tmp_path, monkeypatch):
+        """Any CENTURION_HOME outside ~/.centurion is treated as the root."""
         custom = tmp_path / "my-hermes-data"
         custom.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(custom))
-        assert get_default_hermes_root() == custom
+        assert get_default_centurion_root() == custom
 
     def test_docker_profile_active(self, tmp_path, monkeypatch):
         """When a Docker profile is active (CENTURION_HOME=<root>/profiles/<name>),
@@ -67,7 +67,7 @@ class TestGetDefaultHermesRoot:
         profile.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(profile))
-        assert get_default_hermes_root() == docker_root
+        assert get_default_centurion_root() == docker_root
 
 
 class TestIsContainer:

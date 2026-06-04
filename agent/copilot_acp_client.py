@@ -558,7 +558,7 @@ class CopilotACPClient:
                         }
                     },
                     "clientInfo": {
-                        "name": "hermes-agent",
+                        "name": "centurion-os",
                         "title": "Hermes Agent",
                         "version": "0.0.0",
                     },

@@ -31,8 +31,8 @@ from centurion_cli.config import (
     read_raw_config,
     save_env_value,
 )
-# display_hermes_home is imported lazily at call sites to avoid ImportError
-# when hermes_constants is cached from a pre-update version during `hermes update`.
+# display_centurion_home is imported lazily at call sites to avoid ImportError
+# when hermes_constants is cached from a pre-update version during `centurion update`.
 from centurion_cli.setup import (
     print_header, print_info, print_success, print_warning, print_error,
     prompt, prompt_choice, prompt_yes_no,
@@ -262,7 +262,7 @@ def _get_ancestor_pids() -> set[int]:
 
     Walks from the current PID up to PID 1 (init) so that process-table scans
     never match the calling CLI process or any of its parents.  This prevents
-    ``hermes gateway status`` from falsely counting the ``hermes`` CLI that
+    ``hermes gateway status`` from falsely counting the ``centurion`` CLI that
     invoked it as a running gateway instance (see #13242).
     """
     ancestors: set[int] = set()
@@ -298,12 +298,12 @@ def _scan_gateway_pids(exclude_pids: set[int], all_profiles: bool = False) -> li
     exclude_pids = exclude_pids | _get_ancestor_pids()
     pids: list[int] = []
     patterns = [
-        "hermes_cli.main gateway",
-        "hermes_cli.main --profile",
-        "hermes_cli.main -p",
-        "hermes_cli/main.py gateway",
-        "hermes_cli/main.py --profile",
-        "hermes_cli/main.py -p",
+        "centurion_cli.main gateway",
+        "centurion_cli.main --profile",
+        "centurion_cli.main -p",
+        "centurion_cli/main.py gateway",
+        "centurion_cli/main.py --profile",
+        "centurion_cli/main.py -p",
         "hermes gateway",
         "gateway/run.py",
     ]
@@ -515,7 +515,7 @@ def find_gateway_pids(exclude_pids: set | None = None, all_profiles: bool = Fals
         exclude_pids: PIDs to exclude from the result (e.g. service-managed
             PIDs that should not be killed during a stale-process sweep).
         all_profiles: When ``True``, return gateway PIDs across **all**
-            profiles (the pre-7923 global behaviour).  ``hermes update``
+            profiles (the pre-7923 global behaviour).  ``centurion update``
             needs this because a code update affects every profile.
             When ``False`` (default), only PIDs belonging to the current
             Hermes profile are returned.
@@ -562,7 +562,7 @@ def find_profile_gateway_processes(
 
 
 def _gateway_run_args_for_profile(profile: str) -> list[str]:
-    args = [get_python_path(), "-m", "hermes_cli.main"]
+    args = [get_python_path(), "-m", "centurion_cli.main"]
     if profile != "default":
         args.extend(["--profile", profile])
     args.extend(["gateway", "run", "--replace"])
@@ -584,7 +584,7 @@ def launch_detached_profile_gateway_restart(profile: str, old_pid: int) -> bool:
     #
     # Windows — ``start_new_session`` is silently accepted but does NOT
     # detach.  The watcher stays attached to the CLI's console and dies
-    # when the user closes the terminal, leaving ``hermes update`` users
+    # when the user closes the terminal, leaving ``centurion update`` users
     # with no running gateway until they re-invoke ``hermes gateway``
     # manually.  The Win32 equivalent is the ``CREATE_NEW_PROCESS_GROUP |
     # DETACHED_PROCESS | CREATE_NO_WINDOW`` creationflags bundle.
@@ -702,7 +702,7 @@ def _read_systemd_unit_environment(system: bool = False) -> dict[str, str]:
     return parsed
 
 
-def _sync_hermes_home_from_systemd_unit(system: bool) -> None:
+def _sync_centurion_home_from_systemd_unit(system: bool) -> None:
     """When acting on a system-scope unit, adopt its ``CENTURION_HOME``.
 
     Under ``sudo``, ``CENTURION_HOME`` is stripped and ``HOME=/root``, so
@@ -1289,9 +1289,9 @@ def _profile_suffix() -> str:
     """
     import hashlib
     import re
-    from centurion_constants import get_default_hermes_root
+    from centurion_constants import get_default_centurion_root
     home = get_centurion_home().resolve()
-    default = get_default_hermes_root().resolve()
+    default = get_default_centurion_root().resolve()
     if home == default:
         return ""
     # Detect <root>/profiles/<name> pattern → use the profile name
@@ -1307,21 +1307,21 @@ def _profile_suffix() -> str:
     return hashlib.sha256(str(home).encode()).hexdigest()[:8]
 
 
-def _profile_arg(hermes_home: str | None = None) -> str:
+def _profile_arg(centurion_home: str | None = None) -> str:
     """Return ``--profile <name>`` only when CENTURION_HOME is a named profile.
 
-    For ``~/.hermes/profiles/<name>``, returns ``"--profile <name>"``.
+    For ``~/.centurion/profiles/<name>``, returns ``"--profile <name>"``.
     For the default profile or hash-based custom paths, returns the empty string.
 
     Args:
-        hermes_home: Optional explicit CENTURION_HOME path. Defaults to the current
+        centurion_home: Optional explicit CENTURION_HOME path. Defaults to the current
             ``get_centurion_home()`` value. Should be passed when generating a
             service definition for a different user (e.g. system service).
     """
     import re
-    from centurion_constants import get_default_hermes_root
-    home = Path(hermes_home or str(get_centurion_home())).resolve()
-    default = get_default_hermes_root().resolve()
+    from centurion_constants import get_default_centurion_root
+    home = Path(centurion_home or str(get_centurion_home())).resolve()
+    default = get_default_centurion_root().resolve()
     if home == default:
         return ""
     profiles_root = (default / "profiles").resolve()
@@ -1338,8 +1338,8 @@ def _profile_arg(hermes_home: str | None = None) -> str:
 def get_service_name() -> str:
     """Derive a systemd service name scoped to this CENTURION_HOME.
 
-    Default ``~/.hermes`` returns ``hermes-gateway`` (backward compatible).
-    Profile ``~/.hermes/profiles/coder`` returns ``hermes-gateway-coder``.
+    Default ``~/.centurion`` returns ``hermes-gateway`` (backward compatible).
+    Profile ``~/.centurion/profiles/coder`` returns ``hermes-gateway-coder``.
     Any other CENTURION_HOME appends a short hash for uniqueness.
     """
     suffix = _profile_suffix()
@@ -1599,14 +1599,14 @@ def has_conflicting_systemd_units() -> bool:
 # Legacy service names from older Hermes installs that predate the
 # hermes-gateway rename. Kept as an explicit allowlist (NOT a glob) so
 # profile units (hermes-gateway-*.service) and unrelated third-party
-# "hermes" units are never matched.
+# "centurion" units are never matched.
 _LEGACY_SERVICE_NAMES: tuple[str, ...] = ("hermes.service",)
 
 # ExecStart content markers that identify a unit as running our gateway.
 # A legacy unit is only flagged when its file contains one of these.
 _LEGACY_UNIT_EXECSTART_MARKERS: tuple[str, ...] = (
-    "hermes_cli.main gateway",
-    "hermes_cli/main.py gateway",
+    "centurion_cli.main gateway",
+    "centurion_cli/main.py gateway",
     "gateway/run.py",
     " hermes gateway ",
     "/hermes gateway ",
@@ -1625,7 +1625,7 @@ def _legacy_unit_search_paths() -> list[tuple[bool, Path]]:
     ]
 
 
-def _find_legacy_hermes_units() -> list[tuple[str, Path, bool]]:
+def _find_legacy_centurion_units() -> list[tuple[str, Path, bool]]:
     """Return ``[(unit_name, unit_path, is_system)]`` for legacy Hermes gateway units.
 
     Detects unit files installed by older Hermes versions that used a
@@ -1663,9 +1663,9 @@ def _find_legacy_hermes_units() -> list[tuple[str, Path, bool]]:
     return results
 
 
-def has_legacy_hermes_units() -> bool:
+def has_legacy_centurion_units() -> bool:
     """Return True when any legacy Hermes gateway unit files exist."""
-    return bool(_find_legacy_hermes_units())
+    return bool(_find_legacy_centurion_units())
 
 
 def print_legacy_unit_warning() -> None:
@@ -1674,7 +1674,7 @@ def print_legacy_unit_warning() -> None:
     Idempotent: prints nothing when no legacy units are detected. Safe to
     call from any status/install/setup path.
     """
-    legacy = _find_legacy_hermes_units()
+    legacy = _find_legacy_centurion_units()
     if not legacy:
         return
     print_warning("Legacy Hermes gateway unit(s) detected from an older install:")
@@ -1687,13 +1687,13 @@ def print_legacy_unit_warning() -> None:
     print_info("    hermes gateway migrate-legacy")
 
 
-def remove_legacy_hermes_units(
+def remove_legacy_centurion_units(
     interactive: bool = True,
     dry_run: bool = False,
 ) -> tuple[int, list[Path]]:
     """Stop, disable, and remove legacy Hermes gateway unit files.
 
-    Iterates over whatever ``_find_legacy_hermes_units()`` returns — which is
+    Iterates over whatever ``_find_legacy_centurion_units()`` returns — which is
     an explicit allowlist of legacy names (not a glob). Profile units and
     unrelated third-party services are never touched.
 
@@ -1707,7 +1707,7 @@ def remove_legacy_hermes_units(
         ``(removed_count, remaining_paths)`` — remaining includes units we
         couldn't remove (typically system-scope when not running as root).
     """
-    legacy = _find_legacy_hermes_units()
+    legacy = _find_legacy_centurion_units()
     if not legacy:
         print("No legacy Hermes gateway units found.")
         return 0, []
@@ -1968,8 +1968,8 @@ def _launchd_user_home() -> Path:
 def get_launchd_plist_path() -> Path:
     """Return the launchd plist path, scoped per profile.
 
-    Default ``~/.hermes`` → ``ai.hermes.gateway.plist`` (backward compatible).
-    Profile ``~/.hermes/profiles/coder`` → ``ai.hermes.gateway-coder.plist``.
+    Default ``~/.centurion`` → ``ai.hermes.gateway.plist`` (backward compatible).
+    Profile ``~/.centurion/profiles/coder`` → ``ai.hermes.gateway-coder.plist``.
     """
     suffix = _profile_suffix()
     name = f"ai.hermes.gateway-{suffix}" if suffix else "ai.hermes.gateway"
@@ -2081,7 +2081,7 @@ def _remap_path_for_user(path: str, target_home_dir: str) -> str:
     If *path* lives under ``Path.home()`` the corresponding prefix is swapped
     to *target_home_dir*; otherwise the path is returned unchanged.
 
-      /root/.hermes/hermes-agent  -> /home/alice/.hermes/hermes-agent
+      /root/.hermes/centurion-os  -> /home/alice/.hermes/centurion-os
       /opt/hermes                 -> /opt/hermes  (kept as-is)
 
     Note: this function intentionally does NOT resolve symlinks. A venv's
@@ -2101,7 +2101,7 @@ def _remap_path_for_user(path: str, target_home_dir: str) -> str:
         return str(p)
 
 
-def _hermes_home_for_target_user(target_home_dir: str) -> str:
+def _centurion_home_for_target_user(target_home_dir: str) -> str:
     """Remap the current CENTURION_HOME to the equivalent under a target user's home.
 
     When installing a system service via sudo, get_centurion_home() resolves to
@@ -2114,16 +2114,16 @@ def _hermes_home_for_target_user(target_home_dir: str) -> str:
     current_default = (Path.home() / ".centurion").resolve()
     target_default = Path(target_home_dir) / ".centurion"
 
-    # Default ~/.hermes → remap to target user's default
+    # Default ~/.centurion → remap to target user's default
     if current_hermes == current_default:
         return str(target_default)
 
-    # Profile or subdir of ~/.hermes → preserve the relative structure
+    # Profile or subdir of ~/.centurion → preserve the relative structure
     try:
         relative = current_hermes.relative_to(current_default)
         return str(target_default / relative)
     except ValueError:
-        # Completely custom path (not under ~/.hermes) — keep as-is
+        # Completely custom path (not under ~/.centurion) — keep as-is
         return str(current_hermes)
 
 
@@ -2150,11 +2150,11 @@ def _build_service_path_dirs(project_root: Path | None = None) -> list[str]:
     if _is_dir(node_bin):
         candidates.append(str(node_bin))
 
-    hermes_home = get_centurion_home()
-    hermes_node = hermes_home / "node" / "bin"
+    centurion_home = get_centurion_home()
+    hermes_node = centurion_home / "node" / "bin"
     if _is_dir(hermes_node):
         candidates.append(str(hermes_node))
-    hermes_nm = hermes_home / "node_modules" / ".bin"
+    hermes_nm = centurion_home / "node_modules" / ".bin"
     if _is_dir(hermes_nm):
         candidates.append(str(hermes_nm))
 
@@ -2186,8 +2186,8 @@ def generate_systemd_unit(system: bool = False, run_as_user: str | None = None) 
 
     if system:
         username, group_name, home_dir = _system_service_identity(run_as_user)
-        hermes_home = _hermes_home_for_target_user(home_dir)
-        profile_arg = _profile_arg(hermes_home)
+        centurion_home = _centurion_home_for_target_user(home_dir)
+        profile_arg = _profile_arg(centurion_home)
         # Remap all paths that may resolve under the calling user's home
         # (e.g. /root/) to the target user's home so the service can
         # actually access them.
@@ -2209,14 +2209,14 @@ StartLimitIntervalSec=0
 Type=simple
 User={username}
 Group={group_name}
-ExecStart={python_path} -m hermes_cli.main{f" {profile_arg}" if profile_arg else ""} gateway run --replace
+ExecStart={python_path} -m centurion_cli.main{f" {profile_arg}" if profile_arg else ""} gateway run --replace
 WorkingDirectory={working_dir}
 Environment="HOME={home_dir}"
 Environment="USER={username}"
 Environment="LOGNAME={username}"
 Environment="PATH={sane_path}"
 Environment="VIRTUAL_ENV={venv_dir}"
-Environment="CENTURION_HOME={hermes_home}"
+Environment="CENTURION_HOME={centurion_home}"
 Restart=always
 RestartSec=5
 RestartMaxDelaySec=300
@@ -2233,8 +2233,8 @@ StandardError=journal
 WantedBy=multi-user.target
 """
 
-    hermes_home = str(get_centurion_home().resolve())
-    profile_arg = _profile_arg(hermes_home)
+    centurion_home = str(get_centurion_home().resolve())
+    profile_arg = _profile_arg(centurion_home)
     path_entries.extend(_build_user_local_paths(Path.home(), path_entries))
     path_entries.extend(_build_wsl_interop_paths(path_entries))
     path_entries.extend(common_bin_paths)
@@ -2247,11 +2247,11 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart={python_path} -m hermes_cli.main{f" {profile_arg}" if profile_arg else ""} gateway run --replace
+ExecStart={python_path} -m centurion_cli.main{f" {profile_arg}" if profile_arg else ""} gateway run --replace
 WorkingDirectory={working_dir}
 Environment="PATH={sane_path}"
 Environment="VIRTUAL_ENV={venv_dir}"
-Environment="CENTURION_HOME={hermes_home}"
+Environment="CENTURION_HOME={centurion_home}"
 Restart=always
 RestartSec=5
 RestartMaxDelaySec=300
@@ -2473,12 +2473,12 @@ def systemd_install(
     # flap-fight for the Telegram bot token on every gateway startup.
     # Only removes units matching _LEGACY_SERVICE_NAMES + our ExecStart
     # signature — profile units are never touched.
-    if has_legacy_hermes_units():
+    if has_legacy_centurion_units():
         print()
         print_legacy_unit_warning()
         print()
         if prompt_yes_no("Remove the legacy unit(s) before installing?", True):
-            remove_legacy_hermes_units(interactive=False)
+            remove_legacy_centurion_units(interactive=False)
             print()
 
     unit_path = get_systemd_unit_path(system=system)
@@ -2572,7 +2572,7 @@ def systemd_stop(system: bool = False):
     if system:
         _require_root_for_system_service("stop")
     _require_service_installed("stop", system=system)
-    _sync_hermes_home_from_systemd_unit(system=system)
+    _sync_centurion_home_from_systemd_unit(system=system)
     try:
         from gateway.status import get_running_pid, write_planned_stop_marker
         pid = get_running_pid(cleanup_stale=False)
@@ -2601,7 +2601,7 @@ def systemd_restart(system: bool = False):
         _preflight_user_systemd()
     _require_service_installed("restart", system=system)
     refresh_systemd_unit_if_needed(system=system)
-    _sync_hermes_home_from_systemd_unit(system=system)
+    _sync_centurion_home_from_systemd_unit(system=system)
     from gateway.status import get_running_pid
 
     pid = get_running_pid() or _systemd_main_pid(system=system)
@@ -2697,13 +2697,13 @@ def systemd_status(deep: bool = False, system: bool = False, full: bool = False)
         print(f"  Run: {'sudo ' if system else ''}hermes gateway install{scope_flag}")
         return
 
-    _sync_hermes_home_from_systemd_unit(system=system)
+    _sync_centurion_home_from_systemd_unit(system=system)
 
     if has_conflicting_systemd_units():
         print_systemd_scope_conflict_warning()
         print()
 
-    if has_legacy_hermes_units():
+    if has_legacy_centurion_units():
         print_legacy_unit_warning()
         print()
 
@@ -2805,11 +2805,11 @@ def _launchd_domain() -> str:
 def generate_launchd_plist() -> str:
     python_path = get_python_path()
     working_dir = str(PROJECT_ROOT)
-    hermes_home = str(get_centurion_home().resolve())
+    centurion_home = str(get_centurion_home().resolve())
     log_dir = get_centurion_home() / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     label = get_launchd_label()
-    profile_arg = _profile_arg(hermes_home)
+    profile_arg = _profile_arg(centurion_home)
     # Build a sane PATH for the launchd plist.  launchd provides only a
     # minimal default (/usr/bin:/bin:/usr/sbin:/sbin) which misses Homebrew,
     # nvm, cargo, etc.  We prepend venv/bin and node_modules/.bin (matching
@@ -2833,7 +2833,7 @@ def generate_launchd_plist() -> str:
     prog_args = [
         f"<string>{python_path}</string>",
         "<string>-m</string>",
-        "<string>hermes_cli.main</string>",
+        "<string>centurion_cli.main</string>",
     ]
     if profile_arg:
         for part in profile_arg.split():
@@ -2867,7 +2867,7 @@ def generate_launchd_plist() -> str:
         <key>VIRTUAL_ENV</key>
         <string>{venv_dir}</string>
         <key>CENTURION_HOME</key>
-        <string>{hermes_home}</string>
+        <string>{centurion_home}</string>
     </dict>
     
     <key>RunAtLoad</key>
@@ -2943,7 +2943,7 @@ def launchd_install(force: bool = False):
     print()
     print("Next steps:")
     print("  hermes gateway status             # Check status")
-    from centurion_constants import display_hermes_home as _dhh
+    from centurion_constants import display_centurion_home as _dhh
     print(f"  tail -f {_dhh()}/logs/gateway.log  # View logs")
 
 def launchd_uninstall():
@@ -3147,7 +3147,7 @@ def _guard_official_docker_root_gateway() -> None:
         "Refusing to run the Hermes gateway as root inside the official Docker image."
     )
     print(
-        "  The image entrypoint normally drops privileges to the 'hermes' user. "
+        "  The image entrypoint normally drops privileges to the 'centurion' user. "
         "If you override entrypoint in Docker Compose, include "
         "/opt/hermes/docker/entrypoint.sh before the Hermes command."
     )
@@ -3706,7 +3706,7 @@ def _all_platforms() -> list[dict]:
     # Populate the registry so plugin platforms are visible. Idempotent.
     # Bundled platform plugins (``kind: platform``) auto-load unconditionally,
     # so every shipped messaging channel appears in the setup menu by default.
-    # User-installed platform plugins under ~/.hermes/plugins/ still require
+    # User-installed platform plugins under ~/.centurion/plugins/ still require
     # opt-in via ``plugins.enabled`` (untrusted code).
     try:
         from centurion_cli.plugins import discover_plugins
@@ -4217,7 +4217,7 @@ def _setup_weixin():
     print()
     print_info("  1. Hermes will open Tencent iLink QR login in this terminal.")
     print_info("  2. Use WeChat to scan and confirm the QR code.")
-    print_info("  3. Hermes will store the returned account_id/token in ~/.hermes/.env.")
+    print_info("  3. Hermes will store the returned account_id/token in ~/.centurion/.env.")
     print_info("  4. This adapter supports native text, image, video, and document delivery.")
 
     existing_account = get_env_value("WEIXIN_ACCOUNT_ID")
@@ -4739,7 +4739,7 @@ def _setup_signal():
 def _builtin_setup_fn(key: str):
     """Resolve the interactive setup function for a built-in platform key.
 
-    Late-bound to avoid a circular import with ``hermes_cli.setup`` (which
+    Late-bound to avoid a circular import with ``centurion_cli.setup`` (which
     imports from this module for the remaining bespoke flows).
     """
     from centurion_cli import setup as _s
@@ -4773,7 +4773,7 @@ def _configure_platform(platform: dict) -> None:
       4. Env-var hint fallback for plugins that offer no setup helper.
 
     Bundled platform plugins (e.g. IRC) auto-load, so no plugin enable step
-    is needed here. User-installed platform plugins under ~/.hermes/plugins/
+    is needed here. User-installed platform plugins under ~/.centurion/plugins/
     must already be in ``plugins.enabled`` before they appear in this menu.
     """
     entry = platform.get("_registry_entry")
@@ -4798,7 +4798,7 @@ def _configure_platform(platform: dict) -> None:
     print(color(f"  ─── {emoji} {label} Setup ───", Colors.CYAN))
     required = entry.required_env if entry else []
     if required:
-        print_info(f"  Set these env vars in ~/.hermes/.env: {', '.join(required)}")
+        print_info(f"  Set these env vars in ~/.centurion/.env: {', '.join(required)}")
     else:
         print_info(f"  Configure {label} in config.yaml under gateway.platforms.{platform['key']}")
     if platform.get("install_hint"):
@@ -4828,7 +4828,7 @@ def gateway_setup():
         print_systemd_scope_conflict_warning()
         print()
 
-    if supports_systemd_services() and has_legacy_hermes_units():
+    if supports_systemd_services() and has_legacy_centurion_units():
         print_legacy_unit_warning()
         print()
 
@@ -5009,7 +5009,7 @@ def gateway_setup():
                 print_info("  For persistence:   tmux new -s hermes 'hermes gateway run'")
                 print_info("  To enable systemd: add systemd=true to /etc/wsl.conf, then 'wsl --shutdown'")
             elif is_termux():
-                from centurion_constants import display_hermes_home as _dhh
+                from centurion_constants import display_centurion_home as _dhh
                 print_info("  Termux does not use systemd/launchd services.")
                 print_info("  Run in foreground: hermes gateway run")
                 print_info(f"  Or start it manually in the background (best effort): nohup hermes gateway run >{_dhh()}/logs/gateway.log 2>&1 &")
@@ -5040,7 +5040,7 @@ def _dispatch_via_service_manager_if_s6(
     The s6 service slot was created either by the Phase 4 profile-create
     hook or by the container-boot reconciler (cont-init.d/02-…). If it
     doesn't exist or s6 returns an error, the named errors from
-    :mod:`hermes_cli.service_manager` are caught and surfaced as
+    :mod:`centurion_cli.service_manager` are caught and surfaced as
     actionable CLI messages (no raw ``CalledProcessError`` traceback).
     """
     from centurion_cli.service_manager import (
@@ -5210,7 +5210,7 @@ def _gateway_command_inner(args):
             print()
             print("  hermes gateway run                              # direct foreground")
             print("  tmux new -s hermes 'hermes gateway run'         # persistent via tmux")
-            print("  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+            print("  nohup hermes gateway run > ~/.centurion/logs/gateway.log 2>&1 &  # background")
             sys.exit(1)
         elif is_container():
             # Phase 4: inside a container with s6 the gateway service is
@@ -5311,7 +5311,7 @@ def _gateway_command_inner(args):
             print()
             print("  hermes gateway run                              # direct foreground")
             print("  tmux new -s hermes 'hermes gateway run'         # persistent via tmux")
-            print("  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+            print("  nohup hermes gateway run > ~/.centurion/logs/gateway.log 2>&1 &  # background")
             print()
             print("To enable systemd: add systemd=true to /etc/wsl.conf and run 'wsl --shutdown' from PowerShell.")
             sys.exit(1)
@@ -5597,10 +5597,10 @@ def _gateway_command_inner(args):
                 print("To start:")
                 print("  hermes gateway run      # Run in foreground")
                 if is_termux():
-                    print("  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # Best-effort background start")
+                    print("  nohup hermes gateway run > ~/.centurion/logs/gateway.log 2>&1 &  # Best-effort background start")
                 elif is_wsl():
                     print("  tmux new -s hermes 'hermes gateway run'         # persistent via tmux")
-                    print("  nohup hermes gateway run > ~/.hermes/logs/gateway.log 2>&1 &  # background")
+                    print("  nohup hermes gateway run > ~/.centurion/logs/gateway.log 2>&1 &  # background")
                 elif is_windows():
                     print("  hermes gateway install  # Install as Windows Scheduled Task (auto-start on login)")
                 else:
@@ -5622,4 +5622,4 @@ def _gateway_command_inner(args):
         if not supports_systemd_services() and not is_macos():
             print("Legacy unit migration only applies to systemd-based Linux hosts.")
             return
-        remove_legacy_hermes_units(interactive=not yes, dry_run=dry_run)
+        remove_legacy_centurion_units(interactive=not yes, dry_run=dry_run)

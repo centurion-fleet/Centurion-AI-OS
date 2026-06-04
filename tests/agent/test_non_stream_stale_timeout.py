@@ -18,8 +18,8 @@ import pytest
 
 
 def _write_config(tmp_path: Path, body: str) -> None:
-    hermes_home = tmp_path
-    (hermes_home / "config.yaml").write_text(body or "{}\n", encoding="utf-8")
+    centurion_home = tmp_path
+    (centurion_home / "config.yaml").write_text(body or "{}\n", encoding="utf-8")
 
 
 def _make_agent(tmp_path: Path, **overrides):

@@ -2,7 +2,7 @@
 top-level ``args.command`` subparser dest.
 
 The top-level argparse parser uses ``dest="command"`` for its subparsers
-(``hermes_cli/_parser.py``).  The dispatcher in ``hermes_cli/main.py``
+(``centurion_cli/_parser.py``).  The dispatcher in ``centurion_cli/main.py``
 reads ``args.command`` to decide which command to run; if it is ``None``
 it falls through to interactive chat.
 
@@ -29,7 +29,7 @@ def _build_parser():
     the bug: top-level subparsers (dest="command") and ``mcp add`` with
     its ``--command`` flag.
     """
-    parser = argparse.ArgumentParser(prog="hermes")
+    parser = argparse.ArgumentParser(prog="centurion")
     subparsers = parser.add_subparsers(dest="command")
 
     subparsers.add_parser("chat")

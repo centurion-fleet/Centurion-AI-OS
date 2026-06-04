@@ -59,7 +59,7 @@ class TestPinPeerNameConfigParsing:
             "apiKey": "k",
             "peerName": "Igor",
             "hosts": {
-                "hermes": {"pinPeerName": True},
+                "centurion": {"pinPeerName": True},
             },
         }))
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path / "isolated"))
@@ -75,7 +75,7 @@ class TestPinPeerNameConfigParsing:
             "peerName": "Igor",
             "pinPeerName": True,
             "hosts": {
-                "hermes": {"pinPeerName": False},
+                "centurion": {"pinPeerName": False},
             },
         }))
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path / "isolated"))

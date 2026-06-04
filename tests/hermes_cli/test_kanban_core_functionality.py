@@ -1,7 +1,7 @@
 """Core-functionality tests for the kanban kernel + CLI additions.
 
-Complements tests/hermes_cli/test_kanban_db.py (schema + CAS atomicity)
-and tests/hermes_cli/test_kanban_cli.py (end-to-end run_slash).  The
+Complements tests/centurion_cli/test_kanban_db.py (schema + CAS atomicity)
+and tests/centurion_cli/test_kanban_cli.py (end-to-end run_slash).  The
 tests here exercise the pieces added as part of the kanban hardening
 pass: circuit breaker, crash detection, daemon loop, idempotency,
 retention/gc, stats, notify subscriptions, worker log accessor, run_slash
@@ -1262,7 +1262,7 @@ def test_migration_renames_legacy_event_kinds(tmp_path, monkeypatch):
 
 def test_list_profiles_on_disk(tmp_path, monkeypatch):
     """list_profiles_on_disk returns the implicit default profile plus
-    named profiles under ~/.hermes/profiles/ that contain a config.yaml."""
+    named profiles under ~/.centurion/profiles/ that contain a config.yaml."""
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     monkeypatch.delenv("CENTURION_HOME", raising=False)
     profiles = tmp_path / ".centurion" / "profiles"
@@ -1956,14 +1956,14 @@ def test_cli_bulk_complete_with_summary_rejects(kanban_home):
     finally:
         conn.close()
     # Bulk + summary is refused (stderr message, no mutation).
-    # Note: hermes_cli.main doesn't propagate sub-command exit codes
+    # Note: centurion_cli.main doesn't propagate sub-command exit codes
     # (args.func(args) discards the return value), so we check the side
     # effects instead.
     from subprocess import run as _run
     import os, sys
     env = os.environ.copy()
     r = _run(
-        [sys.executable, "-m", "hermes_cli.main", "kanban",
+        [sys.executable, "-m", "centurion_cli.main", "kanban",
          "complete", a, b, "--summary", "oops"],
         capture_output=True, text=True, env=env,
     )
@@ -2195,7 +2195,7 @@ def test_cli_create_on_fresh_home_auto_inits(tmp_path, monkeypatch):
     env = {**os.environ, "CENTURION_HOME": str(home),
            "PYTHONPATH": str(worktree_root)}
     r = _sp.run(
-        [_sys.executable, "-m", "hermes_cli.main", "kanban",
+        [_sys.executable, "-m", "centurion_cli.main", "kanban",
          "create", "smoke", "--assignee", "worker", "--json"],
         capture_output=True, text=True, env=env,
     )
@@ -3371,7 +3371,7 @@ def test_check_dispatcher_presence_silent_when_gateway_running(monkeypatch):
     from centurion_cli import kanban as kb_cli
     monkeypatch.setattr("gateway.status.get_running_pid", lambda: 12345)
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "centurion_cli.config.load_config",
         lambda: {"kanban": {"dispatch_in_gateway": True}},
     )
     running, msg = kb_cli._check_dispatcher_presence()
@@ -3384,7 +3384,7 @@ def test_check_dispatcher_presence_warns_when_no_gateway(monkeypatch):
     from centurion_cli import kanban as kb_cli
     monkeypatch.setattr("gateway.status.get_running_pid", lambda: None)
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "centurion_cli.config.load_config",
         lambda: {"kanban": {"dispatch_in_gateway": True}},
     )
     running, msg = kb_cli._check_dispatcher_presence()
@@ -3397,7 +3397,7 @@ def test_check_dispatcher_presence_warns_when_flag_off(monkeypatch):
     from centurion_cli import kanban as kb_cli
     monkeypatch.setattr("gateway.status.get_running_pid", lambda: 999)
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "centurion_cli.config.load_config",
         lambda: {"kanban": {"dispatch_in_gateway": False}},
     )
     running, msg = kb_cli._check_dispatcher_presence()
@@ -3435,7 +3435,7 @@ def test_cli_create_warns_when_no_gateway(kanban_home, monkeypatch, capsys):
     from centurion_cli import kanban as kb_cli
     monkeypatch.setattr("gateway.status.get_running_pid", lambda: None)
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "centurion_cli.config.load_config",
         lambda: {"kanban": {"dispatch_in_gateway": True}},
     )
     ns = _make_create_ns(title="warn-me", assignee="worker")
@@ -3450,7 +3450,7 @@ def test_cli_create_silent_when_gateway_up(kanban_home, monkeypatch, capsys):
     from centurion_cli import kanban as kb_cli
     monkeypatch.setattr("gateway.status.get_running_pid", lambda: 4242)
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "centurion_cli.config.load_config",
         lambda: {"kanban": {"dispatch_in_gateway": True}},
     )
     ns = _make_create_ns(title="silent", assignee="worker")
@@ -3464,7 +3464,7 @@ def test_cli_create_no_warn_on_triage(kanban_home, monkeypatch, capsys):
     from centurion_cli import kanban as kb_cli
     monkeypatch.setattr("gateway.status.get_running_pid", lambda: None)
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "centurion_cli.config.load_config",
         lambda: {"kanban": {"dispatch_in_gateway": True}},
     )
     ns = _make_create_ns(title="triage-task", assignee=None, triage=True)
@@ -3478,7 +3478,7 @@ def test_cli_create_no_warn_unassigned(kanban_home, monkeypatch, capsys):
     from centurion_cli import kanban as kb_cli
     monkeypatch.setattr("gateway.status.get_running_pid", lambda: None)
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "centurion_cli.config.load_config",
         lambda: {"kanban": {"dispatch_in_gateway": True}},
     )
     ns = _make_create_ns(title="nobody", assignee=None)

@@ -3,9 +3,9 @@ Profile management for multiple isolated Hermes instances.
 
 Each profile is a fully independent CENTURION_HOME directory with its own
 config.yaml, .env, memory, sessions, skills, gateway, cron, and logs.
-Profiles live under ``~/.hermes/profiles/<name>/`` by default.
+Profiles live under ``~/.centurion/profiles/<name>/`` by default.
 
-The "default" profile is ``~/.hermes`` itself — backward compatible,
+The "default" profile is ``~/.centurion`` itself — backward compatible,
 zero migration needed.
 
 Usage::
@@ -76,12 +76,12 @@ _CLONE_ALL_STRIP: list[str] = [
 ]
 
 # Infrastructure artifacts excluded from --clone-all when the source is the
-# default profile (``~/.hermes``).  Named profiles never contain these
+# default profile (``~/.centurion``).  Named profiles never contain these
 # directories at root, so the exclusion is gated to avoid silently dropping
 # user data from a named-profile source.
 #
 # Rationale per item:
-#   hermes-agent  — git repo checkout (~84 MB source + ~3 GB venv)
+#   centurion-os  — git repo checkout (~84 MB source + ~3 GB venv)
 #   .worktrees    — git worktrees
 #   profiles      — sibling named profiles (recursive copy never intended)
 #   bin           — installed binaries (tirith etc., ~10 MB) shared per-host
@@ -92,7 +92,7 @@ _CLONE_ALL_STRIP: list[str] = [
 # archive is a portable snapshot; clone-all keeps those because the cloned
 # profile is meant to keep working immediately).
 _CLONE_ALL_DEFAULT_EXCLUDE_ROOT: frozenset[str] = frozenset({
-    "hermes-agent",
+    "centurion-os",
     ".worktrees",
     "profiles",
     "bin",
@@ -122,7 +122,7 @@ def _clone_all_copytree_ignore(source_dir: Path):
     Two categories:
       1. Root-level entries in ``_CLONE_ALL_DEFAULT_EXCLUDE_ROOT`` — known
          Hermes infrastructure directories that only the default profile
-         (``~/.hermes``) ever contains.  Gated on ``source_dir`` actually
+         (``~/.centurion``) ever contains.  Gated on ``source_dir`` actually
          being the default profile so a named-profile source never has its
          own data silently dropped.
       2. Universal exclusions at any depth — Python bytecode caches that
@@ -135,7 +135,7 @@ def _clone_all_copytree_ignore(source_dir: Path):
     clone.
     """
     source_resolved = source_dir.resolve()
-    is_default_source = source_resolved == _get_default_hermes_home().resolve()
+    is_default_source = source_resolved == _get_default_centurion_home().resolve()
 
     def _ignore(directory: str, names: List[str]) -> List[str]:
         ignored: list[str] = []
@@ -163,13 +163,13 @@ def _clone_all_copytree_ignore(source_dir: Path):
     return _ignore
 
 
-# Directories/files to exclude when exporting the default (~/.hermes) profile.
+# Directories/files to exclude when exporting the default (~/.centurion) profile.
 # The default profile contains infrastructure (repo checkout, worktrees, DBs,
 # caches, binaries) that named profiles don't have.  We exclude those so the
 # export is a portable, reasonable-size archive of actual profile data.
 _DEFAULT_EXPORT_EXCLUDE_ROOT = frozenset({
     # Infrastructure
-    "hermes-agent",         # repo checkout (multi-GB)
+    "centurion-os",         # repo checkout (multi-GB)
     ".worktrees",           # git worktrees
     "profiles",             # other profiles — never recursive-export
     "bin",                  # installed binaries (tirith, etc.)
@@ -193,7 +193,7 @@ _DEFAULT_EXPORT_EXCLUDE_ROOT = frozenset({
 
 # Names that cannot be used as profile aliases
 _RESERVED_NAMES = frozenset({
-    "hermes", "default", "test", "tmp", "root", "sudo",
+    "centurion", "default", "test", "tmp", "root", "sudo",
 })
 
 # Hermes subcommands that cannot be used as profile names/aliases
@@ -217,26 +217,26 @@ def _get_profiles_root() -> Path:
     can see all profiles.
 
     In Docker/custom deployments where CENTURION_HOME points outside
-    ``~/.hermes``, profiles live under ``CENTURION_HOME/profiles/`` so
+    ``~/.centurion``, profiles live under ``CENTURION_HOME/profiles/`` so
     they persist on the mounted volume.
     """
-    return _get_default_hermes_home() / "profiles"
+    return _get_default_centurion_home() / "profiles"
 
 
-def _get_default_hermes_home() -> Path:
+def _get_default_centurion_home() -> Path:
     """Return the default (pre-profile) CENTURION_HOME path.
 
-    In standard deployments this is ``~/.hermes``.
-    In Docker/custom deployments where CENTURION_HOME is outside ``~/.hermes``
+    In standard deployments this is ``~/.centurion``.
+    In Docker/custom deployments where CENTURION_HOME is outside ``~/.centurion``
     (e.g. ``/opt/data``), returns CENTURION_HOME directly.
     """
-    from centurion_constants import get_default_hermes_root
-    return get_default_hermes_root()
+    from centurion_constants import get_default_centurion_root
+    return get_default_centurion_root()
 
 
 def _get_active_profile_path() -> Path:
     """Return the path to the sticky active_profile file."""
-    return _get_default_hermes_home() / "active_profile"
+    return _get_default_centurion_home() / "active_profile"
 
 
 def _get_wrapper_dir() -> Path:
@@ -275,14 +275,14 @@ def validate_profile_name(name: str) -> None:
     honest about what the on-disk directory name must look like, while
     ingress-point normalization handles UX flexibility (see #18498).
 
-    Also rejects names in :data:`_RESERVED_NAMES` (``hermes``, ``test``,
+    Also rejects names in :data:`_RESERVED_NAMES` (``centurion``, ``test``,
     ``tmp``, ``root``, ``sudo``) that would create confusing on-disk
-    collisions (a ``hermes`` profile inside ``~/.hermes/``) or get refused
+    collisions (a ``centurion`` profile inside ``~/.centurion/``) or get refused
     at alias-creation time anyway. ``default`` is a special pass-through —
     it's a valid alias for the built-in root profile.
     """
     if name == "default":
-        return  # special alias for ~/.hermes
+        return  # special alias for ~/.centurion
     if not _PROFILE_ID_RE.match(name):
         raise ValueError(
             f"Invalid profile name {name!r}. Must match "
@@ -300,7 +300,7 @@ def get_profile_dir(name: str) -> Path:
     """Resolve a profile name to its CENTURION_HOME directory."""
     canon = normalize_profile_name(name)
     if canon == "default":
-        return _get_default_hermes_home()
+        return _get_default_centurion_home()
     return _get_profiles_root() / canon
 
 
@@ -579,7 +579,7 @@ def list_profiles() -> List[ProfileInfo]:
     wrapper_dir = _get_wrapper_dir()
 
     # Default profile
-    default_home = _get_default_hermes_home()
+    default_home = _get_default_centurion_home()
     if default_home.is_dir():
         model, provider = _read_config_model(default_home)
         dist_name, dist_version, dist_source = _read_distribution_meta(default_home)
@@ -660,7 +660,7 @@ def create_profile(
         If True, skip wrapper script creation.
     no_skills:
         If True, create an empty profile with no bundled skills, and write
-        a marker file so ``hermes update`` skips re-seeding this profile's
+        a marker file so ``centurion update`` skips re-seeding this profile's
         skills. Mutually exclusive with ``clone_config``/``clone_all`` (those
         explicitly copy skills from the source).
 
@@ -679,7 +679,7 @@ def create_profile(
 
     if canon == "default":
         raise ValueError(
-            "Cannot create a profile named 'default' — it is the built-in profile (~/.hermes)."
+            "Cannot create a profile named 'default' — it is the built-in profile (~/.centurion)."
         )
 
     profile_dir = get_profile_dir(canon)
@@ -703,7 +703,7 @@ def create_profile(
             )
 
     if clone_all and source_dir:
-        # Full copy of source profile (exclude sibling ~/.hermes/profiles/)
+        # Full copy of source profile (exclude sibling ~/.centurion/profiles/)
         shutil.copytree(
             source_dir,
             profile_dir,
@@ -761,14 +761,14 @@ def create_profile(
         except Exception:
             pass  # best-effort — don't fail profile creation over this
 
-    # Write the opt-out marker so seed_profile_skills() and `hermes update`'s
+    # Write the opt-out marker so seed_profile_skills() and `centurion update`'s
     # all-profile sync loop both skip this profile for bundled-skill seeding.
     if no_skills:
         try:
             (profile_dir / NO_BUNDLED_SKILLS_MARKER).write_text(
                 "This profile opted out of bundled-skill seeding "
                 "(`hermes profile create --no-skills`).\n"
-                "Delete this file to re-enable sync on the next `hermes update`.\n",
+                "Delete this file to re-enable sync on the next `centurion update`.\n",
                 encoding="utf-8",
             )
         except OSError:
@@ -856,7 +856,7 @@ def delete_profile(name: str, yes: bool = False) -> Path:
 
     if canon == "default":
         raise ValueError(
-            "Cannot delete the default profile (~/.hermes).\n"
+            "Cannot delete the default profile (~/.centurion).\n"
             "To remove everything, use: hermes uninstall"
         )
 
@@ -1177,7 +1177,7 @@ def get_active_profile() -> str:
 def set_active_profile(name: str) -> None:
     """Set the sticky active profile.
 
-    Writes to ``~/.hermes/active_profile``. Use ``"default"`` to clear.
+    Writes to ``~/.centurion/active_profile``. Use ``"default"`` to clear.
     """
     canon = normalize_profile_name(name)
     validate_profile_name(canon)
@@ -1202,15 +1202,15 @@ def set_active_profile(name: str) -> None:
 def get_active_profile_name() -> str:
     """Infer the current profile name from CENTURION_HOME.
 
-    Returns ``"default"`` if CENTURION_HOME is not set or points to ``~/.hermes``.
-    Returns the profile name if CENTURION_HOME points into ``~/.hermes/profiles/<name>``.
+    Returns ``"default"`` if CENTURION_HOME is not set or points to ``~/.centurion``.
+    Returns the profile name if CENTURION_HOME points into ``~/.centurion/profiles/<name>``.
     Returns ``"custom"`` if CENTURION_HOME is set to an unrecognized path.
     """
     from centurion_constants import get_centurion_home
-    hermes_home = get_centurion_home()
-    resolved = hermes_home.resolve()
+    centurion_home = get_centurion_home()
+    resolved = centurion_home.resolve()
 
-    default_resolved = _get_default_hermes_home().resolve()
+    default_resolved = _get_default_centurion_home().resolve()
     if resolved == default_resolved:
         return "default"
 
@@ -1272,7 +1272,7 @@ def export_profile(name: str, output_path: str) -> Path:
     base = str(output).removesuffix(".tar.gz").removesuffix(".tgz")
 
     if canon == "default":
-        # The default profile IS ~/.hermes itself — its parent is ~/ and its
+        # The default profile IS ~/.centurion itself — its parent is ~/ and its
         # directory name is ".centurion", not "default".  We stage a clean copy
         # under a temp dir so the archive contains ``default/...``.
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1401,13 +1401,13 @@ def import_profile(archive_path: str, name: Optional[str] = None) -> Path:
         )
 
     # Archives exported from the default profile have "default/" as top-level
-    # dir.  Importing as "default" would target ~/.hermes itself — disallow
+    # dir.  Importing as "default" would target ~/.centurion itself — disallow
     # that and guide the user toward a named profile.
     canon = normalize_profile_name(inferred_name)
     validate_profile_name(canon)
     if canon == "default":
         raise ValueError(
-            "Cannot import as 'default' — that is the built-in root profile (~/.hermes). "
+            "Cannot import as 'default' — that is the built-in root profile (~/.centurion). "
             "Specify a different name: hermes profile import <archive> --name <name>"
         )
 
@@ -1449,7 +1449,7 @@ def _migrate_honcho_profile_host(old_name: str, new_name: str, new_dir: Path) ->
 
     candidates = [
         new_dir / "honcho.json",
-        _get_default_hermes_home() / "honcho.json",
+        _get_default_centurion_home() / "honcho.json",
         Path.home() / ".honcho" / "config.json",
     ]
 

@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from centurion_constants import get_hermes_home
+from centurion_constants import get_centurion_home
 
 # File + directory layout (under $CENTURION_HOME):
 #
@@ -37,7 +37,7 @@ from centurion_constants import get_hermes_home
 
 
 def _root() -> Path:
-    return Path(get_hermes_home()) / "workspace" / "meetings"
+    return Path(get_centurion_home()) / "workspace" / "meetings"
 
 
 def _active_file() -> Path:

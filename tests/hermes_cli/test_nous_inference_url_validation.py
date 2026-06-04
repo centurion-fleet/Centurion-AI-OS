@@ -41,7 +41,7 @@ class TestValidatorRules:
         assert _validate_nous_inference_url_from_network(url) == url.rstrip("/")
 
     def test_attacker_host_rejected(self, caplog):
-        with caplog.at_level(logging.WARNING, logger="hermes_cli.auth"):
+        with caplog.at_level(logging.WARNING, logger="centurion_cli.auth"):
             assert (
                 _validate_nous_inference_url_from_network("https://attacker.com/v1")
                 is None
@@ -62,7 +62,7 @@ class TestValidatorRules:
         )
 
     def test_http_scheme_rejected(self, caplog):
-        with caplog.at_level(logging.WARNING, logger="hermes_cli.auth"):
+        with caplog.at_level(logging.WARNING, logger="centurion_cli.auth"):
             assert (
                 _validate_nous_inference_url_from_network(
                     "http://inference-api.nousresearch.com/v1"

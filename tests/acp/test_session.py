@@ -255,7 +255,7 @@ class TestPersistence:
             captured.update(kwargs)
             return SimpleNamespace(model=kwargs.get("model"), enabled_toolsets=kwargs.get("enabled_toolsets"))
 
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda: {
+        monkeypatch.setattr("centurion_cli.config.load_config", lambda: {
             "model": {"provider": "openrouter", "default": "test-model"},
             "mcp_servers": {
                 "olympus": {"command": "python", "enabled": True},
@@ -264,7 +264,7 @@ class TestPersistence:
             },
         })
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.resolve_runtime_provider",
+            "centurion_cli.runtime_provider.resolve_runtime_provider",
             fake_resolve_runtime_provider,
         )
         db = SessionDB(tmp_path / "state.db")
@@ -273,7 +273,7 @@ class TestPersistence:
             manager = SessionManager(db=db)
             manager.create_session(cwd="/work")
 
-        assert captured["enabled_toolsets"] == ["hermes-acp", "mcp-olympus", "mcp-exa"]
+        assert captured["enabled_toolsets"] == ["centurion-acp", "mcp-olympus", "mcp-exa"]
 
     def test_create_session_writes_to_db(self, manager):
         state = manager.create_session(cwd="/project")
@@ -536,11 +536,11 @@ class TestPersistence:
                 api_mode=kwargs.get("api_mode"),
             )
 
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda: {
+        monkeypatch.setattr("centurion_cli.config.load_config", lambda: {
             "model": {"provider": runtime_choice["provider"], "default": "test-model"}
         })
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.resolve_runtime_provider",
+            "centurion_cli.runtime_provider.resolve_runtime_provider",
             fake_resolve_runtime_provider,
         )
         db = SessionDB(tmp_path / "state.db")
@@ -576,11 +576,11 @@ class TestPersistence:
         def fake_agent(**kwargs):
             return SimpleNamespace(model=kwargs.get("model"), _print_fn=None)
 
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda: {
+        monkeypatch.setattr("centurion_cli.config.load_config", lambda: {
             "model": {"provider": "openrouter", "default": "test-model"}
         })
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.resolve_runtime_provider",
+            "centurion_cli.runtime_provider.resolve_runtime_provider",
             fake_resolve_runtime_provider,
         )
         db = SessionDB(tmp_path / "state.db")

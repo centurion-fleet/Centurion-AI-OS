@@ -127,7 +127,7 @@ def _run_switch(raw_input: str, **extra):
         return []
 
     with patch(
-        "hermes_cli.model_switch.list_provider_models",
+        "centurion_cli.model_switch.list_provider_models",
         side_effect=fake_list_provider_models,
     ):
         return switch_model(raw_input=raw_input, **defaults)

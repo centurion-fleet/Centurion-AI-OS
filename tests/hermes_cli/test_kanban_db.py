@@ -1,4 +1,4 @@
-"""Tests for the Kanban DB layer (hermes_cli.kanban_db)."""
+"""Tests for the Kanban DB layer (centurion_cli.kanban_db)."""
 
 from __future__ import annotations
 
@@ -1436,7 +1436,7 @@ def test_dispatch_respawn_guard_emits_event_for_skipped_task(
 # Workspace resolution
 # ---------------------------------------------------------------------------
 
-def test_scratch_workspace_created_under_hermes_home(kanban_home):
+def test_scratch_workspace_created_under_centurion_home(kanban_home):
     with kb.connect() as conn:
         t = kb.create_task(conn, title="x")
         task = kb.get_task(conn, t)
@@ -1751,15 +1751,15 @@ class TestSharedBoardPaths:
     """`kanban_home`/`kanban_db_path`/`workspaces_root`/`worker_log_path`
     must anchor at the **shared root**, not the active profile's CENTURION_HOME."""
 
-    def _set_home(self, monkeypatch, tmp_path, hermes_home):
+    def _set_home(self, monkeypatch, tmp_path, centurion_home):
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+        monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
         monkeypatch.delenv("HERMES_KANBAN_HOME", raising=False)
 
     def test_default_install_anchors_at_home_dot_hermes(
         self, tmp_path, monkeypatch
     ):
-        # Standard install: CENTURION_HOME == ~/.hermes, no profile active.
+        # Standard install: CENTURION_HOME == ~/.centurion, no profile active.
         default_home = tmp_path / ".centurion"
         default_home.mkdir()
         self._set_home(monkeypatch, tmp_path, default_home)
@@ -1775,10 +1775,10 @@ class TestSharedBoardPaths:
     def test_profile_worker_resolves_to_shared_root(
         self, tmp_path, monkeypatch
     ):
-        # Reproduces the bug: dispatcher uses ~/.hermes/kanban.db,
+        # Reproduces the bug: dispatcher uses ~/.centurion/kanban.db,
         # worker spawned with -p <profile> previously resolved to
-        # ~/.hermes/profiles/<profile>/kanban.db. After the fix both
-        # converge on ~/.hermes/kanban.db.
+        # ~/.centurion/profiles/<profile>/kanban.db. After the fix both
+        # converge on ~/.centurion/kanban.db.
         default_home = tmp_path / ".centurion"
         default_home.mkdir()
         profile_home = default_home / "profiles" / "nehemiahkanban"
@@ -1826,14 +1826,14 @@ class TestSharedBoardPaths:
         assert dispatcher_ws == worker_ws
         assert dispatcher_log == worker_log
 
-    def test_docker_custom_hermes_home_uses_env_path_directly(
+    def test_docker_custom_centurion_home_uses_env_path_directly(
         self, tmp_path, monkeypatch
     ):
-        # Docker / custom deployment: CENTURION_HOME points outside ~/.hermes.
-        # `get_default_hermes_root()` returns env_home directly when it
+        # Docker / custom deployment: CENTURION_HOME points outside ~/.centurion.
+        # `get_default_centurion_root()` returns env_home directly when it
         # is not a `<root>/profiles/<name>` shape and not under
         # `Path.home() / ".centurion"`.
-        custom_root = tmp_path / "opt" / "hermes"
+        custom_root = tmp_path / "opt" / "centurion"
         custom_root.mkdir(parents=True)
         self._set_home(monkeypatch, tmp_path, custom_root)
 
@@ -1844,9 +1844,9 @@ class TestSharedBoardPaths:
         self, tmp_path, monkeypatch
     ):
         # Docker profile shape: CENTURION_HOME=/opt/hermes/profiles/coder;
-        # `get_default_hermes_root()` walks up to /opt/hermes because
+        # `get_default_centurion_root()` walks up to /opt/hermes because
         # the immediate parent dir is named "profiles".
-        custom_root = tmp_path / "opt" / "hermes"
+        custom_root = tmp_path / "opt" / "centurion"
         profile = custom_root / "profiles" / "coder"
         profile.mkdir(parents=True)
         self._set_home(monkeypatch, tmp_path, profile)
@@ -1854,7 +1854,7 @@ class TestSharedBoardPaths:
         assert kb.kanban_home() == custom_root
         assert kb.kanban_db_path() == custom_root / "kanban.db"
 
-    def test_explicit_override_via_hermes_kanban_home(
+    def test_explicit_override_via_centurion_kanban_home(
         self, tmp_path, monkeypatch
     ):
         # Explicit override: HERMES_KANBAN_HOME beats every other
@@ -1907,11 +1907,11 @@ class TestSharedBoardPaths:
         assert task is not None
         assert task.title == "cross-profile"
 
-    def test_hermes_kanban_db_pin_beats_kanban_home(
+    def test_centurion_kanban_db_pin_beats_kanban_home(
         self, tmp_path, monkeypatch
     ):
         # HERMES_KANBAN_DB pins the file path directly and beats both
-        # HERMES_KANBAN_HOME and the `get_default_hermes_root()` path.
+        # HERMES_KANBAN_HOME and the `get_default_centurion_root()` path.
         # This is the env the dispatcher injects into workers.
         default_home = tmp_path / ".centurion"
         default_home.mkdir()
@@ -1930,7 +1930,7 @@ class TestSharedBoardPaths:
         # are independent.
         assert kb.workspaces_root() == umbrella / "kanban" / "workspaces"
 
-    def test_hermes_kanban_workspaces_root_pin_beats_kanban_home(
+    def test_centurion_kanban_workspaces_root_pin_beats_kanban_home(
         self, tmp_path, monkeypatch
     ):
         # HERMES_KANBAN_WORKSPACES_ROOT pins the workspaces root directly.
@@ -2103,7 +2103,7 @@ def test_connect_falls_back_to_delete_on_locking_protocol(kanban_home, caplog):
     Without this fallback, the gateway's kanban dispatcher crashes every
     60s and the kanban migration (``consecutive_failures`` ADD COLUMN) is
     retried forever — which is what the real-world user report shows
-    (see hermes-agent issue #22032).
+    (see centurion-os issue #22032).
     """
     import sqlite3 as _sqlite3
     from unittest.mock import patch as _patch
@@ -2124,7 +2124,7 @@ def test_connect_falls_back_to_delete_on_locking_protocol(kanban_home, caplog):
             *args, factory=_WalBlockingConnection, **kwargs
         )
 
-    with _patch("hermes_cli.kanban_db.sqlite3.connect", side_effect=wal_blocking_connect):
+    with _patch("centurion_cli.kanban_db.sqlite3.connect", side_effect=wal_blocking_connect):
         with caplog.at_level("WARNING", logger="hermes_state"):
             conn = kb.connect()
 
@@ -2286,30 +2286,30 @@ def test_migrate_add_optional_columns_tolerates_concurrent_migration(kanban_home
 
 
 # ---------------------------------------------------------------------------
-# Dispatcher spawn invocation — _resolve_hermes_argv()
+# Dispatcher spawn invocation — _resolve_centurion_argv()
 #
-# Workers spawned by the dispatcher must use a `hermes` invocation that does
+# Workers spawned by the dispatcher must use a `centurion` invocation that does
 # not depend on PATH being set up correctly. cron jobs, systemd User= services,
 # launchd jobs, and other detached processes routinely run with a stripped
-# $PATH that doesn't include the venv's bin/, so a bare `["hermes", ...]`
+# $PATH that doesn't include the venv's bin/, so a bare `["centurion", ...]`
 # spawn fails with FileNotFoundError and the task gets stuck. The resolver
 # prefers the PATH shim (familiar `ps` output) but falls back to the module
 # form so the spawn keeps working when PATH is missing the shim.
 # ---------------------------------------------------------------------------
 
 
-def test_resolve_hermes_argv_prefers_path_shim(monkeypatch):
-    """When `hermes` is on PATH, use the shim — preserves familiar ps output."""
+def test_resolve_centurion_argv_prefers_path_shim(monkeypatch):
+    """When `centurion` is on PATH, use the shim — preserves familiar ps output."""
     import shutil
     import centurion_cli.kanban_db as kb
 
     monkeypatch.delenv("HERMES_BIN", raising=False)
     monkeypatch.setattr(shutil, "which", lambda name: "/usr/local/bin/hermes")
-    argv = kb._resolve_hermes_argv()
+    argv = kb._resolve_centurion_argv()
     assert argv == ["/usr/local/bin/hermes"]
 
 
-def test_resolve_hermes_argv_absolutizes_relative_exe_shim(monkeypatch, tmp_path):
+def test_resolve_centurion_argv_absolutizes_relative_exe_shim(monkeypatch, tmp_path):
     """A relative executable override must not remain workspace-cwd-dependent."""
     import centurion_cli.kanban_db as kb
 
@@ -2317,10 +2317,10 @@ def test_resolve_hermes_argv_absolutizes_relative_exe_shim(monkeypatch, tmp_path
     monkeypatch.setenv("HERMES_BIN", ".\\hermes.exe")
     monkeypatch.setattr(kb, "_IS_WINDOWS", True)
 
-    assert kb._resolve_hermes_argv() == [os.path.abspath(".\\hermes.exe")]
+    assert kb._resolve_centurion_argv() == [os.path.abspath(".\\hermes.exe")]
 
 
-def test_resolve_hermes_argv_avoids_implicit_windows_batch_shim(monkeypatch, tmp_path):
+def test_resolve_centurion_argv_avoids_implicit_windows_batch_shim(monkeypatch, tmp_path):
     """Implicit .cmd/.bat shims use the module fallback, not batch argv[0]."""
     import sys
     import centurion_cli.kanban_db as kb
@@ -2333,43 +2333,43 @@ def test_resolve_hermes_argv_avoids_implicit_windows_batch_shim(monkeypatch, tmp
     monkeypatch.setenv("PATHEXT", ".CMD")
     monkeypatch.setattr(kb, "_IS_WINDOWS", True)
 
-    assert kb._resolve_hermes_argv() == [sys.executable, "-m", "hermes_cli.main"]
+    assert kb._resolve_centurion_argv() == [sys.executable, "-m", "centurion_cli.main"]
 
 
-def test_resolve_hermes_argv_honors_hermes_bin_path_override(monkeypatch, tmp_path):
+def test_resolve_centurion_argv_honors_centurion_bin_path_override(monkeypatch, tmp_path):
     """An explicit path-like HERMES_BIN lets service managers pin the executable."""
     import shutil
     import centurion_cli.kanban_db as kb
 
-    shim = tmp_path / "bin" / "hermes"
+    shim = tmp_path / "bin" / "centurion"
     shim.parent.mkdir()
     shim.write_text("#!/bin/sh\n", encoding="utf-8")
     monkeypatch.setenv("HERMES_BIN", str(shim))
     monkeypatch.setattr(shutil, "which", lambda name: None)
 
-    assert kb._resolve_hermes_argv() == [str(shim)]
+    assert kb._resolve_centurion_argv() == [str(shim)]
 
 
-def test_resolve_hermes_argv_hermes_bin_bare_name_uses_path(monkeypatch, tmp_path):
+def test_resolve_centurion_argv_centurion_bin_bare_name_uses_path(monkeypatch, tmp_path):
     """Bare HERMES_BIN values keep PATH semantics instead of cwd shadowing."""
     import stat
     import centurion_cli.kanban_db as kb
 
-    cwd_hermes = tmp_path / "hermes"
+    cwd_hermes = tmp_path / "centurion"
     cwd_hermes.write_text("wrong\n", encoding="utf-8")
     cwd_hermes.chmod(cwd_hermes.stat().st_mode | stat.S_IXUSR)
-    path_hermes = tmp_path / "bin" / "hermes"
+    path_hermes = tmp_path / "bin" / "centurion"
     path_hermes.parent.mkdir()
     path_hermes.write_text("right\n", encoding="utf-8")
     path_hermes.chmod(path_hermes.stat().st_mode | stat.S_IXUSR)
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("PATH", str(path_hermes.parent))
-    monkeypatch.setenv("HERMES_BIN", "hermes")
+    monkeypatch.setenv("HERMES_BIN", "centurion")
 
-    assert kb._resolve_hermes_argv() == [str(path_hermes)]
+    assert kb._resolve_centurion_argv() == [str(path_hermes)]
 
 
-def test_resolve_hermes_argv_hermes_bin_bare_name_ignores_cwd(monkeypatch, tmp_path):
+def test_resolve_centurion_argv_centurion_bin_bare_name_ignores_cwd(monkeypatch, tmp_path):
     """Bare HERMES_BIN does not accept current-directory shadow executables."""
     import sys
     import centurion_cli.kanban_db as kb
@@ -2377,13 +2377,13 @@ def test_resolve_hermes_argv_hermes_bin_bare_name_ignores_cwd(monkeypatch, tmp_p
     (tmp_path / "hermes.exe").write_text("wrong\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("PATH", "")
-    monkeypatch.setenv("HERMES_BIN", "hermes")
+    monkeypatch.setenv("HERMES_BIN", "centurion")
     monkeypatch.setattr(kb, "_IS_WINDOWS", True)
 
-    assert kb._resolve_hermes_argv() == [sys.executable, "-m", "hermes_cli.main"]
+    assert kb._resolve_centurion_argv() == [sys.executable, "-m", "centurion_cli.main"]
 
 
-def test_resolve_hermes_argv_hermes_bin_bare_cmd_uses_module_fallback(monkeypatch, tmp_path):
+def test_resolve_centurion_argv_centurion_bin_bare_cmd_uses_module_fallback(monkeypatch, tmp_path):
     """A PATH-resolved HERMES_BIN batch shim is not used as worker argv[0]."""
     import sys
     import centurion_cli.kanban_db as kb
@@ -2393,28 +2393,28 @@ def test_resolve_hermes_argv_hermes_bin_bare_cmd_uses_module_fallback(monkeypatc
     (bin_dir / "hermes.CMD").write_text("@echo off\n", encoding="utf-8")
     monkeypatch.setenv("PATH", str(bin_dir))
     monkeypatch.setenv("PATHEXT", ".CMD")
-    monkeypatch.setenv("HERMES_BIN", "hermes")
+    monkeypatch.setenv("HERMES_BIN", "centurion")
     monkeypatch.setattr(kb, "_IS_WINDOWS", True)
 
-    assert kb._resolve_hermes_argv() == [sys.executable, "-m", "hermes_cli.main"]
+    assert kb._resolve_centurion_argv() == [sys.executable, "-m", "centurion_cli.main"]
 
 
-def test_resolve_hermes_argv_hermes_bin_unresolved_bare_name_falls_back(monkeypatch):
+def test_resolve_centurion_argv_centurion_bin_unresolved_bare_name_falls_back(monkeypatch):
     """Unresolved HERMES_BIN command names do not delegate cwd search to Popen."""
     import sys
     import centurion_cli.kanban_db as kb
 
     monkeypatch.setenv("PATH", "")
-    monkeypatch.setenv("HERMES_BIN", "hermes")
+    monkeypatch.setenv("HERMES_BIN", "centurion")
 
-    assert kb._resolve_hermes_argv() == [sys.executable, "-m", "hermes_cli.main"]
+    assert kb._resolve_centurion_argv() == [sys.executable, "-m", "centurion_cli.main"]
 
 
-def test_resolve_hermes_argv_falls_back_to_module_form_when_no_path_shim(monkeypatch):
-    """When the shim is not on PATH, fall back to `python -m hermes_cli.main`.
+def test_resolve_centurion_argv_falls_back_to_module_form_when_no_path_shim(monkeypatch):
+    """When the shim is not on PATH, fall back to `python -m centurion_cli.main`.
 
-    Pins the correct module name (NOT `hermes` — there is no top-level
-    `hermes` package). Regression for #23198: the original PR shipped
+    Pins the correct module name (NOT `centurion` — there is no top-level
+    `centurion` package). Regression for #23198: the original PR shipped
     `python -m hermes` which fails with `No module named hermes` on every
     invocation.
     """
@@ -2424,16 +2424,16 @@ def test_resolve_hermes_argv_falls_back_to_module_form_when_no_path_shim(monkeyp
 
     monkeypatch.delenv("HERMES_BIN", raising=False)
     monkeypatch.setattr(shutil, "which", lambda name: None)
-    argv = kb._resolve_hermes_argv()
-    assert argv == [sys.executable, "-m", "hermes_cli.main"]
+    argv = kb._resolve_centurion_argv()
+    assert argv == [sys.executable, "-m", "centurion_cli.main"]
 
 
-def test_resolve_hermes_argv_module_actually_runs():
+def test_resolve_centurion_argv_module_actually_runs():
     """The fallback module name must be importable + runnable.
 
     A unit test that pins the literal string is necessary but not
-    sufficient — if `hermes_cli.main` ever loses `if __name__ == "__main__"`
-    handling or its argparse setup, `python -m hermes_cli.main --version`
+    sufficient — if `centurion_cli.main` ever loses `if __name__ == "__main__"`
+    handling or its argparse setup, `python -m centurion_cli.main --version`
     would fail and so would every dispatcher spawn that hits the fallback.
     Run it as a real subprocess to catch that regression.
     """
@@ -2446,7 +2446,7 @@ def test_resolve_hermes_argv_module_actually_runs():
     with mock.patch.dict(os.environ, {}, clear=False):
         os.environ.pop("HERMES_BIN", None)
         with mock.patch.object(shutil, "which", return_value=None):
-            argv = kb._resolve_hermes_argv()
+            argv = kb._resolve_centurion_argv()
     r = subprocess.run(argv + ["--version"], capture_output=True, text=True, timeout=30)
     assert r.returncode == 0, (
         f"`{' '.join(argv)} --version` failed (rc={r.returncode}); "
@@ -3254,7 +3254,7 @@ def test_maybe_emit_scratch_tip_fires_once_per_install(kanban_home, caplog):
     # Sentinel must not exist yet on a fresh install.
     assert not kb._scratch_tip_shown()
 
-    with caplog.at_level(logging.WARNING, logger="hermes_cli.kanban_db"):
+    with caplog.at_level(logging.WARNING, logger="centurion_cli.kanban_db"):
         with kb.connect() as conn:
             kb._maybe_emit_scratch_tip(conn, t1, "scratch")
 
@@ -3286,7 +3286,7 @@ def test_maybe_emit_scratch_tip_fires_once_per_install(kanban_home, caplog):
 
     # Second scratch materialization on the same install stays silent.
     caplog.clear()
-    with caplog.at_level(logging.WARNING, logger="hermes_cli.kanban_db"):
+    with caplog.at_level(logging.WARNING, logger="centurion_cli.kanban_db"):
         with kb.connect() as conn:
             kb._maybe_emit_scratch_tip(conn, t2, "scratch")
     tip_records2 = [
@@ -3318,7 +3318,7 @@ def test_maybe_emit_scratch_tip_skips_non_scratch_workspaces(kanban_home, caplog
 
     assert not kb._scratch_tip_shown()
 
-    with caplog.at_level(logging.WARNING, logger="hermes_cli.kanban_db"):
+    with caplog.at_level(logging.WARNING, logger="centurion_cli.kanban_db"):
         with kb.connect() as conn:
             kb._maybe_emit_scratch_tip(conn, t_wt, "worktree")
             kb._maybe_emit_scratch_tip(conn, t_dir, "dir")

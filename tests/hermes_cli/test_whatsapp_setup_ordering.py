@@ -36,8 +36,8 @@ def isolated_home(tmp_path, monkeypatch):
     return hermes
 
 
-def _env_value(hermes_home: Path, key: str) -> str | None:
-    env_file = hermes_home / ".env"
+def _env_value(centurion_home: Path, key: str) -> str | None:
+    env_file = centurion_home / ".env"
     if not env_file.exists():
         return None
     for line in env_file.read_text().splitlines():
@@ -68,7 +68,7 @@ def test_aborted_setup_does_not_enable_whatsapp(isolated_home, monkeypatch):
 
     monkeypatch.setattr("builtins.input", fake_input)
     # _require_tty calls sys.stdin.isatty — make it pass.
-    monkeypatch.setattr("hermes_cli.main._require_tty", lambda *_a, **_kw: None)
+    monkeypatch.setattr("centurion_cli.main._require_tty", lambda *_a, **_kw: None)
     # No node, no bridge script — we shouldn't reach those steps anyway.
 
     buf = io.StringIO()
@@ -110,7 +110,7 @@ def test_existing_pairing_skip_branch_enables_whatsapp(isolated_home, monkeypatc
             return "n"
 
     monkeypatch.setattr("builtins.input", fake_input)
-    monkeypatch.setattr("hermes_cli.main._require_tty", lambda *_a, **_kw: None)
+    monkeypatch.setattr("centurion_cli.main._require_tty", lambda *_a, **_kw: None)
     # Skip the bridge npm install — we're testing setup-ordering, not bridge
     # bootstrapping.  Pretend node_modules exists (Path.exists -> True for that
     # specific check is hard to scope, so instead pretend npm install would

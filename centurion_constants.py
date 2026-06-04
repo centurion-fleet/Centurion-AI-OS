@@ -53,8 +53,8 @@ def get_centurion_home() -> Path:
     ``~/.centurion`` — because raising here would brick 30+ module-level
     callers that import this at load time.  Subprocess spawners are
     expected to propagate ``CENTURION_HOME`` explicitly (see the systemd
-    template in ``hermes_cli/gateway.py`` and the kanban dispatcher in
-    ``hermes_cli/kanban_db.py``).  See https://github.com/NousResearch/hermes-agent/issues/18594.
+    template in ``centurion_cli/gateway.py`` and the kanban dispatcher in
+    ``centurion_cli/kanban_db.py``).  See https://github.com/NousResearch/centurion-os/issues/18594.
     """
     override = get_centurion_home_override()
     if override:
@@ -139,10 +139,6 @@ def get_default_centurion_root() -> Path:
 
     # Not a profile path — CENTURION_HOME itself is the root
     return env_path
-
-# Backward-compatible alias for migration compatibility
-get_default_hermes_root = get_default_centurion_root
-get_hermes_home = get_centurion_home
 
 
 def _get_packaged_data_dir(name: str) -> Path | None:
@@ -239,9 +235,6 @@ def display_centurion_home() -> str:
     except ValueError:
         return str(home)
 
-# Backward-compatible alias for migration compatibility
-display_hermes_home = display_centurion_home
-
 
 def secure_parent_dir(path: Path) -> None:
     """Chmod ``0o700`` on the parent directory of *path*, but only if safe.
@@ -251,7 +244,7 @@ def secure_parent_dir(path: Path) -> None:
     prevent catastrophic host bricking when ``CENTURION_HOME`` or other path
     env vars resolve to an unexpected location.
 
-    See https://github.com/NousResearch/hermes-agent/issues/25821.
+    See https://github.com/NousResearch/centurion-os/issues/25821.
     """
     parent = path.parent.resolve()
     # Refuse root and its direct children (/usr, /home, /var, /tmp, …).
@@ -420,7 +413,7 @@ def apply_ipv4_preference(force: bool = False) -> None:
     import socket
 
     # Guard against double-patching
-    if getattr(socket.getaddrinfo, "_hermes_ipv4_patched", False):
+    if getattr(socket.getaddrinfo, "_centurion_ipv4_patched", False):
         return
 
     _original_getaddrinfo = socket.getaddrinfo
@@ -436,7 +429,7 @@ def apply_ipv4_preference(force: bool = False) -> None:
                 return _original_getaddrinfo(host, port, family, type, proto, flags)
         return _original_getaddrinfo(host, port, family, type, proto, flags)
 
-    _ipv4_getaddrinfo._hermes_ipv4_patched = True  # type: ignore[attr-defined]
+    _ipv4_getaddrinfo._centurion_ipv4_patched = True  # type: ignore[attr-defined]
     socket.getaddrinfo = _ipv4_getaddrinfo  # type: ignore[assignment]
 
 

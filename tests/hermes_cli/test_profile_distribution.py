@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.profile_distribution — git-based profile installs.
+"""Tests for centurion_cli.profile_distribution — git-based profile installs.
 
 Covers manifest parsing, version requirement checks, install / update / describe
 on local-directory sources, and guards on what can and can't be installed.
@@ -25,7 +25,7 @@ from centurion_cli.profile_distribution import (
     _env_template_from_manifest,
     _looks_like_git_url,
     _parse_semver,
-    check_hermes_requires,
+    check_centurion_requires,
     describe_distribution,
     install_distribution,
     plan_install,
@@ -36,7 +36,7 @@ from centurion_cli.profile_distribution import (
 
 
 # ---------------------------------------------------------------------------
-# Isolated profile env (matches tests/hermes_cli/test_profiles.py)
+# Isolated profile env (matches tests/centurion_cli/test_profiles.py)
 # ---------------------------------------------------------------------------
 
 
@@ -186,10 +186,10 @@ class TestVersionRequires:
     ])
     def test_check_matrix(self, spec, cur, ok):
         if ok:
-            check_hermes_requires(spec, cur)
+            check_centurion_requires(spec, cur)
         else:
             with pytest.raises(DistributionError, match="requires Hermes"):
-                check_hermes_requires(spec, cur)
+                check_centurion_requires(spec, cur)
 
     def test_parse_semver_handles_prerelease(self):
         assert _parse_semver("0.12.0-rc1") == (0, 12, 0)
@@ -335,10 +335,10 @@ class TestInstall:
         assert example.is_file()
         assert "OPENAI_API_KEY" in example.read_text()
 
-    def test_install_enforces_hermes_requires(self, profile_env, monkeypatch):
+    def test_install_enforces_centurion_requires(self, profile_env, monkeypatch):
         # Pin current Hermes version to something well below the requirement
         import centurion_cli
-        monkeypatch.setattr(hermes_cli, "__version__", "0.1.0", raising=False)
+        monkeypatch.setattr(centurion_cli, "__version__", "0.1.0", raising=False)
 
         mf = DistributionManifest(
             name="future",
@@ -530,7 +530,7 @@ class TestInstalledAtStamp:
             def now(cls, tz=None):
                 return _dt.datetime(2099, 1, 1, 0, 0, 0, tzinfo=tz or _dt.timezone.utc)
         monkeypatch.setattr(
-            "hermes_cli.profile_distribution.datetime", _FakeDT, raising=True
+            "centurion_cli.profile_distribution.datetime", _FakeDT, raising=True
         )
 
         from centurion_cli.profile_distribution import update_distribution

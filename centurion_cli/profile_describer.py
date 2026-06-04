@@ -12,7 +12,7 @@ badge. User can edit afterward to confirm.
 
 Design notes
 ------------
-- Mirrors the shape of ``hermes_cli/kanban_specify.py``: lazy aux
+- Mirrors the shape of ``centurion_cli/kanban_specify.py``: lazy aux
   client import inside the function, lenient response parse, never
   raises on expected failure modes.
 - Reads at most ``MAX_SKILLS_FOR_PROMPT`` skill names to keep the

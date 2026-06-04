@@ -1,7 +1,7 @@
 """Tests for Bug #12905 fix — stale OAuth token detection in hermes model flow.
 
 Bug 3: `hermes model` with `provider=anthropic` skips OAuth re-authentication
-when a stale ANTHROPIC_TOKEN exists in ~/.hermes/.env but no valid
+when a stale ANTHROPIC_TOKEN exists in ~/.centurion/.env but no valid
 Claude Code credentials are available. The fast-path silently proceeds to
 model selection with a broken token instead of offering re-auth.
 """
@@ -54,7 +54,7 @@ class TestStaleOAuthTokenDetection:
 
         # Simulate user types "3" (Cancel) when prompted for re-auth
         monkeypatch.setattr("builtins.input", lambda _: "3")
-        monkeypatch.setattr("hermes_cli.secret_prompt.masked_secret_prompt", lambda _: "")
+        monkeypatch.setattr("centurion_cli.secret_prompt.masked_secret_prompt", lambda _: "")
 
         from centurion_cli.main import _model_flow_anthropic
         cfg = {}

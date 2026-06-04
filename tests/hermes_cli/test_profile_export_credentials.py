@@ -35,9 +35,9 @@ class TestCredentialExclusion:
         (profile_dir / "memories").mkdir()
         (profile_dir / "memories" / "MEMORY.md").write_text("# Memories\n")
 
-        monkeypatch.setattr("hermes_cli.profiles._get_profiles_root", lambda: profiles_root)
-        monkeypatch.setattr("hermes_cli.profiles.get_profile_dir", lambda n: profile_dir)
-        monkeypatch.setattr("hermes_cli.profiles.validate_profile_name", lambda n: None)
+        monkeypatch.setattr("centurion_cli.profiles._get_profiles_root", lambda: profiles_root)
+        monkeypatch.setattr("centurion_cli.profiles.get_profile_dir", lambda n: profile_dir)
+        monkeypatch.setattr("centurion_cli.profiles.validate_profile_name", lambda n: None)
 
         output = tmp_path / "export.tar.gz"
         result = export_profile("testprofile", str(output))

@@ -15,7 +15,7 @@ import pytest
 @pytest.fixture
 def config_home(tmp_path, monkeypatch):
     """Isolated CENTURION_HOME with a minimal config."""
-    home = tmp_path / "hermes"
+    home = tmp_path / "centurion"
     home.mkdir()
     config_yaml = home / "config.yaml"
     config_yaml.write_text("model: old-model\ncustom_providers: []\n")
@@ -45,7 +45,7 @@ class TestCustomProviderModelSwitch:
             "model": "model-A",  # already saved
         }
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["model-A", "model-B"]) as mock_fetch, \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["model-A", "model-B"]) as mock_fetch, \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="2"), \
              patch("builtins.print"):
@@ -70,7 +70,7 @@ class TestCustomProviderModelSwitch:
             "model": "model-A",
         }
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["model-A", "model-B"]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["model-A", "model-B"]), \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="2"), \
              patch("builtins.print"):
@@ -94,7 +94,7 @@ class TestCustomProviderModelSwitch:
         }
 
         # fetch returns empty list (probe failed), user presses Enter (empty input)
-        with patch("hermes_cli.models.fetch_api_models", return_value=[]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=[]), \
              patch("builtins.input", return_value=""), \
              patch("builtins.print"):
             _model_flow_named_custom({}, provider_info)
@@ -116,7 +116,7 @@ class TestCustomProviderModelSwitch:
             # no "model" key
         }
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["model-X"]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["model-X"]), \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="1"), \
              patch("builtins.print"):
@@ -140,7 +140,7 @@ class TestCustomProviderModelSwitch:
             "api_mode": "anthropic_messages",
         }
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["claude-3"]) as mock_fetch, \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["claude-3"]) as mock_fetch, \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="1"), \
              patch("builtins.print"):
@@ -173,7 +173,7 @@ class TestCustomProviderModelSwitch:
             "model": "llama-3",
         }
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["llama-3"]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["llama-3"]), \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="1"), \
              patch("builtins.print"):
@@ -210,7 +210,7 @@ class TestCustomProviderModelSwitch:
             "model": "qwen3.6-35b-fast",
         }
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["qwen3.6-35b-fast"]) as mock_fetch, \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["qwen3.6-35b-fast"]) as mock_fetch, \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="1"), \
              patch("builtins.print"):
@@ -251,7 +251,7 @@ class TestCustomProviderModelSwitch:
             "model": "qwen3.6-35b-fast",
         }
 
-        with patch("hermes_cli.models.fetch_api_models", return_value=["qwen3.6-35b-fast"]), \
+        with patch("centurion_cli.models.fetch_api_models", return_value=["qwen3.6-35b-fast"]), \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="1"), \
              patch("builtins.print"):
@@ -306,9 +306,9 @@ class TestCustomProviderModelSwitch:
                 f"NeuralWatt entry missing from provider menu: {labels}"
             )
 
-        with patch("hermes_cli.main._prompt_provider_choice",
+        with patch("centurion_cli.main._prompt_provider_choice",
                    side_effect=_pick_neuralwatt), \
-             patch("hermes_cli.models.fetch_api_models",
+             patch("centurion_cli.models.fetch_api_models",
                    return_value=["qwen3.6-35b-fast"]) as mock_fetch, \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="1"), \
@@ -373,7 +373,7 @@ class TestCustomProviderModelSwitch:
             captured["default"] = default
             return len(labels) - 1  # Leave unchanged
 
-        with patch("hermes_cli.main._prompt_provider_choice",
+        with patch("centurion_cli.main._prompt_provider_choice",
                    side_effect=_capture_and_cancel), \
              patch("builtins.print"):
             select_provider_and_model()
@@ -419,9 +419,9 @@ class TestCustomProviderModelSwitch:
                 f"NeuralWatt entry missing from provider menu: {labels}"
             )
 
-        with patch("hermes_cli.main._prompt_provider_choice",
+        with patch("centurion_cli.main._prompt_provider_choice",
                    side_effect=_pick_neuralwatt), \
-             patch("hermes_cli.models.fetch_api_models",
+             patch("centurion_cli.models.fetch_api_models",
                    return_value=["qwen3.6-35b-fast"]) as mock_fetch, \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
              patch("builtins.input", return_value="1"), \
@@ -484,7 +484,7 @@ class TestCustomProviderModelSwitch:
         }
 
         with patch(
-            "hermes_cli.models.fetch_api_models",
+            "centurion_cli.models.fetch_api_models",
             return_value=["claude-opus-4-7"],
         ) as mock_fetch, \
              patch.dict("sys.modules", {"simple_term_menu": None}), \
@@ -549,7 +549,7 @@ class TestCustomProviderModelSwitch:
         }
 
         with patch(
-            "hermes_cli.models.fetch_api_models",
+            "centurion_cli.models.fetch_api_models",
             return_value=["claude-opus-4-7"],
         ), \
              patch.dict("sys.modules", {"simple_term_menu": None}), \

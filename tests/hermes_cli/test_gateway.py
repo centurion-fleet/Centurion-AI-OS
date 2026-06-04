@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.gateway."""
+"""Tests for centurion_cli.gateway."""
 
 import sys
 from types import ModuleType, SimpleNamespace
@@ -69,7 +69,7 @@ def test_run_gateway_exits_nonzero_when_start_gateway_reports_failure(monkeypatc
 
 
 def test_run_gateway_refuses_root_in_official_docker(monkeypatch, tmp_path, capsys):
-    project_root = tmp_path / "opt" / "hermes"
+    project_root = tmp_path / "opt" / "centurion"
     (project_root / "docker").mkdir(parents=True)
     (project_root / "docker" / "entrypoint.sh").write_text("#!/bin/sh\n")
 
@@ -702,4 +702,4 @@ class TestStopProfileGateway:
 def test_module_has_logger():
     """Verify module has a logger instance (regression guard for #27154)."""
     assert hasattr(gateway, "logger")
-    assert gateway.logger.name == "hermes_cli.gateway"
+    assert gateway.logger.name == "centurion_cli.gateway"

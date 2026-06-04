@@ -36,7 +36,7 @@ class TestOllamaCloudCredentials:
             }
         }
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider._get_model_config",
+            "centurion_cli.runtime_provider._get_model_config",
             lambda: mock_config.get("model", {}),
         )
 
@@ -60,7 +60,7 @@ class TestOllamaCloudCredentials:
             }
         }
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider._get_model_config",
+            "centurion_cli.runtime_provider._get_model_config",
             lambda: mock_config.get("model", {}),
         )
 
@@ -90,7 +90,7 @@ class TestDirectAliases:
             }
         }
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
 
@@ -294,7 +294,7 @@ class TestLoadDirectAliasesEdgeCases:
         """Empty model_aliases dict returns only builtins (if any)."""
         mock_config = {"model_aliases": {}}
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
 
@@ -306,7 +306,7 @@ class TestLoadDirectAliasesEdgeCases:
         """Non-dict model_aliases value is gracefully ignored."""
         mock_config = {"model_aliases": "bad-string-value"}
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
 
@@ -318,7 +318,7 @@ class TestLoadDirectAliasesEdgeCases:
         """model_aliases: null in config is handled gracefully."""
         mock_config = {"model_aliases": None}
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
 
@@ -341,7 +341,7 @@ class TestLoadDirectAliasesEdgeCases:
             }
         }
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
 
@@ -361,7 +361,7 @@ class TestLoadDirectAliasesEdgeCases:
             }
         }
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
 
@@ -375,7 +375,7 @@ class TestLoadDirectAliasesEdgeCases:
     def test_load_config_exception_returns_builtins(self, monkeypatch):
         """If load_config raises, _load_direct_aliases returns builtins only."""
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: (_ for _ in ()).throw(RuntimeError("config broken")),
         )
 
@@ -394,7 +394,7 @@ class TestLoadDirectAliasesEdgeCases:
             }
         }
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
 
@@ -412,7 +412,7 @@ class TestLoadDirectAliasesEdgeCases:
             }
         }
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
 
@@ -439,7 +439,7 @@ class TestEnsureDirectAliases:
             }
         }
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: mock_config,
         )
         monkeypatch.setattr(ms, "DIRECT_ALIASES", {})
@@ -517,13 +517,13 @@ class TestSwitchModelDirectAliasOverride:
             lambda raw, prov: ("custom", "qwen3.5:397b", "qwen"))
 
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.resolve_runtime_provider",
+            "centurion_cli.runtime_provider.resolve_runtime_provider",
             lambda **kwargs: {"api_key": "", "base_url": "", "api_mode": "openai_compat", "provider": "custom"},
         )
 
-        monkeypatch.setattr("hermes_cli.models.validate_requested_model",
+        monkeypatch.setattr("centurion_cli.models.validate_requested_model",
             lambda *a, **kw: {"accepted": True, "persist": True, "recognized": True, "message": None})
-        monkeypatch.setattr("hermes_cli.models.opencode_model_api_mode",
+        monkeypatch.setattr("centurion_cli.models.opencode_model_api_mode",
             lambda *a, **kw: "openai_compat")
 
         result = ms.switch_model("qwen", "openrouter", "old-model")
@@ -543,12 +543,12 @@ class TestSwitchModelDirectAliasOverride:
         monkeypatch.setattr(ms, "resolve_alias",
             lambda raw, prov: ("custom", "local-model", "local"))
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.resolve_runtime_provider",
+            "centurion_cli.runtime_provider.resolve_runtime_provider",
             lambda **kwargs: {"api_key": "", "base_url": "", "api_mode": "openai_compat", "provider": "custom"},
         )
-        monkeypatch.setattr("hermes_cli.models.validate_requested_model",
+        monkeypatch.setattr("centurion_cli.models.validate_requested_model",
             lambda *a, **kw: {"accepted": True, "persist": True, "recognized": True, "message": None})
-        monkeypatch.setattr("hermes_cli.models.opencode_model_api_mode",
+        monkeypatch.setattr("centurion_cli.models.opencode_model_api_mode",
             lambda *a, **kw: "openai_compat")
 
         result = ms.switch_model("local", "openrouter", "old-model")

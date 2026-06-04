@@ -43,7 +43,7 @@ def test_dashboard_oauth_write_uses_atomic_replace_and_cleans_temp_files(oauth_f
         replace_calls.append((src, dst))
         raise OSError('simulated replace failure')
 
-    monkeypatch.setattr('hermes_cli.web_server.os.replace', flaky_replace)
+    monkeypatch.setattr('centurion_cli.web_server.os.replace', flaky_replace)
 
     with pytest.raises(OSError, match='simulated replace failure'):
         _save_anthropic_oauth_creds('access-token', 'refresh-token', 123456)

@@ -21,8 +21,8 @@ def test_no_duplicate_skills_subparser():
     import sys
 
     # Remove cached module if present
-    if 'hermes_cli.main' in sys.modules:
-        del sys.modules['hermes_cli.main']
+    if 'centurion_cli.main' in sys.modules:
+        del sys.modules['centurion_cli.main']
 
     try:
         import centurion_cli.main  # noqa: F401

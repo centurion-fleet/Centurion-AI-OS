@@ -1,4 +1,4 @@
-"""Tests for hermes_cli configuration management."""
+"""Tests for centurion_cli configuration management."""
 
 import os
 from pathlib import Path
@@ -9,8 +9,8 @@ import yaml
 
 from centurion_cli.config import (
     DEFAULT_CONFIG,
-    get_hermes_home,
-    ensure_hermes_home,
+    get_centurion_home,
+    ensure_centurion_home,
     get_compatible_custom_providers,
     load_config,
     load_env,
@@ -28,19 +28,19 @@ class TestGetHermesHome:
     def test_default_path(self):
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("CENTURION_HOME", None)
-            home = get_hermes_home()
+            home = get_centurion_home()
             assert home == Path.home() / ".centurion"
 
     def test_env_override(self):
         with patch.dict(os.environ, {"CENTURION_HOME": "/custom/path"}):
-            home = get_hermes_home()
+            home = get_centurion_home()
             assert home == Path("/custom/path")
 
 
 class TestEnsureHermesHome:
     def test_creates_subdirs(self, tmp_path):
         with patch.dict(os.environ, {"CENTURION_HOME": str(tmp_path)}):
-            ensure_hermes_home()
+            ensure_centurion_home()
             assert (tmp_path / "cron").is_dir()
             assert (tmp_path / "sessions").is_dir()
             assert (tmp_path / "logs").is_dir()
@@ -48,7 +48,7 @@ class TestEnsureHermesHome:
 
     def test_creates_default_soul_md_if_missing(self, tmp_path):
         with patch.dict(os.environ, {"CENTURION_HOME": str(tmp_path)}):
-            ensure_hermes_home()
+            ensure_centurion_home()
             soul_path = tmp_path / "SOUL.md"
             assert soul_path.exists()
             assert soul_path.read_text(encoding="utf-8").strip() != ""
@@ -57,7 +57,7 @@ class TestEnsureHermesHome:
         with patch.dict(os.environ, {"CENTURION_HOME": str(tmp_path)}):
             soul_path = tmp_path / "SOUL.md"
             soul_path.write_text("custom soul", encoding="utf-8")
-            ensure_hermes_home()
+            ensure_centurion_home()
             assert soul_path.read_text(encoding="utf-8") == "custom soul"
 
 
@@ -105,7 +105,7 @@ class TestLoadConfigParseFailure:
             (tmp_path / "config.yaml").write_text("\tbroken tab indent:\n")
 
             import logging
-            with caplog.at_level(logging.WARNING, logger="hermes_cli.config"):
+            with caplog.at_level(logging.WARNING, logger="centurion_cli.config"):
                 config = load_config()
 
             # Falls back to defaults — confirms the silent-fallback we're warning about
@@ -789,16 +789,16 @@ class TestEnvWriteDenylist:
     attacker who steals the token could plant
     ``LD_PRELOAD=/tmp/evil.so`` in ``.env`` and own the next Hermes
     process on next startup via the dotenv → ``os.environ`` chain in
-    ``hermes_cli/env_loader.py``.
+    ``centurion_cli/env_loader.py``.
 
     Regression test for the dashboard pentest finding filed alongside
     the ``web-pentest`` skill (PR #32265 / issue #32267).
     """
 
     @pytest.fixture(autouse=True)
-    def _hermes_home(self, tmp_path, monkeypatch):
+    def _centurion_home(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-        ensure_hermes_home()
+        ensure_centurion_home()
 
     @pytest.mark.parametrize(
         "denied_key",
@@ -847,7 +847,7 @@ class TestEnvWriteDenylist:
             "HERMES_MAX_ITERATIONS",
         ],
     )
-    def test_hermes_integration_keys_still_writable(self, allowed_key):
+    def test_centurion_integration_keys_still_writable(self, allowed_key):
         """``HERMES_*`` overall is NOT blocked — only the four runtime
         location names (HOME/PROFILE/CONFIG/ENV) are. Integration
         credentials following the ``HERMES_*`` convention must keep

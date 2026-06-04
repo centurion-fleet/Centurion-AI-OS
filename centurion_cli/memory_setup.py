@@ -17,7 +17,7 @@ from centurion_cli.secret_prompt import masked_secret_prompt
 
 
 # ---------------------------------------------------------------------------
-# Curses-based interactive picker (same pattern as hermes tools)
+# Curses-based interactive picker (same pattern as centurion tools)
 # ---------------------------------------------------------------------------
 
 def _curses_select(title: str, items: list[tuple[str, str]], default: int = 0) -> int:
@@ -203,8 +203,8 @@ def cmd_setup_provider(provider_name: str) -> None:
         config["memory"] = {}
 
     if hasattr(provider, "post_setup"):
-        hermes_home = str(get_centurion_home())
-        provider.post_setup(hermes_home, config)
+        centurion_home = str(get_centurion_home())
+        provider.post_setup(centurion_home, config)
         return
 
     # Fallback: generic schema-based setup (same as cmd_setup)
@@ -222,7 +222,7 @@ def cmd_setup(args) -> None:
 
     if not providers:
         print("\n  No memory provider plugins detected.")
-        print("  Install a plugin to ~/.hermes/plugins/ and try again.\n")
+        print("  Install a plugin to ~/.centurion/plugins/ and try again.\n")
         return
 
     # Build picker items
@@ -254,8 +254,8 @@ def cmd_setup(args) -> None:
     # If the provider has a post_setup hook, delegate entirely to it.
     # The hook handles its own config, connection test, and activation.
     if hasattr(provider, "post_setup"):
-        hermes_home = str(get_centurion_home())
-        provider.post_setup(hermes_home, config)
+        centurion_home = str(get_centurion_home())
+        provider.post_setup(centurion_home, config)
         return
 
     schema = provider.get_config_schema() if hasattr(provider, "get_config_schema") else []
@@ -331,10 +331,10 @@ def cmd_setup(args) -> None:
     save_config(config)
 
     # Write non-secret config to provider's native location
-    hermes_home = str(get_centurion_home())
+    centurion_home = str(get_centurion_home())
     if provider_config and hasattr(provider, "save_config"):
         try:
-            provider.save_config(provider_config, hermes_home)
+            provider.save_config(provider_config, centurion_home)
         except Exception as e:
             print(f"  Failed to write provider config: {e}")
 
@@ -432,7 +432,7 @@ def cmd_status(args) -> None:
                     break
         else:
             print(f"\n  Plugin:    NOT installed ✗")
-            print(f"  Install the '{provider_name}' memory plugin to ~/.hermes/plugins/")
+            print(f"  Install the '{provider_name}' memory plugin to ~/.centurion/plugins/")
 
     providers = _get_available_providers()
     if providers:

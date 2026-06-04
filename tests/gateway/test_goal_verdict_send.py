@@ -21,7 +21,7 @@ from gateway.session import SessionEntry, SessionSource, build_session_key
 
 
 @pytest.fixture()
-def hermes_home(tmp_path, monkeypatch):
+def centurion_home(tmp_path, monkeypatch):
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -97,7 +97,7 @@ def _make_runner_with_adapter(session_id: str = None):
 
 
 @pytest.mark.asyncio
-async def test_goal_verdict_done_sent_via_adapter_send(hermes_home):
+async def test_goal_verdict_done_sent_via_adapter_send(centurion_home):
     """When the judge says done, the '✓ Goal achieved' message must reach
     the user through the adapter's ``send()`` method."""
     runner, adapter, session_entry, src = _make_runner_with_adapter()
@@ -107,7 +107,7 @@ async def test_goal_verdict_done_sent_via_adapter_send(hermes_home):
     mgr = GoalManager(session_entry.session_id)
     mgr.set("ship the feature")
 
-    with patch("hermes_cli.goals.judge_goal", return_value=("done", "the feature shipped", False)):
+    with patch("centurion_cli.goals.judge_goal", return_value=("done", "the feature shipped", False)):
         await runner._post_turn_goal_continuation(
             session_entry=session_entry,
             source=src,
@@ -124,7 +124,7 @@ async def test_goal_verdict_done_sent_via_adapter_send(hermes_home):
 
 
 @pytest.mark.asyncio
-async def test_goal_verdict_continue_enqueues_continuation(hermes_home):
+async def test_goal_verdict_continue_enqueues_continuation(centurion_home):
     """When the judge says continue, both the 'continuing' status and the
     continuation-prompt event must be delivered. The continuation prompt is
     routed through the adapter's pending-messages FIFO so the goal loop
@@ -136,7 +136,7 @@ async def test_goal_verdict_continue_enqueues_continuation(hermes_home):
     mgr = GoalManager(session_entry.session_id)
     mgr.set("polish the docs")
 
-    with patch("hermes_cli.goals.judge_goal", return_value=("continue", "still needs work", False)):
+    with patch("centurion_cli.goals.judge_goal", return_value=("continue", "still needs work", False)):
         await runner._post_turn_goal_continuation(
             session_entry=session_entry,
             source=src,
@@ -152,7 +152,7 @@ async def test_goal_verdict_continue_enqueues_continuation(hermes_home):
 
 
 @pytest.mark.asyncio
-async def test_goal_verdict_budget_exhausted_sends_pause(hermes_home):
+async def test_goal_verdict_budget_exhausted_sends_pause(centurion_home):
     """When the budget is exhausted, a '⏸ Goal paused' message must be sent
     and no further continuation enqueued."""
     runner, adapter, session_entry, src = _make_runner_with_adapter()
@@ -164,7 +164,7 @@ async def test_goal_verdict_budget_exhausted_sends_pause(hermes_home):
     state.turns_used = 2
     save_goal(session_entry.session_id, state)
 
-    with patch("hermes_cli.goals.judge_goal", return_value=("continue", "keep going", False)):
+    with patch("centurion_cli.goals.judge_goal", return_value=("continue", "keep going", False)):
         await runner._post_turn_goal_continuation(
             session_entry=session_entry,
             source=src,
@@ -181,7 +181,7 @@ async def test_goal_verdict_budget_exhausted_sends_pause(hermes_home):
 
 
 @pytest.mark.asyncio
-async def test_goal_verdict_skipped_when_no_active_goal(hermes_home):
+async def test_goal_verdict_skipped_when_no_active_goal(centurion_home):
     """No goal set → the hook is a no-op. Nothing is sent, nothing enqueued."""
     runner, adapter, session_entry, src = _make_runner_with_adapter()
 
@@ -197,7 +197,7 @@ async def test_goal_verdict_skipped_when_no_active_goal(hermes_home):
 
 
 @pytest.mark.asyncio
-async def test_goal_verdict_survives_adapter_without_send(hermes_home):
+async def test_goal_verdict_survives_adapter_without_send(centurion_home):
     """Bad adapter (no ``send`` attribute) must not crash the judge hook."""
     runner, _adapter, session_entry, src = _make_runner_with_adapter()
 
@@ -211,7 +211,7 @@ async def test_goal_verdict_survives_adapter_without_send(hermes_home):
 
     runner.adapters[Platform.TELEGRAM] = _NoSendAdapter()
 
-    with patch("hermes_cli.goals.judge_goal", return_value=("done", "ok", False)):
+    with patch("centurion_cli.goals.judge_goal", return_value=("done", "ok", False)):
         # must not raise
         await runner._post_turn_goal_continuation(
             session_entry=session_entry,

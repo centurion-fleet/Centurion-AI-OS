@@ -48,10 +48,10 @@ logger = logging.getLogger(__name__)
 # Marker comments wrapping the managed section so re-runs can detect
 # what's ours and what's user-edited. Both must appear or strip is a no-op.
 MIGRATION_MARKER = (
-    "# managed by hermes-agent — `hermes codex-runtime migrate` regenerates this section"
+    "# managed by centurion-os — `hermes codex-runtime migrate` regenerates this section"
 )
 MIGRATION_END_MARKER = (
-    "# end hermes-agent managed section"
+    "# end centurion-os managed section"
 )
 
 
@@ -536,10 +536,10 @@ def _looks_like_test_tempdir(path: str) -> bool:
     macOS routes ``/tmp`` through ``/private/var/folders/<…>/T`` which is
     what pytest's tempdir factory uses by default. If a CENTURION_HOME pointing
     at one of those paths is burned into ``~/.codex/config.toml``, every
-    codex-routed hermes-tools call fails silently once the directory is GC'd.
+    codex-routed centurion-tools call fails silently once the directory is GC'd.
 
     We err on the side of refusing — losing a (very unlikely) real
-    ``~/.hermes`` symlink that happens to live under ``/private/var/folders``
+    ``~/.centurion`` symlink that happens to live under ``/private/var/folders``
     is much less harmful than silently bricking codex's tool surface.
     """
     if not path:
@@ -554,7 +554,7 @@ def _looks_like_test_tempdir(path: str) -> bool:
     return any(needle in normalized for needle in needles)
 
 
-def _build_hermes_tools_mcp_entry() -> dict:
+def _build_centurion_tools_mcp_entry() -> dict:
     """Build the codex stdio-transport entry that launches Hermes' own
     tool surface as an MCP server. Codex's subprocess will call back into
     this for browser/web/delegate_task/vision/memory/skills tools.
@@ -579,11 +579,11 @@ def _build_hermes_tools_mcp_entry() -> dict:
     # a sibling test's monkeypatch.setenv("CENTURION_HOME", tmp_path) would
     # otherwise leak a transient pytest tempdir into the user's real
     # ~/.codex/config.toml and silently brick codex once the tempdir is GC'd.
-    hermes_home = os.environ.get("CENTURION_HOME") or ""
-    if hermes_home and _looks_like_test_tempdir(hermes_home):
-        hermes_home = ""
-    if hermes_home:
-        env["CENTURION_HOME"] = hermes_home
+    centurion_home = os.environ.get("CENTURION_HOME") or ""
+    if centurion_home and _looks_like_test_tempdir(centurion_home):
+        centurion_home = ""
+    if centurion_home:
+        env["CENTURION_HOME"] = centurion_home
     # PYTHONPATH passes through so a worktree-launched hermes finds the
     # branch's modules instead of the installed package.
     pythonpath = os.environ.get("PYTHONPATH")
@@ -595,7 +595,7 @@ def _build_hermes_tools_mcp_entry() -> dict:
 
     out: dict[str, Any] = {
         "command": sys.executable,
-        "args": ["-m", "agent.transports.hermes_tools_mcp_server"],
+        "args": ["-m", "agent.transports.centurion_tools_mcp_server"],
     }
     if env:
         out["env"] = env
@@ -613,13 +613,13 @@ def migrate(
     dry_run: bool = False,
     discover_plugins: bool = True,
     default_permission_profile: Optional[str] = ":workspace",
-    expose_hermes_tools: bool = True,
+    expose_centurion_tools: bool = True,
 ) -> MigrationReport:
     """Translate Hermes mcp_servers config + Codex curated plugins into
     ~/.codex/config.toml.
 
     Args:
-        hermes_config: full ~/.hermes/config.yaml dict
+        hermes_config: full ~/.centurion/config.yaml dict
         codex_home: override CODEX_HOME (defaults to ~/.codex)
         dry_run: skip the actual write; report what would happen
         discover_plugins: when True (default), query `plugin/list` against
@@ -635,7 +635,7 @@ def migrate(
             configured in their own [permissions.<name>] table. Set None
             to leave permissions unset and let codex use its compiled-in
             default (which is read-only).
-        expose_hermes_tools: when True (default), register Hermes' own
+        expose_centurion_tools: when True (default), register Hermes' own
             tool surface (web_search, browser_*, delegate_task, vision,
             memory, skills, etc.) as an MCP server in ~/.codex/config.toml
             so the codex subprocess can call back into Hermes for tools
@@ -691,12 +691,12 @@ def migrate(
     # codex subprocess can call back into Hermes for the tools codex
     # doesn't ship with — web_search, browser_*, delegate_task, vision,
     # memory, skills, session_search, image_generate, text_to_speech.
-    # The server itself is agent/transports/hermes_tools_mcp_server.py
+    # The server itself is agent/transports/centurion_tools_mcp_server.py
     # and is launched on demand by codex (stdio MCP).
-    if expose_hermes_tools:
-        translated["hermes-tools"] = _build_hermes_tools_mcp_entry()
-        if "hermes-tools" not in report.migrated:
-            report.migrated.append("hermes-tools")
+    if expose_centurion_tools:
+        translated["centurion-tools"] = _build_centurion_tools_mcp_entry()
+        if "centurion-tools" not in report.migrated:
+            report.migrated.append("centurion-tools")
 
     # Build the new managed block
     managed_block = render_codex_toml_section(

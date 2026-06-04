@@ -246,11 +246,11 @@ class HonchoMemoryProvider(MemoryProvider):
         except Exception:
             return False
 
-    def save_config(self, values, hermes_home):
+    def save_config(self, values, centurion_home):
         """Write config to $CENTURION_HOME/honcho.json (Honcho SDK native format)."""
         import json
         from pathlib import Path
-        config_path = Path(hermes_home) / "honcho.json"
+        config_path = Path(centurion_home) / "honcho.json"
         existing = {}
         if config_path.exists():
             try:
@@ -266,7 +266,7 @@ class HonchoMemoryProvider(MemoryProvider):
             {"key": "baseUrl", "description": "Honcho base URL (for self-hosted)"},
         ]
 
-    def post_setup(self, hermes_home: str, config: dict) -> None:
+    def post_setup(self, centurion_home: str, config: dict) -> None:
         """Run the full Honcho setup wizard after provider selection."""
         import types
         from plugins.memory.honcho.cli import cmd_setup
@@ -387,8 +387,8 @@ class HonchoMemoryProvider(MemoryProvider):
         # of performing a one-time migration.
         try:
             if not session.messages and cfg.session_strategy != "per-session":
-                from centurion_constants import get_hermes_home
-                mem_dir = str(get_hermes_home() / "memories")
+                from centurion_constants import get_centurion_home
+                mem_dir = str(get_centurion_home() / "memories")
                 self._manager.migrate_memory_files(self._session_key, mem_dir)
                 logger.debug("Honcho memory file migration attempted for new session: %s", self._session_key)
             elif cfg.session_strategy == "per-session":

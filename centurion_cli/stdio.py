@@ -15,7 +15,7 @@ Python's stdout is a real TTY; code-page flipping lets subprocesses and
 child Python ``print()`` calls agree on encoding.
 
 This module is a no-op on every non-Windows platform, and idempotent.
-Entry points (``cli.py`` ``main``, ``hermes_cli/main.py`` CLI dispatch,
+Entry points (``cli.py`` ``main``, ``centurion_cli/main.py`` CLI dispatch,
 ``gateway/run.py`` startup) call :func:`configure_windows_stdio` exactly
 once early in startup.
 
@@ -200,7 +200,7 @@ def _augment_path_with_known_tools() -> None:
     ``%LOCALAPPDATA%\\hermes\\git\\bin`` to the User PATH via
     ``SetEnvironmentVariable(..., "User")``.  That write propagates to newly
     *spawned* processes only — already-running shells (including the one the
-    user invokes ``hermes`` from right after install) retain their old PATH.
+    user invokes ``centurion`` from right after install) retain their old PATH.
 
     Any subprocess Hermes spawns — bash, ``rg``, ``grep``, ``npm`` — inherits
     that stale PATH and reports commands as missing even though they're on
@@ -227,13 +227,13 @@ def _augment_path_with_known_tools() -> None:
     # should match so this prefill fully mirrors what a fresh shell would
     # see on next launch.
     candidate_dirs = [
-        os.path.join(local_appdata, "hermes", "git", "cmd"),
-        os.path.join(local_appdata, "hermes", "git", "bin"),
-        os.path.join(local_appdata, "hermes", "git", "usr", "bin"),
+        os.path.join(local_appdata, "centurion", "git", "cmd"),
+        os.path.join(local_appdata, "centurion", "git", "bin"),
+        os.path.join(local_appdata, "centurion", "git", "usr", "bin"),
         # Hermes venv Scripts directory — host of the hermes.exe shim itself,
         # also where any pip-installed console scripts land.  Usually already
         # on PATH when the user invokes hermes, but harmless to include.
-        os.path.join(local_appdata, "hermes", "hermes-agent", "venv", "Scripts"),
+        os.path.join(local_appdata, "centurion", "centurion-os", "venv", "Scripts"),
         # WinGet packages directory — where ``winget install`` drops CLI
         # shims by default (ripgrep lands here as rg.exe).  Covers the case
         # of a system-Git install + ripgrep-via-winget that isn't yet on

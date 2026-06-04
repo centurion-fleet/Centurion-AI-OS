@@ -1,5 +1,5 @@
 """
-Tests for hermes_cli.mcp_config — ``hermes mcp`` subcommands.
+Tests for centurion_cli.mcp_config — ``hermes mcp`` subcommands.
 
 These tests mock the MCP server connection layer so they run without
 any actual MCP servers or API keys.
@@ -25,15 +25,15 @@ def _isolate_config(tmp_path, monkeypatch):
     """Redirect all config I/O to a temp directory."""
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     monkeypatch.setattr(
-        "hermes_cli.config.get_hermes_home", lambda: tmp_path
+        "centurion_cli.config.get_centurion_home", lambda: tmp_path
     )
     config_path = tmp_path / "config.yaml"
     env_path = tmp_path / ".env"
     monkeypatch.setattr(
-        "hermes_cli.config.get_config_path", lambda: config_path
+        "centurion_cli.config.get_config_path", lambda: config_path
     )
     monkeypatch.setattr(
-        "hermes_cli.config.get_env_path", lambda: env_path
+        "centurion_cli.config.get_env_path", lambda: env_path
     )
     return tmp_path
 
@@ -155,9 +155,9 @@ class TestMcpRemove:
             "oauth-srv": {"url": "https://example.com/mcp", "auth": "oauth"},
         })
         monkeypatch.setattr("builtins.input", lambda _: "y")
-        # Also patch get_hermes_home in the mcp_config module namespace
+        # Also patch get_centurion_home in the mcp_config module namespace
         monkeypatch.setattr(
-            "hermes_cli.mcp_config.get_hermes_home", lambda: tmp_path
+            "centurion_cli.mcp_config.get_centurion_home", lambda: tmp_path
         )
 
         # Create a fake token file
@@ -196,7 +196,7 @@ class TestMcpAdd:
             return [(t.name, t.description) for t in fake_tools]
 
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._probe_single_server", mock_probe
+            "centurion_cli.mcp_config._probe_single_server", mock_probe
         )
         # No auth, accept all tools
         inputs = iter(["n", ""])  # no auth needed, enable all
@@ -224,7 +224,7 @@ class TestMcpAdd:
             return [(t.name, t.description) for t in fake_tools]
 
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._probe_single_server", mock_probe
+            "centurion_cli.mcp_config._probe_single_server", mock_probe
         )
         inputs = iter([""])  # accept all tools
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
@@ -255,7 +255,7 @@ class TestMcpAdd:
             raise ConnectionError("Connection refused")
 
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._probe_single_server", mock_probe_fail
+            "centurion_cli.mcp_config._probe_single_server", mock_probe_fail
         )
         inputs = iter(["n", "y"])  # no auth, yes save disabled
         monkeypatch.setattr("builtins.input", lambda _: next(inputs))
@@ -283,7 +283,7 @@ class TestMcpAdd:
             return [(t.name, t.description) for t in fake_tools]
 
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._probe_single_server", mock_probe
+            "centurion_cli.mcp_config._probe_single_server", mock_probe
         )
         monkeypatch.setattr("builtins.input", lambda _: "")
 
@@ -335,7 +335,7 @@ class TestMcpAdd:
     def test_add_preset_fills_transport(self, tmp_path, capsys, monkeypatch):
         """A preset fills in command/args when no explicit transport given."""
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._MCP_PRESETS",
+            "centurion_cli.mcp_config._MCP_PRESETS",
             {"testmcp": {"command": "npx", "args": ["-y", "test-mcp-server"], "display_name": "Test MCP"}},
         )
         fake_tools = [FakeTool("do_thing", "Does a thing")]
@@ -348,7 +348,7 @@ class TestMcpAdd:
             return [(t.name, t.description) for t in fake_tools]
 
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._probe_single_server", mock_probe
+            "centurion_cli.mcp_config._probe_single_server", mock_probe
         )
         monkeypatch.setattr("builtins.input", lambda _: "")
 
@@ -368,7 +368,7 @@ class TestMcpAdd:
     def test_preset_does_not_override_explicit_command(self, tmp_path, capsys, monkeypatch):
         """Explicit transports win over presets."""
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._MCP_PRESETS",
+            "centurion_cli.mcp_config._MCP_PRESETS",
             {"testmcp": {"command": "npx", "args": ["-y", "test-mcp-server"], "display_name": "Test MCP"}},
         )
         fake_tools = [FakeTool("search", "Search repos")]
@@ -380,7 +380,7 @@ class TestMcpAdd:
             return [(t.name, t.description) for t in fake_tools]
 
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._probe_single_server", mock_probe
+            "centurion_cli.mcp_config._probe_single_server", mock_probe
         )
         monkeypatch.setattr("builtins.input", lambda _: "")
 
@@ -433,7 +433,7 @@ class TestMcpTest:
             return [("create_service", "Deploy"), ("list_services", "List all")]
 
         monkeypatch.setattr(
-            "hermes_cli.mcp_config._probe_single_server", mock_probe
+            "centurion_cli.mcp_config._probe_single_server", mock_probe
         )
         from centurion_cli.mcp_config import cmd_mcp_test
 
@@ -555,7 +555,7 @@ class TestMcpRemoveEvictsManager:
         })
         monkeypatch.setattr("builtins.input", lambda _: "y")
         monkeypatch.setattr(
-            "hermes_cli.mcp_config.get_hermes_home", lambda: tmp_path
+            "centurion_cli.mcp_config.get_centurion_home", lambda: tmp_path
         )
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
 

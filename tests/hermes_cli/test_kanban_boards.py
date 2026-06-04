@@ -43,7 +43,7 @@ def fresh_home(tmp_path, monkeypatch):
     fixture layers a per-test CENTURION_HOME plus a path-init cache reset
     so each test sees a truly empty board set.
     """
-    home = tmp_path / "hermes_home"
+    home = tmp_path / "centurion_home"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
     for var in (
@@ -53,10 +53,10 @@ def fresh_home(tmp_path, monkeypatch):
         "HERMES_KANBAN_BOARD",
     ):
         monkeypatch.delenv(var, raising=False)
-    # Also reset hermes_constants cache so get_default_hermes_root() re-reads.
+    # Also reset hermes_constants cache so get_default_centurion_root() re-reads.
     try:
         import centurion_constants
-        hermes_constants._cached_default_hermes_root = None  # type: ignore[attr-defined]
+        hermes_constants._cached_default_centurion_root = None  # type: ignore[attr-defined]
     except Exception:
         pass
     # Kanban module-level init cache must not leak between tests.
@@ -70,7 +70,7 @@ def fresh_home(tmp_path, monkeypatch):
 
 class TestSlugValidation:
     @pytest.mark.parametrize("good", [
-        "default", "atm10-server", "hermes-agent", "proj_1", "a",
+        "default", "atm10-server", "centurion-os", "proj_1", "a",
         "very-long-but-still-ok-slug-with-hyphens-and-numbers-1234",
     ])
     def test_accepts_valid(self, good):
@@ -474,7 +474,7 @@ def _cli(args: list[str], env_extra: dict | None = None) -> subprocess.Completed
     if env_extra:
         env.update(env_extra)
     return subprocess.run(
-        [sys.executable, "-m", "hermes_cli.main", "kanban"] + args,
+        [sys.executable, "-m", "centurion_cli.main", "kanban"] + args,
         env=env,
         capture_output=True,
         text=True,

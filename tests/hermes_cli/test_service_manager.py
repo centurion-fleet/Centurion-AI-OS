@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.service_manager — the abstract ServiceManager
+"""Tests for centurion_cli.service_manager — the abstract ServiceManager
 protocol, the detect_service_manager() entry point, and the host-side
 adapter wrappers (Systemd / Launchd / Windows).
 
@@ -209,16 +209,16 @@ def test_windows_manager_kind_and_registration_unsupported() -> None:
 def test_systemd_manager_lifecycle_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
     called: list[str] = []
     monkeypatch.setattr(
-        "hermes_cli.gateway.systemd_start", lambda: called.append("start"),
+        "centurion_cli.gateway.systemd_start", lambda: called.append("start"),
     )
     monkeypatch.setattr(
-        "hermes_cli.gateway.systemd_stop", lambda: called.append("stop"),
+        "centurion_cli.gateway.systemd_stop", lambda: called.append("stop"),
     )
     monkeypatch.setattr(
-        "hermes_cli.gateway.systemd_restart", lambda: called.append("restart"),
+        "centurion_cli.gateway.systemd_restart", lambda: called.append("restart"),
     )
     monkeypatch.setattr(
-        "hermes_cli.gateway._probe_systemd_service_running",
+        "centurion_cli.gateway._probe_systemd_service_running",
         lambda *a, **kw: (False, True),
     )
     mgr = SystemdServiceManager()
@@ -232,16 +232,16 @@ def test_systemd_manager_lifecycle_delegates(monkeypatch: pytest.MonkeyPatch) ->
 def test_launchd_manager_lifecycle_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
     called: list[str] = []
     monkeypatch.setattr(
-        "hermes_cli.gateway.launchd_start", lambda: called.append("start"),
+        "centurion_cli.gateway.launchd_start", lambda: called.append("start"),
     )
     monkeypatch.setattr(
-        "hermes_cli.gateway.launchd_stop", lambda: called.append("stop"),
+        "centurion_cli.gateway.launchd_stop", lambda: called.append("stop"),
     )
     monkeypatch.setattr(
-        "hermes_cli.gateway.launchd_restart", lambda: called.append("restart"),
+        "centurion_cli.gateway.launchd_restart", lambda: called.append("restart"),
     )
     monkeypatch.setattr(
-        "hermes_cli.gateway._probe_launchd_service_running", lambda: False,
+        "centurion_cli.gateway._probe_launchd_service_running", lambda: False,
     )
     mgr = LaunchdServiceManager()
     mgr.start("ignored")
@@ -254,7 +254,7 @@ def test_launchd_manager_lifecycle_delegates(monkeypatch: pytest.MonkeyPatch) ->
 def test_windows_manager_lifecycle_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
     called: list[str] = []
     # Force-import the submodule so monkeypatch's attribute lookup
-    # against the `hermes_cli` package succeeds — gateway_windows is
+    # against the `centurion_cli` package succeeds — gateway_windows is
     # imported lazily inside the wrapper and may not yet be loaded.
     import centurion_cli.gateway_windows  # noqa: F401
 
@@ -268,9 +268,9 @@ def test_windows_manager_lifecycle_delegates(monkeypatch: pytest.MonkeyPatch) ->
         @staticmethod
         def is_installed() -> bool: return True
 
-    monkeypatch.setattr("hermes_cli.gateway_windows", _FakeWindowsModule)
+    monkeypatch.setattr("centurion_cli.gateway_windows", _FakeWindowsModule)
     monkeypatch.setattr(
-        "hermes_cli.gateway.find_gateway_pids",
+        "centurion_cli.gateway.find_gateway_pids",
         lambda **kw: [12345],
     )
     mgr = WindowsServiceManager()
@@ -290,9 +290,9 @@ def test_windows_manager_is_running_false_when_not_installed(
         @staticmethod
         def is_installed() -> bool: return False
 
-    monkeypatch.setattr("hermes_cli.gateway_windows", _FakeWindowsModule)
+    monkeypatch.setattr("centurion_cli.gateway_windows", _FakeWindowsModule)
     monkeypatch.setattr(
-        "hermes_cli.gateway.find_gateway_pids",
+        "centurion_cli.gateway.find_gateway_pids",
         lambda **kw: [12345],  # PIDs would otherwise vote "running"
     )
     assert WindowsServiceManager().is_running("ignored") is False
@@ -310,7 +310,7 @@ def test_windows_manager_install_forwards_kwargs(monkeypatch: pytest.MonkeyPatch
             captured["start_on_login"] = start_on_login
             captured["elevated_handoff"] = elevated_handoff
 
-    monkeypatch.setattr("hermes_cli.gateway_windows", _FakeWindowsModule)
+    monkeypatch.setattr("centurion_cli.gateway_windows", _FakeWindowsModule)
     WindowsServiceManager().install(
         force=True, start_now=True, start_on_login=False, elevated_handoff=True,
     )
@@ -341,7 +341,7 @@ def test_get_service_manager_returns_correct_backend(
     cls: type,
 ) -> None:
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: kind,
+        "centurion_cli.service_manager.detect_service_manager", lambda: kind,
     )
     assert isinstance(get_service_manager(), cls)
 
@@ -350,7 +350,7 @@ def test_get_service_manager_raises_when_unsupported(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "none",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "none",
     )
     with pytest.raises(RuntimeError, match="no supported service manager"):
         get_service_manager()
@@ -363,7 +363,7 @@ def test_get_service_manager_returns_s6_instance(
     S6ServiceManager when running inside a container."""
     from centurion_cli.service_manager import S6ServiceManager
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     assert isinstance(get_service_manager(), S6ServiceManager)
 

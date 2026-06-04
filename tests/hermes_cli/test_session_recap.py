@@ -1,4 +1,4 @@
-"""Unit tests for hermes_cli.session_recap."""
+"""Unit tests for centurion_cli.session_recap."""
 from __future__ import annotations
 
 import json

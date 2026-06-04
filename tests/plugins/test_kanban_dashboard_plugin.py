@@ -747,8 +747,8 @@ def test_ws_events_rejects_when_token_required(tmp_path, monkeypatch):
     import centurion_cli
     import types
     stub = types.SimpleNamespace(_SESSION_TOKEN="secret-xyz")
-    monkeypatch.setitem(sys.modules, "hermes_cli.web_server", stub)
-    monkeypatch.setattr(hermes_cli, "web_server", stub, raising=False)
+    monkeypatch.setitem(sys.modules, "centurion_cli.web_server", stub)
+    monkeypatch.setattr(centurion_cli, "web_server", stub, raising=False)
 
     app = FastAPI()
     app.include_router(_load_plugin_router(), prefix="/api/plugins/kanban")
@@ -807,8 +807,8 @@ def test_ws_events_board_query_param_default_overrides_current_board_pointer(tmp
     import types
 
     stub = types.SimpleNamespace(_SESSION_TOKEN="secret-xyz")
-    monkeypatch.setitem(sys.modules, "hermes_cli.web_server", stub)
-    monkeypatch.setattr(hermes_cli, "web_server", stub, raising=False)
+    monkeypatch.setitem(sys.modules, "centurion_cli.web_server", stub)
+    monkeypatch.setattr(centurion_cli, "web_server", stub, raising=False)
 
     app = FastAPI()
     app.include_router(_load_plugin_router(), prefix="/api/plugins/kanban")
@@ -1347,7 +1347,7 @@ def test_create_task_includes_warning_when_no_dispatcher(client, monkeypatch):
     so the dashboard UI can surface a banner."""
     # Force the dispatcher probe to report "not running".
     monkeypatch.setattr(
-        "hermes_cli.kanban._check_dispatcher_presence",
+        "centurion_cli.kanban._check_dispatcher_presence",
         lambda: (False, "No gateway is running — start `hermes gateway start`."),
     )
     r = client.post(
@@ -1363,7 +1363,7 @@ def test_create_task_includes_warning_when_no_dispatcher(client, monkeypatch):
 def test_create_task_no_warning_when_dispatcher_up(client, monkeypatch):
     """Dispatcher running -> no `warning` field in the response."""
     monkeypatch.setattr(
-        "hermes_cli.kanban._check_dispatcher_presence",
+        "centurion_cli.kanban._check_dispatcher_presence",
         lambda: (True, ""),
     )
     r = client.post(
@@ -1378,7 +1378,7 @@ def test_create_task_no_warning_on_triage(client, monkeypatch):
     """Triage tasks never get the warning (they can't be dispatched
     anyway until promoted)."""
     monkeypatch.setattr(
-        "hermes_cli.kanban._check_dispatcher_presence",
+        "centurion_cli.kanban._check_dispatcher_presence",
         lambda: (False, "oh no"),
     )
     r = client.post(
@@ -1399,7 +1399,7 @@ def test_create_task_no_warning_on_triage(client, monkeypatch):
 # instead of 500'ing GET /board for the entire org.
 #
 # kanban_db._safe_int / task_age corruption paths are covered in
-# tests/hermes_cli/test_kanban_db.py. The OUTER fallback here is not, which
+# tests/centurion_cli/test_kanban_db.py. The OUTER fallback here is not, which
 # means a refactor that drops the try/except would not be caught by CI. The
 # tests below pin that contract.
 # ---------------------------------------------------------------------------
@@ -1432,7 +1432,7 @@ def test_board_endpoint_survives_task_age_exception(client, monkeypatch):
     # contract this test pins.
     def _boom(_task):
         raise RuntimeError("simulated future task_age bug")
-    monkeypatch.setattr("hermes_cli.kanban_db.task_age", _boom)
+    monkeypatch.setattr("centurion_cli.kanban_db.task_age", _boom)
 
     r = client.get("/api/plugins/kanban/board")
     assert r.status_code == 200, r.text
@@ -1463,7 +1463,7 @@ def test_single_task_endpoint_survives_task_age_exception(client, monkeypatch):
 
     def _boom(_task):
         raise RuntimeError("simulated future task_age bug")
-    monkeypatch.setattr("hermes_cli.kanban_db.task_age", _boom)
+    monkeypatch.setattr("centurion_cli.kanban_db.task_age", _boom)
 
     r = client.get(f"/api/plugins/kanban/tasks/{task_id}")
     assert r.status_code == 200, r.text
@@ -1475,7 +1475,7 @@ def test_create_task_probe_error_does_not_break_create(client, monkeypatch):
     def _raise():
         raise RuntimeError("probe crashed")
     monkeypatch.setattr(
-        "hermes_cli.kanban._check_dispatcher_presence", _raise,
+        "centurion_cli.kanban._check_dispatcher_presence", _raise,
     )
     r = client.post(
         "/api/plugins/kanban/tasks",
@@ -1683,7 +1683,7 @@ def test_board_surfaces_warnings_field_for_hallucinated_completions(client):
     a ``warnings`` object on the /board payload so the UI can badge
     them without fetching per-task events. The warnings summary is
     keyed by diagnostic kind (``hallucinated_cards``) rather than the
-    raw event kind — see hermes_cli.kanban_diagnostics for the rule
+    raw event kind — see centurion_cli.kanban_diagnostics for the rule
     that produces it.
     """
     conn = kb.connect()

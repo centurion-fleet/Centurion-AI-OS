@@ -1,6 +1,6 @@
 """Harness: in-container integration tests for S6ServiceManager.
 
-The unit tests in tests/hermes_cli/test_service_manager.py exercise the
+The unit tests in tests/centurion_cli/test_service_manager.py exercise the
 class against a tmp-path scandir with a stubbed ``subprocess.run``.
 These tests run the real class inside a real container against the
 real s6-svc / s6-svscanctl binaries, validating end-to-end.
@@ -11,7 +11,7 @@ valid profile config). The full register → start → supervised-restart
 → unregister cycle is covered by Phase 4 once profile create/delete
 hooks land.
 
-Every ``docker exec`` here runs as the unprivileged ``hermes`` user
+Every ``docker exec`` here runs as the unprivileged ``centurion`` user
 (via :func:`docker_exec` in conftest); see the conftest module
 docstring. ``/run/service`` is chowned hermes-writable by the
 ``02-reconcile-profiles`` cont-init.d script, so register/unregister

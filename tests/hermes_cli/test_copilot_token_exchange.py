@@ -101,14 +101,14 @@ class TestExchangeCopilotToken:
 class TestGetCopilotApiToken:
     """Tests for get_copilot_api_token() — the fallback wrapper."""
 
-    @patch("hermes_cli.copilot_auth.exchange_copilot_token")
+    @patch("centurion_cli.copilot_auth.exchange_copilot_token")
     def test_returns_exchanged_token(self, mock_exchange):
         from centurion_cli.copilot_auth import get_copilot_api_token
 
         mock_exchange.return_value = ("exchanged_jwt", time.time() + 1800)
         assert get_copilot_api_token("gho_raw") == "exchanged_jwt"
 
-    @patch("hermes_cli.copilot_auth.exchange_copilot_token", side_effect=ValueError("fail"))
+    @patch("centurion_cli.copilot_auth.exchange_copilot_token", side_effect=ValueError("fail"))
     def test_falls_back_to_raw_token(self, mock_exchange):
         from centurion_cli.copilot_auth import get_copilot_api_token
 
@@ -146,8 +146,8 @@ class TestTokenFingerprint:
 class TestCallerIntegration:
     """Test that callers correctly use token exchange."""
 
-    @patch("hermes_cli.copilot_auth.resolve_copilot_token", return_value=("gho_raw", "GH_TOKEN"))
-    @patch("hermes_cli.copilot_auth.get_copilot_api_token", return_value="exchanged_jwt")
+    @patch("centurion_cli.copilot_auth.resolve_copilot_token", return_value=("gho_raw", "GH_TOKEN"))
+    @patch("centurion_cli.copilot_auth.get_copilot_api_token", return_value="exchanged_jwt")
     def test_auth_resolve_uses_exchange(self, mock_exchange, mock_resolve):
         from centurion_cli.auth import _resolve_api_key_provider_secret
 

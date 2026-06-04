@@ -3,7 +3,7 @@
 Mounted at /api/plugins/kanban/ by the dashboard plugin system.
 
 This layer is intentionally thin: every handler is a small wrapper around
-``hermes_cli.kanban_db`` or a direct SQL query. Writes use the same code
+``centurion_cli.kanban_db`` or a direct SQL query. Writes use the same code
 paths the CLI and gateway ``/kanban`` command use, so the three surfaces
 cannot drift.
 
@@ -24,9 +24,9 @@ browsers don't have to handle it manually.
 For the ``/events`` WebSocket we still require the session token as a
 ``?token=`` query parameter (browsers cannot set the ``Authorization``
 header on an upgrade request), matching the established pattern used by
-the in-browser PTY bridge in ``hermes_cli/web_server.py``.
+the in-browser PTY bridge in ``centurion_cli/web_server.py``.
 
-This means ``hermes dashboard --host 0.0.0.0`` is safe to run on a LAN:
+This means ``centurion dashboard --host 0.0.0.0`` is safe to run on a LAN:
 plugin routes are no longer an unauthenticated exception. The auth still
 isn't multi-user — anyone who can read the printed URL+token gets full
 dashboard access — but they can't ride along just because they can reach
@@ -227,7 +227,7 @@ def _compute_task_diagnostics(
     and return ``{task_id: [diagnostic_dict, ...]}``.
 
     Tasks with no active diagnostics are omitted from the result.
-    Uses ``hermes_cli.kanban_diagnostics`` — see that module for the
+    Uses ``centurion_cli.kanban_diagnostics`` — see that module for the
     rule definitions.
     """
     from centurion_cli import kanban_diagnostics as kd
@@ -1067,7 +1067,7 @@ def bulk_update(payload: BulkTaskBody, board: Optional[str] = Query(None)):
 
 # ---------------------------------------------------------------------------
 # Diagnostics — fleet-wide distress signals (hallucinations, crashes,
-# spawn failures, stuck-blocked). See hermes_cli.kanban_diagnostics for
+# spawn failures, stuck-blocked). See centurion_cli.kanban_diagnostics for
 # the rule engine.
 # ---------------------------------------------------------------------------
 
@@ -1450,7 +1450,7 @@ def reassign_task_endpoint(
 
 @router.get("/config")
 def get_config():
-    """Return kanban dashboard preferences from ~/.hermes/config.yaml.
+    """Return kanban dashboard preferences from ~/.centurion/config.yaml.
 
     Reads the ``dashboard.kanban`` section if present; defaults otherwise.
     Used by the UI to pre-select tenant filters, toggle markdown rendering,
@@ -1655,7 +1655,7 @@ def get_stats(board: Optional[str] = Query(None)):
 def get_assignees(board: Optional[str] = Query(None)):
     """Known profiles + per-profile task counts.
 
-    Returns the union of ``~/.hermes/profiles/*`` on disk and every
+    Returns the union of ``~/.centurion/profiles/*`` on disk and every
     distinct assignee currently used on the board. The dashboard uses
     this to populate its assignee dropdown so a freshly-created profile
     appears in the picker before it's been given any task.
@@ -1916,9 +1916,9 @@ def update_profile_description(profile_name: str, payload: DescribeBody):
         from centurion_cli import profiles as profiles_mod
         canon = profiles_mod.normalize_profile_name(profile_name)
         if canon == "default":
-            from centurion_constants import get_hermes_home  # type: ignore
+            from centurion_constants import get_centurion_home  # type: ignore
             from pathlib import Path as _Path
-            profile_dir = _Path(get_hermes_home())
+            profile_dir = _Path(get_centurion_home())
         else:
             profile_dir = profiles_mod.get_profile_dir(canon)
         if not profile_dir.is_dir():
@@ -2071,7 +2071,7 @@ def get_orchestration_settings():
 
 @router.put("/orchestration")
 def set_orchestration_settings(payload: OrchestrationSettingsBody):
-    """Update the kanban orchestration knobs in ~/.hermes/config.yaml.
+    """Update the kanban orchestration knobs in ~/.centurion/config.yaml.
 
     Each field is optional — only fields explicitly passed are
     written. ``orchestrator_profile`` / ``default_assignee`` accept
@@ -2144,7 +2144,7 @@ def set_orchestration_settings(payload: OrchestrationSettingsBody):
 async def stream_events(ws: WebSocket):
     # Enforce the dashboard session token as a query param — browsers can't
     # set Authorization on a WS upgrade. This matches how the PTY bridge
-    # authenticates in hermes_cli/web_server.py.
+    # authenticates in centurion_cli/web_server.py.
     token = ws.query_params.get("token")
     if not _check_ws_token(token):
         await ws.close(code=http_status.WS_1008_POLICY_VIOLATION)

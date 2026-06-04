@@ -2,7 +2,7 @@
 
 Provider profiles can live in two places:
 
-1. Bundled plugins: ``plugins/model-providers/<name>/`` (shipped with hermes-agent)
+1. Bundled plugins: ``plugins/model-providers/<name>/`` (shipped with centurion-os)
 2. User plugins: ``$CENTURION_HOME/plugins/model-providers/<name>/``
 
 Each plugin directory contains:
@@ -91,9 +91,9 @@ def list_providers() -> list[ProviderProfile]:
 def _user_plugins_dir() -> Path | None:
     """Return ``$CENTURION_HOME/plugins/model-providers/`` if it exists."""
     try:
-        from centurion_constants import get_hermes_home
+        from centurion_constants import get_centurion_home
 
-        d = get_hermes_home() / "plugins" / "model-providers"
+        d = get_centurion_home() / "plugins" / "model-providers"
         return d if d.is_dir() else None
     except Exception:
         return None
@@ -116,7 +116,7 @@ def _import_plugin_dir(plugin_dir: Path, source: str) -> None:
     if source == "bundled":
         module_name = f"plugins.model_providers.{safe_name}"
     else:
-        module_name = f"_hermes_user_provider_{safe_name}"
+        module_name = f"_centurion_user_provider_{safe_name}"
 
     if module_name in sys.modules:
         return  # already imported
@@ -153,7 +153,7 @@ def _discover_providers() -> None:
         return
     _discovered = True
 
-    # 1. Bundled plugins — shipped with hermes-agent.
+    # 1. Bundled plugins — shipped with centurion-os.
     if _BUNDLED_PLUGINS_DIR.is_dir():
         for child in sorted(_BUNDLED_PLUGINS_DIR.iterdir()):
             if not child.is_dir() or child.name.startswith(("_", ".")):

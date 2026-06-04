@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.runtime_provider._detect_api_mode_for_url.
+"""Tests for centurion_cli.runtime_provider._detect_api_mode_for_url.
 
 The helper maps base URLs to api_modes for three cases:
   * api.openai.com  → codex_responses

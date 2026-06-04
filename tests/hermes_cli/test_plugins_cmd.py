@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.plugins_cmd — the ``hermes plugins`` CLI subcommand."""
+"""Tests for centurion_cli.plugins_cmd — the ``hermes plugins`` CLI subcommand."""
 
 from __future__ import annotations
 
@@ -240,7 +240,7 @@ class TestReadManifest:
 
     def test_invalid_yaml_returns_empty_and_logs(self, tmp_path, caplog):
         (tmp_path / "plugin.yaml").write_text(": : : bad yaml [[[")
-        with caplog.at_level(logging.WARNING, logger="hermes_cli.plugins_cmd"):
+        with caplog.at_level(logging.WARNING, logger="centurion_cli.plugins_cmd"):
             result = _read_manifest(tmp_path)
         assert result == {}
         assert any("Failed to read plugin.yaml" in r.message for r in caplog.records)
@@ -264,7 +264,7 @@ class TestCmdInstall:
         with pytest.raises(SystemExit):
             cmd_install("")
 
-    @patch("hermes_cli.plugins_cmd._resolve_git_url")
+    @patch("centurion_cli.plugins_cmd._resolve_git_url")
     def test_install_validates_identifier(self, mock_resolve):
         from centurion_cli.plugins_cmd import cmd_install
 
@@ -274,12 +274,12 @@ class TestCmdInstall:
             cmd_install("invalid")
         assert exc_info.value.code == 1
 
-    @patch("hermes_cli.plugins_cmd._display_after_install")
-    @patch("hermes_cli.plugins_cmd.shutil.move")
-    @patch("hermes_cli.plugins_cmd.shutil.rmtree")
-    @patch("hermes_cli.plugins_cmd._plugins_dir")
-    @patch("hermes_cli.plugins_cmd._read_manifest")
-    @patch("hermes_cli.plugins_cmd.subprocess.run")
+    @patch("centurion_cli.plugins_cmd._display_after_install")
+    @patch("centurion_cli.plugins_cmd.shutil.move")
+    @patch("centurion_cli.plugins_cmd.shutil.rmtree")
+    @patch("centurion_cli.plugins_cmd._plugins_dir")
+    @patch("centurion_cli.plugins_cmd._read_manifest")
+    @patch("centurion_cli.plugins_cmd.subprocess.run")
     def test_install_rejects_manifest_name_pointing_at_plugins_root(
         self,
         mock_run,
@@ -313,9 +313,9 @@ class TestCmdInstall:
 class TestCmdUpdate:
     """Test the update command."""
 
-    @patch("hermes_cli.plugins_cmd._sanitize_plugin_name")
-    @patch("hermes_cli.plugins_cmd._plugins_dir")
-    @patch("hermes_cli.plugins_cmd.subprocess.run")
+    @patch("centurion_cli.plugins_cmd._sanitize_plugin_name")
+    @patch("centurion_cli.plugins_cmd._plugins_dir")
+    @patch("centurion_cli.plugins_cmd.subprocess.run")
     def test_update_git_pull_success(self, mock_run, mock_plugins_dir, mock_sanitize):
         from centurion_cli.plugins_cmd import cmd_update
 
@@ -334,8 +334,8 @@ class TestCmdUpdate:
 
         mock_run.assert_called_once()
 
-    @patch("hermes_cli.plugins_cmd._sanitize_plugin_name")
-    @patch("hermes_cli.plugins_cmd._plugins_dir")
+    @patch("centurion_cli.plugins_cmd._sanitize_plugin_name")
+    @patch("centurion_cli.plugins_cmd._plugins_dir")
     def test_update_plugin_not_found(self, mock_plugins_dir, mock_sanitize):
         from centurion_cli.plugins_cmd import cmd_update
 
@@ -358,9 +358,9 @@ class TestCmdUpdate:
 class TestCmdRemove:
     """Test the remove command."""
 
-    @patch("hermes_cli.plugins_cmd._sanitize_plugin_name")
-    @patch("hermes_cli.plugins_cmd._plugins_dir")
-    @patch("hermes_cli.plugins_cmd.shutil.rmtree")
+    @patch("centurion_cli.plugins_cmd._sanitize_plugin_name")
+    @patch("centurion_cli.plugins_cmd._plugins_dir")
+    @patch("centurion_cli.plugins_cmd.shutil.rmtree")
     def test_remove_deletes_plugin(self, mock_rmtree, mock_plugins_dir, mock_sanitize):
         from centurion_cli.plugins_cmd import cmd_remove
 
@@ -373,8 +373,8 @@ class TestCmdRemove:
 
         mock_rmtree.assert_called_once_with(mock_target)
 
-    @patch("hermes_cli.plugins_cmd._sanitize_plugin_name")
-    @patch("hermes_cli.plugins_cmd._plugins_dir")
+    @patch("centurion_cli.plugins_cmd._sanitize_plugin_name")
+    @patch("centurion_cli.plugins_cmd._plugins_dir")
     def test_remove_plugin_not_found(self, mock_plugins_dir, mock_sanitize):
         from centurion_cli.plugins_cmd import cmd_remove
 
@@ -397,7 +397,7 @@ class TestCmdRemove:
 class TestCmdList:
     """Test the list command."""
 
-    @patch("hermes_cli.plugins_cmd._plugins_dir")
+    @patch("centurion_cli.plugins_cmd._plugins_dir")
     def test_list_empty_plugins_dir(self, mock_plugins_dir):
         from centurion_cli.plugins_cmd import cmd_list
 
@@ -407,8 +407,8 @@ class TestCmdList:
 
         cmd_list()
 
-    @patch("hermes_cli.plugins_cmd._plugins_dir")
-    @patch("hermes_cli.plugins_cmd._read_manifest")
+    @patch("centurion_cli.plugins_cmd._plugins_dir")
+    @patch("centurion_cli.plugins_cmd._read_manifest")
     def test_list_with_plugins(self, mock_read_manifest, mock_plugins_dir):
         from centurion_cli.plugins_cmd import cmd_list
 
@@ -458,7 +458,7 @@ class TestDiscoverAllPlugins:
         bundled.mkdir()
         user.mkdir()
         monkeypatch.setattr(
-            "hermes_cli.plugins.get_bundled_plugins_dir", lambda: bundled
+            "centurion_cli.plugins.get_bundled_plugins_dir", lambda: bundled
         )
         monkeypatch.setattr(plugins_cmd, "_plugins_dir", lambda: user)
         return bundled, user, lambda: {
@@ -528,7 +528,7 @@ class TestDiscoverAllPlugins:
 
     def test_user_memory_subdir_is_still_scanned(self, tmp_path, monkeypatch):
         """The memory/context_engine skip only applies to *bundled* — a user
-        plugin at ``~/.hermes/plugins/memory/<x>/`` should still be discovered
+        plugin at ``~/.centurion/plugins/memory/<x>/`` should still be discovered
         so the user can see what they installed."""
         bundled, user, discover = self._entries_by_key(tmp_path, monkeypatch)
         self._write_plugin(user, ["memory", "my-custom-store"])
@@ -588,7 +588,7 @@ class TestCopyExampleFiles:
 
         # Mock shutil.copy2 to raise an error
         with patch(
-            "hermes_cli.plugins_cmd.shutil.copy2",
+            "centurion_cli.plugins_cmd.shutil.copy2",
             side_effect=OSError("Permission denied"),
         ):
             # Should not raise, just warn
@@ -614,7 +614,7 @@ class TestPromptPluginEnvVars:
         from unittest.mock import MagicMock, patch
 
         console = MagicMock()
-        with patch("hermes_cli.config.get_env_value", return_value="already-set"):
+        with patch("centurion_cli.config.get_env_value", return_value="already-set"):
             _prompt_plugin_env_vars({"requires_env": ["MY_KEY"]}, console)
         # No prompt should appear — all vars are set
         console.print.assert_not_called()
@@ -629,9 +629,9 @@ class TestPromptPluginEnvVars:
             "requires_env": ["MY_API_KEY"],
         }
 
-        with patch("hermes_cli.config.get_env_value", return_value=None), \
+        with patch("centurion_cli.config.get_env_value", return_value=None), \
              patch("builtins.input", return_value="sk-test-123"), \
-             patch("hermes_cli.config.save_env_value") as mock_save:
+             patch("centurion_cli.config.save_env_value") as mock_save:
             _prompt_plugin_env_vars(manifest, console)
 
         mock_save.assert_called_once_with("MY_API_KEY", "sk-test-123")
@@ -653,9 +653,9 @@ class TestPromptPluginEnvVars:
             ],
         }
 
-        with patch("hermes_cli.config.get_env_value", return_value=None), \
+        with patch("centurion_cli.config.get_env_value", return_value=None), \
              patch("builtins.input", return_value="pk-lf-123"), \
-             patch("hermes_cli.config.save_env_value") as mock_save:
+             patch("centurion_cli.config.save_env_value") as mock_save:
             _prompt_plugin_env_vars(manifest, console)
 
         mock_save.assert_called_once_with("LANGFUSE_PUBLIC_KEY", "pk-lf-123")
@@ -673,9 +673,9 @@ class TestPromptPluginEnvVars:
             "requires_env": [{"name": "SECRET_KEY", "secret": True}],
         }
 
-        with patch("hermes_cli.config.get_env_value", return_value=None), \
-             patch("hermes_cli.plugins_cmd.masked_secret_prompt", return_value="s3cret") as mock_prompt, \
-             patch("hermes_cli.config.save_env_value"):
+        with patch("centurion_cli.config.get_env_value", return_value=None), \
+             patch("centurion_cli.plugins_cmd.masked_secret_prompt", return_value="s3cret") as mock_prompt, \
+             patch("centurion_cli.config.save_env_value"):
             _prompt_plugin_env_vars(manifest, console)
 
         mock_prompt.assert_called_once()
@@ -687,9 +687,9 @@ class TestPromptPluginEnvVars:
         console = MagicMock()
         manifest = {"name": "test", "requires_env": ["OPTIONAL_VAR"]}
 
-        with patch("hermes_cli.config.get_env_value", return_value=None), \
+        with patch("centurion_cli.config.get_env_value", return_value=None), \
              patch("builtins.input", return_value=""), \
-             patch("hermes_cli.config.save_env_value") as mock_save:
+             patch("centurion_cli.config.save_env_value") as mock_save:
             _prompt_plugin_env_vars(manifest, console)
 
         mock_save.assert_not_called()
@@ -701,9 +701,9 @@ class TestPromptPluginEnvVars:
         console = MagicMock()
         manifest = {"name": "test", "requires_env": ["KEY1", "KEY2"]}
 
-        with patch("hermes_cli.config.get_env_value", return_value=None), \
+        with patch("centurion_cli.config.get_env_value", return_value=None), \
              patch("builtins.input", side_effect=KeyboardInterrupt), \
-             patch("hermes_cli.config.save_env_value") as mock_save:
+             patch("centurion_cli.config.save_env_value") as mock_save:
             _prompt_plugin_env_vars(manifest, console)
 
         # Should not crash, and not save anything

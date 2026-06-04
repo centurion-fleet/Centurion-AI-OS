@@ -1,6 +1,6 @@
-"""CLI entry point for the hermes-agent ACP adapter.
+"""CLI entry point for the centurion-os ACP adapter.
 
-Loads environment variables from ``~/.hermes/.env``, configures logging
+Loads environment variables from ``~/.centurion/.env``, configures logging
 to write to stderr (so stdout is reserved for ACP JSON-RPC transport),
 and starts the ACP agent server.
 
@@ -8,18 +8,18 @@ Usage::
 
     python -m acp_adapter.entry
     # or
-    hermes acp
+    centurion acp
     # or
-    hermes-acp
+    centurion-acp
 """
 
-# IMPORTANT: hermes_bootstrap must be the very first import — UTF-8 stdio
-# on Windows.  No-op on POSIX.  See hermes_bootstrap.py for full rationale.
+# IMPORTANT: centurion_bootstrap must be the very first import — UTF-8 stdio
+# on Windows.  No-op on POSIX.  See centurion_bootstrap.py for full rationale.
 try:
     import centurion_bootstrap  # noqa: F401
 except ModuleNotFoundError:
-    # Graceful fallback when hermes_bootstrap isn't registered in the venv
-    # yet — happens during partial ``hermes update`` where git-reset landed
+    # Graceful fallback when centurion_bootstrap isn't registered in the venv
+    # yet — happens during partial ``centurion update`` where git-reset landed
     # new code but ``uv pip install -e .`` didn't finish.  Missing bootstrap
     # means UTF-8 stdio setup is skipped on Windows; POSIX is unaffected.
     pass
@@ -29,7 +29,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from centurion_constants import get_hermes_home
+from centurion_constants import get_centurion_home
 
 
 # Methods clients send as periodic liveness probes. They are not part of the
@@ -94,23 +94,23 @@ def _setup_logging() -> None:
 
 
 def _load_env() -> None:
-    """Load .env from CENTURION_HOME (default ``~/.hermes``)."""
-    from centurion_cli.env_loader import load_hermes_dotenv
+    """Load .env from CENTURION_HOME (default ``~/.centurion``)."""
+    from centurion_cli.env_loader import load_centurion_dotenv
 
-    hermes_home = get_hermes_home()
-    loaded = load_hermes_dotenv(hermes_home=hermes_home)
+    centurion_home = get_centurion_home()
+    loaded = load_centurion_dotenv(centurion_home=centurion_home)
     if loaded:
         for env_file in loaded:
             logging.getLogger(__name__).info("Loaded env from %s", env_file)
     else:
         logging.getLogger(__name__).info(
-            "No .env found at %s, using system env", hermes_home / ".env"
+            "No .env found at %s, using system env", centurion_home / ".env"
         )
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        prog="hermes-acp",
+        prog="centurion-acp",
         description="Run Hermes Agent as an ACP stdio server.",
     )
     parser.add_argument("--version", action="store_true", help="Print Hermes version and exit")
@@ -127,7 +127,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--setup-browser",
         action="store_true",
-        help="Install agent-browser + Playwright Chromium into ~/.hermes/node/ "
+        help="Install agent-browser + Playwright Chromium into ~/.centurion/node/ "
              "for browser tool support. Idempotent.",
     )
     parser.add_argument(
@@ -142,9 +142,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _print_version() -> None:
-    from centurion_cli import __version__ as hermes_version
+    from centurion_cli import __version__ as centurion_version
 
-    print(hermes_version)
+    print(centurion_version)
 
 
 def _run_check() -> None:
@@ -155,12 +155,12 @@ def _run_check() -> None:
 
 
 def _run_setup() -> None:
-    from centurion_cli.main import main as hermes_main
+    from centurion_cli.main import main as centurion_main
 
     old_argv = sys.argv[:]
     try:
-        sys.argv = [old_argv[0] if old_argv else "hermes", "model"]
-        hermes_main()
+        sys.argv = [old_argv[0] if old_argv else "centurion", "model"]
+        centurion_main()
     finally:
         sys.argv = old_argv
 
@@ -185,7 +185,7 @@ def _run_setup_browser(assume_yes: bool = False) -> int:
     """Bootstrap agent-browser + Chromium.
 
     Routes through dep_ensure -> install.{sh,ps1} --ensure, sharing code
-    with ``hermes postinstall`` and the runtime lazy installer.
+    with ``centurion postinstall`` and the runtime lazy installer.
 
     Returns 0 on success, 1 on failure.
     """
@@ -231,7 +231,7 @@ def main(argv: list[str] | None = None) -> None:
     _load_env()
 
     logger = logging.getLogger(__name__)
-    logger.info("Starting hermes-agent ACP adapter")
+    logger.info("Starting centurion-os ACP adapter")
 
     # Ensure the project root is on sys.path so ``from run_agent import AIAgent`` works
     project_root = str(Path(__file__).resolve().parent.parent)

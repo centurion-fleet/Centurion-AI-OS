@@ -34,7 +34,7 @@ import threading
 import time
 import urllib.request
 
-from centurion_constants import get_hermes_home
+from centurion_constants import get_centurion_home
 
 logger = logging.getLogger(__name__)
 
@@ -133,14 +133,14 @@ def _reset_spawn_warning_state() -> None:
 _MARKER_TTL = 86400  # 24 hours
 
 
-def _get_hermes_home() -> str:
+def _get_centurion_home() -> str:
     """Return the Hermes home directory, respecting CENTURION_HOME env var."""
-    return str(get_hermes_home())
+    return str(get_centurion_home())
 
 
 def _failure_marker_path() -> str:
     """Return the path to the install-failure marker file."""
-    return os.path.join(_get_hermes_home(), ".tirith-install-failed")
+    return os.path.join(_get_centurion_home(), ".tirith-install-failed")
 
 
 def _read_failure_reason() -> str | None:
@@ -206,9 +206,9 @@ def _clear_install_failed():
         pass
 
 
-def _hermes_bin_dir() -> str:
+def _centurion_bin_dir() -> str:
     """Return $CENTURION_HOME/bin, creating it if needed."""
-    d = os.path.join(_get_hermes_home(), "bin")
+    d = os.path.join(_get_centurion_home(), "bin")
     os.makedirs(d, exist_ok=True)
     return d
 
@@ -407,7 +407,7 @@ def _install_tirith(*, log_failures: bool = True) -> tuple[str | None, str]:
                 return None, "binary_not_in_archive"
 
         src = os.path.join(tmpdir, "tirith")
-        dest = os.path.join(_hermes_bin_dir(), "tirith")
+        dest = os.path.join(_centurion_bin_dir(), "tirith")
         try:
             shutil.move(src, dest)
         except OSError:
@@ -497,7 +497,7 @@ def _resolve_tirith_path(configured_path: str) -> str:
         _clear_install_failed()
         return found
 
-    hermes_bin = os.path.join(_hermes_bin_dir(), "tirith")
+    hermes_bin = os.path.join(_centurion_bin_dir(), "tirith")
     if os.path.isfile(hermes_bin) and os.access(hermes_bin, os.X_OK):
         _resolved_path = hermes_bin
         _install_failure_reason = ""
@@ -561,7 +561,7 @@ def _background_install(*, log_failures: bool = True):
             _install_failure_reason = ""
             return
 
-        hermes_bin = os.path.join(_hermes_bin_dir(), "tirith")
+        hermes_bin = os.path.join(_centurion_bin_dir(), "tirith")
         if os.path.isfile(hermes_bin) and os.access(hermes_bin, os.X_OK):
             _resolved_path = hermes_bin
             _install_failure_reason = ""
@@ -631,7 +631,7 @@ def ensure_installed(*, log_failures: bool = True):
         _clear_install_failed()
         return found
 
-    hermes_bin = os.path.join(_hermes_bin_dir(), "tirith")
+    hermes_bin = os.path.join(_centurion_bin_dir(), "tirith")
     if os.path.isfile(hermes_bin) and os.access(hermes_bin, os.X_OK):
         _resolved_path = hermes_bin
         _install_failure_reason = ""

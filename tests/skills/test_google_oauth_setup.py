@@ -259,66 +259,66 @@ class TestExchangeAuthCode:
 
 
 class TestHermesConstantsFallback:
-    """Tests for _hermes_home.py fallback when hermes_constants is unavailable."""
+    """Tests for _centurion_home.py fallback when hermes_constants is unavailable."""
 
     HELPER_PATH = (
         Path(__file__).resolve().parents[2]
-        / "skills/productivity/google-workspace/scripts/_hermes_home.py"
+        / "skills/productivity/google-workspace/scripts/_centurion_home.py"
     )
 
     def _load_helper(self, monkeypatch):
-        """Load _hermes_home.py with hermes_constants blocked."""
+        """Load _centurion_home.py with hermes_constants blocked."""
         monkeypatch.setitem(sys.modules, "hermes_constants", None)
-        spec = importlib.util.spec_from_file_location("_hermes_home_test", self.HELPER_PATH)
+        spec = importlib.util.spec_from_file_location("_centurion_home_test", self.HELPER_PATH)
         module = importlib.util.module_from_spec(spec)
         assert spec.loader is not None
         spec.loader.exec_module(module)
         return module
 
-    def test_fallback_uses_hermes_home_env_var(self, monkeypatch, tmp_path):
+    def test_fallback_uses_centurion_home_env_var(self, monkeypatch, tmp_path):
         """When hermes_constants is missing, CENTURION_HOME comes from env var."""
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path / "custom-hermes"))
         module = self._load_helper(monkeypatch)
-        assert module.get_hermes_home() == tmp_path / "custom-hermes"
+        assert module.get_centurion_home() == tmp_path / "custom-hermes"
 
     def test_fallback_defaults_to_dot_hermes(self, monkeypatch):
-        """When hermes_constants is missing and CENTURION_HOME unset, default to ~/.hermes."""
+        """When hermes_constants is missing and CENTURION_HOME unset, default to ~/.centurion."""
         monkeypatch.delenv("CENTURION_HOME", raising=False)
         module = self._load_helper(monkeypatch)
-        assert module.get_hermes_home() == Path.home() / ".centurion"
+        assert module.get_centurion_home() == Path.home() / ".centurion"
 
-    def test_fallback_ignores_empty_hermes_home(self, monkeypatch):
+    def test_fallback_ignores_empty_centurion_home(self, monkeypatch):
         """Empty/whitespace CENTURION_HOME is treated as unset."""
         monkeypatch.setenv("CENTURION_HOME", "  ")
         module = self._load_helper(monkeypatch)
-        assert module.get_hermes_home() == Path.home() / ".centurion"
+        assert module.get_centurion_home() == Path.home() / ".centurion"
 
-    def test_fallback_display_hermes_home_shortens_path(self, monkeypatch):
-        """Fallback display_hermes_home() uses ~/ shorthand like the real one."""
+    def test_fallback_display_centurion_home_shortens_path(self, monkeypatch):
+        """Fallback display_centurion_home() uses ~/ shorthand like the real one."""
         monkeypatch.delenv("CENTURION_HOME", raising=False)
         module = self._load_helper(monkeypatch)
-        assert module.display_hermes_home() == "~/.hermes"
+        assert module.display_centurion_home() == "~/.centurion"
 
-    def test_fallback_display_hermes_home_profile_path(self, monkeypatch):
-        """Fallback display_hermes_home() handles profile paths under ~/."""
+    def test_fallback_display_centurion_home_profile_path(self, monkeypatch):
+        """Fallback display_centurion_home() handles profile paths under ~/."""
         monkeypatch.setenv("CENTURION_HOME", str(Path.home() / ".hermes/profiles/coder"))
         module = self._load_helper(monkeypatch)
-        assert module.display_hermes_home() == "~/.hermes/profiles/coder"
+        assert module.display_centurion_home() == "~/.centurion/profiles/coder"
 
-    def test_fallback_display_hermes_home_custom_path(self, monkeypatch):
-        """Fallback display_hermes_home() returns full path for non-home locations."""
+    def test_fallback_display_centurion_home_custom_path(self, monkeypatch):
+        """Fallback display_centurion_home() returns full path for non-home locations."""
         monkeypatch.setenv("CENTURION_HOME", "/opt/hermes-custom")
         module = self._load_helper(monkeypatch)
-        assert module.display_hermes_home() == "/opt/hermes-custom"
+        assert module.display_centurion_home() == "/opt/hermes-custom"
 
-    def test_delegates_to_hermes_constants_when_available(self):
-        """When hermes_constants IS importable, _hermes_home delegates to it."""
+    def test_delegates_to_centurion_constants_when_available(self):
+        """When hermes_constants IS importable, _centurion_home delegates to it."""
         spec = importlib.util.spec_from_file_location(
-            "_hermes_home_happy", self.HELPER_PATH
+            "_centurion_home_happy", self.HELPER_PATH
         )
         module = importlib.util.module_from_spec(spec)
         assert spec.loader is not None
         spec.loader.exec_module(module)
         import centurion_constants
-        assert module.get_hermes_home is hermes_constants.get_hermes_home
-        assert module.display_hermes_home is hermes_constants.display_hermes_home
+        assert module.get_centurion_home is hermes_constants.get_centurion_home
+        assert module.display_centurion_home is hermes_constants.display_centurion_home

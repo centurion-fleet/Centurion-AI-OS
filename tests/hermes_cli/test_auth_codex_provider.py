@@ -1,4 +1,4 @@
-"""Tests for Codex auth — tokens stored in Hermes auth store (~/.hermes/auth.json)."""
+"""Tests for Codex auth — tokens stored in Hermes auth store (~/.centurion/auth.json)."""
 
 import json
 import time
@@ -25,9 +25,9 @@ from centurion_cli.auth import (
 )
 
 
-def _setup_hermes_auth(hermes_home: Path, *, access_token: str = "access", refresh_token: str = "refresh"):
+def _setup_centurion_auth(centurion_home: Path, *, access_token: str = "access", refresh_token: str = "refresh"):
     """Write Codex tokens into the Hermes auth store."""
-    hermes_home.mkdir(parents=True, exist_ok=True)
+    centurion_home.mkdir(parents=True, exist_ok=True)
     auth_store = {
         "version": 1,
         "active_provider": "openai-codex",
@@ -42,7 +42,7 @@ def _setup_hermes_auth(hermes_home: Path, *, access_token: str = "access", refre
             },
         },
     }
-    auth_file = hermes_home / "auth.json"
+    auth_file = centurion_home / "auth.json"
     auth_file.write_text(json.dumps(auth_store, indent=2))
     return auth_file
 
@@ -54,9 +54,9 @@ def _jwt_with_exp(exp_epoch: int) -> str:
 
 
 def test_read_codex_tokens_success(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    _setup_hermes_auth(hermes_home)
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    centurion_home = tmp_path / "centurion"
+    _setup_centurion_auth(centurion_home)
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     data = _read_codex_tokens()
     assert data["tokens"]["access_token"] == "access"
@@ -64,11 +64,11 @@ def test_read_codex_tokens_success(tmp_path, monkeypatch):
 
 
 def test_read_codex_tokens_missing(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
+    centurion_home = tmp_path / "centurion"
+    centurion_home.mkdir(parents=True, exist_ok=True)
     # Empty auth store
-    (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    (centurion_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     with pytest.raises(AuthError) as exc:
         _read_codex_tokens()
@@ -76,9 +76,9 @@ def test_read_codex_tokens_missing(tmp_path, monkeypatch):
 
 
 def test_resolve_codex_runtime_credentials_missing_access_token(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    _setup_hermes_auth(hermes_home, access_token="")
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    centurion_home = tmp_path / "centurion"
+    _setup_centurion_auth(centurion_home, access_token="")
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     with pytest.raises(AuthError) as exc:
         resolve_codex_runtime_credentials()
@@ -87,10 +87,10 @@ def test_resolve_codex_runtime_credentials_missing_access_token(tmp_path, monkey
 
 
 def test_resolve_codex_runtime_credentials_refreshes_expiring_token(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
+    centurion_home = tmp_path / "centurion"
     expiring_token = _jwt_with_exp(int(time.time()) - 10)
-    _setup_hermes_auth(hermes_home, access_token=expiring_token, refresh_token="refresh-old")
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    _setup_centurion_auth(centurion_home, access_token=expiring_token, refresh_token="refresh-old")
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     called = {"count": 0}
 
@@ -98,7 +98,7 @@ def test_resolve_codex_runtime_credentials_refreshes_expiring_token(tmp_path, mo
         called["count"] += 1
         return {"access_token": "access-new", "refresh_token": "refresh-new"}
 
-    monkeypatch.setattr("hermes_cli.auth._refresh_codex_auth_tokens", _fake_refresh)
+    monkeypatch.setattr("centurion_cli.auth._refresh_codex_auth_tokens", _fake_refresh)
 
     resolved = resolve_codex_runtime_credentials()
 
@@ -107,9 +107,9 @@ def test_resolve_codex_runtime_credentials_refreshes_expiring_token(tmp_path, mo
 
 
 def test_resolve_codex_runtime_credentials_force_refresh(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    _setup_hermes_auth(hermes_home, access_token="access-current", refresh_token="refresh-old")
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    centurion_home = tmp_path / "centurion"
+    _setup_centurion_auth(centurion_home, access_token="access-current", refresh_token="refresh-old")
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     called = {"count": 0}
 
@@ -117,7 +117,7 @@ def test_resolve_codex_runtime_credentials_force_refresh(tmp_path, monkeypatch):
         called["count"] += 1
         return {"access_token": "access-forced", "refresh_token": "refresh-new"}
 
-    monkeypatch.setattr("hermes_cli.auth._refresh_codex_auth_tokens", _fake_refresh)
+    monkeypatch.setattr("centurion_cli.auth._refresh_codex_auth_tokens", _fake_refresh)
 
     resolved = resolve_codex_runtime_credentials(force_refresh=True, refresh_if_expiring=False)
 
@@ -132,10 +132,10 @@ def test_resolve_provider_explicit_codex_does_not_fallback(monkeypatch):
 
 
 def test_save_codex_tokens_roundtrip(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    hermes_home.mkdir(parents=True, exist_ok=True)
-    (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    centurion_home = tmp_path / "centurion"
+    centurion_home.mkdir(parents=True, exist_ok=True)
+    (centurion_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     _save_codex_tokens({"access_token": "at123", "refresh_token": "rt456"})
     data = _read_codex_tokens()
@@ -165,13 +165,13 @@ def test_import_codex_cli_tokens_missing(tmp_path, monkeypatch):
 
 def test_codex_tokens_not_written_to_shared_file(tmp_path, monkeypatch):
     """Verify _save_codex_tokens writes only to Hermes auth store, not ~/.codex/."""
-    hermes_home = tmp_path / "hermes"
+    centurion_home = tmp_path / "centurion"
     codex_home = tmp_path / "codex-cli"
-    hermes_home.mkdir(parents=True, exist_ok=True)
+    centurion_home.mkdir(parents=True, exist_ok=True)
     codex_home.mkdir(parents=True, exist_ok=True)
 
-    (hermes_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+    (centurion_home / "auth.json").write_text(json.dumps({"version": 1, "providers": {}}))
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
     monkeypatch.setenv("CODEX_HOME", str(codex_home))
 
     _save_codex_tokens({"access_token": "hermes-at", "refresh_token": "hermes-rt"})
@@ -184,10 +184,10 @@ def test_codex_tokens_not_written_to_shared_file(tmp_path, monkeypatch):
     assert data["tokens"]["access_token"] == "hermes-at"
 
 
-def test_resolve_returns_hermes_auth_store_source(tmp_path, monkeypatch):
-    hermes_home = tmp_path / "hermes"
-    _setup_hermes_auth(hermes_home)
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_home))
+def test_resolve_returns_centurion_auth_store_source(tmp_path, monkeypatch):
+    centurion_home = tmp_path / "centurion"
+    _setup_centurion_auth(centurion_home)
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
 
     creds = resolve_codex_runtime_credentials()
     assert creds["source"] == "hermes-auth-store"
@@ -225,7 +225,7 @@ def _patch_httpx(monkeypatch, response):
     def _factory(*args, **kwargs):
         return _StubHTTPClient(response)
 
-    monkeypatch.setattr("hermes_cli.auth.httpx.Client", _factory)
+    monkeypatch.setattr("centurion_cli.auth.httpx.Client", _factory)
 
 
 def test_refresh_parses_openai_nested_error_shape_refresh_token_reused(monkeypatch):
@@ -319,15 +319,15 @@ def test_login_openai_codex_force_new_login_skips_existing_reuse_prompt(monkeypa
     called = {"device_login": 0}
 
     monkeypatch.setattr(
-        "hermes_cli.auth.resolve_codex_runtime_credentials",
+        "centurion_cli.auth.resolve_codex_runtime_credentials",
         lambda: {"base_url": DEFAULT_CODEX_BASE_URL},
     )
     monkeypatch.setattr(
-        "hermes_cli.auth._import_codex_cli_tokens",
+        "centurion_cli.auth._import_codex_cli_tokens",
         lambda: {"access_token": "cli-at", "refresh_token": "cli-rt"},
     )
     monkeypatch.setattr(
-        "hermes_cli.auth._codex_device_code_login",
+        "centurion_cli.auth._codex_device_code_login",
         lambda: {
             "tokens": {"access_token": "fresh-at", "refresh_token": "fresh-rt"},
             "last_refresh": "2026-04-01T00:00:00Z",
@@ -340,8 +340,8 @@ def test_login_openai_codex_force_new_login_skips_existing_reuse_prompt(monkeypa
         called["tokens"] = dict(tokens)
         called["last_refresh"] = last_refresh
 
-    monkeypatch.setattr("hermes_cli.auth._save_codex_tokens", _fake_save)
-    monkeypatch.setattr("hermes_cli.auth._update_config_for_provider", lambda *args, **kwargs: "/tmp/config.yaml")
+    monkeypatch.setattr("centurion_cli.auth._save_codex_tokens", _fake_save)
+    monkeypatch.setattr("centurion_cli.auth._update_config_for_provider", lambda *args, **kwargs: "/tmp/config.yaml")
     monkeypatch.setattr(
         "builtins.input",
         lambda prompt="": (_ for _ in ()).throw(AssertionError("force_new_login should not prompt for reuse/import")),

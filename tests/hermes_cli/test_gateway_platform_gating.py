@@ -1,4 +1,4 @@
-"""Host-specific gating in ``hermes_cli.gateway._all_platforms()``.
+"""Host-specific gating in ``centurion_cli.gateway._all_platforms()``.
 
 Some messaging platforms can't function on every host. The gate lives
 in one place — ``_all_platforms()`` — so the setup wizard, the curses

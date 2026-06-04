@@ -1,4 +1,4 @@
-"""Regression tests for the OAuth dispatcher in hermes_cli.web_server.
+"""Regression tests for the OAuth dispatcher in centurion_cli.web_server.
 
 Bug history (2026-05-09): the `_OAUTH_PROVIDER_CATALOG` had two entries
 flagged ``flow: "pkce"`` — anthropic and minimax-oauth — and the
@@ -70,13 +70,13 @@ def test_minimax_login_does_not_launch_anthropic_flow():
         "state": "stub-state",
     }
     with patch(
-        "hermes_cli.auth._minimax_request_user_code",
+        "centurion_cli.auth._minimax_request_user_code",
         return_value=fake_user_code_resp,
     ), patch(
-        "hermes_cli.auth._minimax_pkce_pair",
+        "centurion_cli.auth._minimax_pkce_pair",
         return_value=("verifier-stub", "challenge-stub", "stub-state"),
     ), patch(
-        "hermes_cli.web_server._minimax_poller",
+        "centurion_cli.web_server._minimax_poller",
         return_value=None,
     ):
         resp = client.post(
@@ -232,7 +232,7 @@ def test_minimax_dashboard_poller_accepts_absolute_ms_expired_in():
 
     try:
         with patch(
-            "hermes_cli.auth._minimax_poll_token",
+            "centurion_cli.auth._minimax_poll_token",
             return_value={
                 "status": "success",
                 "access_token": "access",
@@ -241,7 +241,7 @@ def test_minimax_dashboard_poller_accepts_absolute_ms_expired_in():
                 "token_type": "Bearer",
             },
         ), patch(
-            "hermes_cli.auth._minimax_save_auth_state",
+            "centurion_cli.auth._minimax_save_auth_state",
             side_effect=lambda state: captured_state.update(state),
         ):
             ws._minimax_poller(session_id)
@@ -262,7 +262,7 @@ def test_anthropic_pkce_branch_still_works():
         "expires_in": 600,
     }
     with patch(
-        "hermes_cli.web_server._start_anthropic_pkce",
+        "centurion_cli.web_server._start_anthropic_pkce",
         return_value=fake_anthropic_response,
     ):
         resp = client.post(

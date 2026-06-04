@@ -1,4 +1,4 @@
-"""Tests for MiniMax OAuth provider (hermes_cli/auth.py).
+"""Tests for MiniMax OAuth provider (centurion_cli/auth.py).
 
 Covers:
 - PKCE pair generation (S256 challenge)
@@ -373,7 +373,7 @@ def test_refresh_updates_access_token():
         mock_client_class.return_value = mock_client_instance
 
         # Patch _minimax_save_auth_state to avoid touching the auth store
-        with patch("hermes_cli.auth._minimax_save_auth_state"):
+        with patch("centurion_cli.auth._minimax_save_auth_state"):
             result = _refresh_minimax_oauth_state(state)
 
     assert result["access_token"] == "new-access"
@@ -411,7 +411,7 @@ def test_refresh_updates_access_token_absolute_ms_expired_in():
         mock_client_instance.post.return_value = mock_resp
         mock_client_class.return_value = mock_client_instance
 
-        with patch("hermes_cli.auth._minimax_save_auth_state"):
+        with patch("centurion_cli.auth._minimax_save_auth_state"):
             result = _refresh_minimax_oauth_state(state)
 
     assert result["access_token"] == "new-access"
@@ -461,7 +461,7 @@ def test_refresh_reuse_triggers_relogin_required():
 
 def test_resolve_credentials_requires_login():
     """When no state is stored, resolve_minimax_oauth_runtime_credentials raises."""
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=None):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=None):
         with pytest.raises(AuthError) as exc_info:
             resolve_minimax_oauth_runtime_credentials()
 
@@ -504,9 +504,9 @@ def test_resolve_credentials_quarantines_dead_tokens_on_terminal_refresh_failure
             relogin_required=True,
         )
 
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=stale_state), \
-         patch("hermes_cli.auth._refresh_minimax_oauth_state", side_effect=_terminal_refresh), \
-         patch("hermes_cli.auth._minimax_save_auth_state", side_effect=_capture_save):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=stale_state), \
+         patch("centurion_cli.auth._refresh_minimax_oauth_state", side_effect=_terminal_refresh), \
+         patch("centurion_cli.auth._minimax_save_auth_state", side_effect=_capture_save):
         with pytest.raises(AuthError) as exc_info:
             resolve_minimax_oauth_runtime_credentials()
 
@@ -562,9 +562,9 @@ def test_resolve_credentials_does_not_quarantine_on_transient_refresh_failure():
             relogin_required=False,
         )
 
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=stale_state), \
-         patch("hermes_cli.auth._refresh_minimax_oauth_state", side_effect=_transient_refresh), \
-         patch("hermes_cli.auth._minimax_save_auth_state", side_effect=lambda s: saved_states.append(dict(s))):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=stale_state), \
+         patch("centurion_cli.auth._refresh_minimax_oauth_state", side_effect=_transient_refresh), \
+         patch("centurion_cli.auth._minimax_save_auth_state", side_effect=lambda s: saved_states.append(dict(s))):
         with pytest.raises(AuthError) as exc_info:
             resolve_minimax_oauth_runtime_credentials()
 
@@ -604,7 +604,7 @@ def test_minimax_oauth_alias_resolves():
 # ---------------------------------------------------------------------------
 
 def test_get_minimax_oauth_auth_status_not_logged_in():
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=None):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=None):
         status = get_minimax_oauth_auth_status()
 
     assert status["logged_in"] is False
@@ -622,7 +622,7 @@ def test_get_minimax_oauth_auth_status_logged_in():
         "region": "global",
     }
 
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=state):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=state):
         status = get_minimax_oauth_auth_status()
 
     assert status["logged_in"] is True
@@ -636,7 +636,7 @@ def test_generic_auth_status_dispatches_minimax_oauth():
         "region": "global",
     }
 
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=state):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=state):
         status = get_auth_status("minimax-oauth")
 
     assert status["logged_in"] is True
@@ -667,7 +667,7 @@ def test_token_provider_returns_current_access_token_when_fresh():
 
     provider = build_minimax_oauth_token_provider()
 
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=state), \
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=state), \
          patch("httpx.Client") as mock_client_class:
         token = provider()
         # No network call should happen — token is fresh.
@@ -699,9 +699,9 @@ def test_token_provider_refreshes_when_near_expiry():
 
     provider = build_minimax_oauth_token_provider()
 
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=state), \
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=state), \
          patch("httpx.Client") as mock_client_class, \
-         patch("hermes_cli.auth._minimax_save_auth_state"):
+         patch("centurion_cli.auth._minimax_save_auth_state"):
         mock_instance = MagicMock()
         mock_instance.__enter__ = MagicMock(return_value=mock_instance)
         mock_instance.__exit__ = MagicMock(return_value=False)
@@ -738,7 +738,7 @@ def test_token_provider_rereads_state_each_call():
     ]
 
     provider = build_minimax_oauth_token_provider()
-    with patch("hermes_cli.auth.get_provider_auth_state", side_effect=states):
+    with patch("centurion_cli.auth.get_provider_auth_state", side_effect=states):
         first = provider()
         second = provider()
 
@@ -751,7 +751,7 @@ def test_token_provider_raises_not_logged_in_when_state_missing():
     from centurion_cli.auth import build_minimax_oauth_token_provider
 
     provider = build_minimax_oauth_token_provider()
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=None):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=None):
         with pytest.raises(AuthError) as exc_info:
             provider()
 
@@ -781,10 +781,10 @@ def test_token_provider_quarantines_state_on_terminal_refresh():
     saved_states: list[dict] = []
 
     provider = build_minimax_oauth_token_provider()
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=state), \
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=state), \
          patch("httpx.Client") as mock_client_class, \
          patch(
-             "hermes_cli.auth._minimax_save_auth_state",
+             "centurion_cli.auth._minimax_save_auth_state",
              side_effect=lambda s: saved_states.append(dict(s)),
          ):
         mock_instance = MagicMock()
@@ -817,7 +817,7 @@ def test_resolve_returns_callable_when_as_token_provider_true():
         "expires_at": _future_iso(3600),
     }
 
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=state):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=state):
         creds = resolve_minimax_oauth_runtime_credentials(as_token_provider=True)
 
     assert callable(creds["api_key"])
@@ -836,7 +836,7 @@ def test_resolve_returns_string_by_default():
         "expires_at": _future_iso(3600),
     }
 
-    with patch("hermes_cli.auth.get_provider_auth_state", return_value=state):
+    with patch("centurion_cli.auth.get_provider_auth_state", return_value=state):
         creds = resolve_minimax_oauth_runtime_credentials()
 
     assert creds["api_key"] == "tok"

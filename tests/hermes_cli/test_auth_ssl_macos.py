@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.auth._default_verify platform-aware fallback.
+"""Tests for centurion_cli.auth._default_verify platform-aware fallback.
 
 On macOS with Homebrew Python, the system OpenSSL cannot locate the
 system trust store, so we explicitly load certifi's bundle. On other

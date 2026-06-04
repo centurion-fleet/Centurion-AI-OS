@@ -22,11 +22,11 @@ def test_cli_skills_install_yes_sets_skip_confirm(monkeypatch):
         captured["force"] = args.force
         captured["yes"] = args.yes
 
-    monkeypatch.setattr("hermes_cli.skills_hub.skills_command", fake_skills_command)
+    monkeypatch.setattr("centurion_cli.skills_hub.skills_command", fake_skills_command)
     monkeypatch.setattr(
         sys,
         "argv",
-        ["hermes", "skills", "install", "official/email/agentmail", "--yes"],
+        ["centurion", "skills", "install", "official/email/agentmail", "--yes"],
     )
 
     main()
@@ -46,11 +46,11 @@ def test_cli_skills_install_y_alias(monkeypatch):
         captured["yes"] = args.yes
         captured["force"] = args.force
 
-    monkeypatch.setattr("hermes_cli.skills_hub.skills_command", fake_skills_command)
+    monkeypatch.setattr("centurion_cli.skills_hub.skills_command", fake_skills_command)
     monkeypatch.setattr(
         sys,
         "argv",
-        ["hermes", "skills", "install", "test/skill", "-y"],
+        ["centurion", "skills", "install", "test/skill", "-y"],
     )
 
     main()
@@ -69,11 +69,11 @@ def test_cli_skills_install_force_sets_force(monkeypatch):
         captured["force"] = args.force
         captured["yes"] = args.yes
 
-    monkeypatch.setattr("hermes_cli.skills_hub.skills_command", fake_skills_command)
+    monkeypatch.setattr("centurion_cli.skills_hub.skills_command", fake_skills_command)
     monkeypatch.setattr(
         sys,
         "argv",
-        ["hermes", "skills", "install", "test/skill", "--force"],
+        ["centurion", "skills", "install", "test/skill", "--force"],
     )
 
     main()
@@ -92,11 +92,11 @@ def test_cli_skills_install_force_and_yes_together(monkeypatch):
         captured["force"] = args.force
         captured["yes"] = args.yes
 
-    monkeypatch.setattr("hermes_cli.skills_hub.skills_command", fake_skills_command)
+    monkeypatch.setattr("centurion_cli.skills_hub.skills_command", fake_skills_command)
     monkeypatch.setattr(
         sys,
         "argv",
-        ["hermes", "skills", "install", "test/skill", "--force", "--yes"],
+        ["centurion", "skills", "install", "test/skill", "--force", "--yes"],
     )
 
     main()
@@ -115,11 +115,11 @@ def test_cli_skills_install_no_flags(monkeypatch):
         captured["force"] = args.force
         captured["yes"] = args.yes
 
-    monkeypatch.setattr("hermes_cli.skills_hub.skills_command", fake_skills_command)
+    monkeypatch.setattr("centurion_cli.skills_hub.skills_command", fake_skills_command)
     monkeypatch.setattr(
         sys,
         "argv",
-        ["hermes", "skills", "install", "test/skill"],
+        ["centurion", "skills", "install", "test/skill"],
     )
 
     main()

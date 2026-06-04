@@ -1,4 +1,4 @@
-"""Tests for the kanban CLI surface (hermes_cli.kanban)."""
+"""Tests for the kanban CLI surface (centurion_cli.kanban)."""
 
 from __future__ import annotations
 

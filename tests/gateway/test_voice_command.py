@@ -210,7 +210,7 @@ class TestHandleVoiceCommand:
 
         fake_cfg = {"voice": {"auto_tts": True}}
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "centurion_cli.config.load_config",
             lambda: fake_cfg,
         )
         adapter = SimpleNamespace(

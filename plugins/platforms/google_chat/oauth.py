@@ -75,17 +75,17 @@ logger = logging.getLogger("gateway.platforms.google_chat_user_oauth")
 # Use the project's CENTURION_HOME helper so the token follows the user's
 # profile (e.g. tests can override via CENTURION_HOME=/tmp/...).
 try:
-    from centurion_constants import display_hermes_home, get_hermes_home
+    from centurion_constants import display_centurion_home, get_centurion_home
 except (ModuleNotFoundError, ImportError):
     # Fallback for environments where hermes_constants isn't importable
     # (mirrors the same fallback used by the google-workspace skill's
-    # _hermes_home.py shim).
-    def get_hermes_home() -> Path:
+    # _centurion_home.py shim).
+    def get_centurion_home() -> Path:
         val = os.environ.get("CENTURION_HOME", "").strip()
         return Path(val) if val else Path.home() / ".centurion"
 
-    def display_hermes_home() -> str:
-        home = get_hermes_home()
+    def display_centurion_home() -> str:
+        home = get_centurion_home()
         try:
             return "~/" + str(home.relative_to(Path.home()))
         except ValueError:
@@ -94,20 +94,20 @@ except (ModuleNotFoundError, ImportError):
 from utils import atomic_replace
 
 
-def _hermes_home() -> Path:
+def _centurion_home() -> Path:
     """Resolve CENTURION_HOME at call time (NOT module import).
 
     Tests and ``CENTURION_HOME=...`` env overrides need this to be late-
     binding. If we cached the path at import time, switching profiles
     or tweaking env vars in tests would silently keep using the old
     path."""
-    return get_hermes_home()
+    return get_centurion_home()
 
 
 # Filesystem-safe key: lowercase, allow ``[a-z0-9._-@]``, replace anything
 # else with ``_``. ``ramon.fernandez@nttdata.com`` stays human-readable
 # (``ramon.fernandez@nttdata.com.json``) which makes admin debugging by
-# ``ls ~/.hermes/google_chat_user_tokens/`` trivial.
+# ``ls ~/.centurion/google_chat_user_tokens/`` trivial.
 _EMAIL_FS_RE = re.compile(r"[^a-z0-9._@-]+")
 
 
@@ -117,19 +117,19 @@ def _sanitize_email(email: str) -> str:
 
 
 def _legacy_token_path() -> Path:
-    return _hermes_home() / "google_chat_user_token.json"
+    return _centurion_home() / "google_chat_user_token.json"
 
 
 def _user_tokens_dir() -> Path:
-    return _hermes_home() / "google_chat_user_tokens"
+    return _centurion_home() / "google_chat_user_tokens"
 
 
 def _legacy_pending_path() -> Path:
-    return _hermes_home() / "google_chat_user_oauth_pending.json"
+    return _centurion_home() / "google_chat_user_oauth_pending.json"
 
 
 def _user_pending_dir() -> Path:
-    return _hermes_home() / "google_chat_user_oauth_pending"
+    return _centurion_home() / "google_chat_user_oauth_pending"
 
 
 def _token_path(email: Optional[str] = None) -> Path:
@@ -140,7 +140,7 @@ def _token_path(email: Optional[str] = None) -> Path:
 
 
 def _client_secret_path() -> Path:
-    return _hermes_home() / "google_chat_user_client_secret.json"
+    return _centurion_home() / "google_chat_user_client_secret.json"
 
 
 def _pending_auth_path(email: Optional[str] = None) -> Path:
@@ -199,7 +199,7 @@ def load_user_credentials(email: Optional[str] = None) -> Optional[Any]:
     except ImportError:
         logger.warning(
             "[google_chat_user_oauth] google-auth not installed; user-OAuth "
-            "attachment delivery is disabled. Install hermes-agent[google_chat]."
+            "attachment delivery is disabled. Install centurion-os[google_chat]."
         )
         return None
 
@@ -388,7 +388,7 @@ def install_deps() -> bool:
     except subprocess.CalledProcessError as exc:
         print(f"ERROR: Failed to install dependencies: {exc}")
         print("Or install via the optional extra:")
-        print("  pip install 'hermes-agent[google_chat]'")
+        print("  pip install 'centurion-os[google_chat]'")
         return False
 
 
@@ -582,9 +582,9 @@ def exchange_auth_code(code: str, email: Optional[str] = None) -> None:
 
     print(f"OK: Authenticated. Token saved to {token_path}")
     rel_label = (
-        f"{display_hermes_home()}/google_chat_user_tokens/{_sanitize_email(email)}.json"
+        f"{display_centurion_home()}/google_chat_user_tokens/{_sanitize_email(email)}.json"
         if email
-        else f"{display_hermes_home()}/google_chat_user_token.json"
+        else f"{display_centurion_home()}/google_chat_user_token.json"
     )
     print(f"Profile path: {rel_label}")
 

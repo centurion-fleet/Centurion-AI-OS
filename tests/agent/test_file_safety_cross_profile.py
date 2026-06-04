@@ -6,8 +6,8 @@ depth, NOT a security boundary — but it prevents the agent from silently
 corrupting a profile that belongs to a different session.
 
 Reference: May 2026 incident — a hermes-security profile session
-accidentally edited skills under both ~/.hermes/profiles/hermes-security/skills/
-AND ~/.hermes/skills/ (the default profile's skills), realizing only
+accidentally edited skills under both ~/.centurion/profiles/hermes-security/skills/
+AND ~/.centurion/skills/ (the default profile's skills), realizing only
 afterwards that the second path belonged to a different profile.
 """
 from __future__ import annotations
@@ -59,11 +59,11 @@ def fake_hermes(tmp_path, monkeypatch):
     # Monkeypatch the resolver functions used by file_safety so each test
     # can choose which profile is "active".
     import centurion_constants
-    monkeypatch.setattr(hermes_constants, "get_default_hermes_root", lambda: root)
+    monkeypatch.setattr(hermes_constants, "get_default_centurion_root", lambda: root)
 
     # The reloads below ensure get_cross_profile_warning/classify see the patched root.
     import agent.file_safety as fs
-    monkeypatch.setattr(fs, "_hermes_root_path", lambda: root)
+    monkeypatch.setattr(fs, "_centurion_root_path", lambda: root)
 
     return {
         "root": root,
@@ -73,10 +73,10 @@ def fake_hermes(tmp_path, monkeypatch):
     }
 
 
-def _set_active_home(monkeypatch, hermes_home: Path):
-    """Point file_safety._hermes_home_path at a specific profile dir."""
+def _set_active_home(monkeypatch, centurion_home: Path):
+    """Point file_safety._centurion_home_path at a specific profile dir."""
     import agent.file_safety as fs
-    monkeypatch.setattr(fs, "_hermes_home_path", lambda: hermes_home)
+    monkeypatch.setattr(fs, "_centurion_home_path", lambda: centurion_home)
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ class TestResolveActiveProfileName:
         def _boom():
             raise RuntimeError("simulated")
 
-        monkeypatch.setattr(fs, "_hermes_home_path", _boom)
+        monkeypatch.setattr(fs, "_centurion_home_path", _boom)
         # Should not raise — falls back to "default"
         assert fs._resolve_active_profile_name() == "default"
 
@@ -162,13 +162,13 @@ class TestClassifyCrossProfileTarget:
         assert result is not None
         assert result["area"] == area
 
-    def test_non_hermes_path_returns_none(self, fake_hermes, monkeypatch, tmp_path):
+    def test_non_centurion_path_returns_none(self, fake_hermes, monkeypatch, tmp_path):
         _set_active_home(monkeypatch, fake_hermes["security_home"])
         from agent.file_safety import classify_cross_profile_target
         # Path outside any Hermes root
         assert classify_cross_profile_target(str(tmp_path / "random.txt")) is None
 
-    def test_hermes_config_not_classified_as_cross_profile(self, fake_hermes, monkeypatch):
+    def test_centurion_config_not_classified_as_cross_profile(self, fake_hermes, monkeypatch):
         """Files under <root>/config.yaml or <root>/.env are NOT profile-scoped
         (already covered by build_write_denied_paths). Don't double-warn."""
         _set_active_home(monkeypatch, fake_hermes["security_home"])

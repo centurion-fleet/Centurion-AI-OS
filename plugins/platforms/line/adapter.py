@@ -1282,15 +1282,15 @@ class LineAdapter(BasePlatformAdapter):
             return web.Response(status=404, text="not found")
 
         try:
-            from centurion_constants import get_hermes_home
-            hermes_home = Path(get_hermes_home()).resolve()
+            from centurion_constants import get_centurion_home
+            centurion_home = Path(get_centurion_home()).resolve()
         except Exception:
-            hermes_home = Path.home().joinpath(".centurion").resolve()
+            centurion_home = Path.home().joinpath(".centurion").resolve()
 
         allowed_roots = {
             Path(tempfile.gettempdir()).resolve(),
             Path("/tmp").resolve(),  # → /private/tmp on macOS
-            hermes_home,
+            centurion_home,
         }
         resolved = path.resolve()
         if not any(_is_relative_to(resolved, r) for r in allowed_roots):
@@ -1565,7 +1565,7 @@ def interactive_setup() -> None:
     """Minimal stdin wizard for ``hermes setup line``.
 
     Mirrors the irc/teams style: prompts for the two required vars, plus
-    one optional public URL. Writes to ``~/.hermes/.env`` via ``hermes_cli.config``.
+    one optional public URL. Writes to ``~/.centurion/.env`` via ``centurion_cli.config``.
     """
     print()
     print("LINE Messaging API setup")
@@ -1577,7 +1577,7 @@ def interactive_setup() -> None:
     try:
         from centurion_cli.config import get_env_var, set_env_var
     except ImportError:
-        print("hermes_cli.config not available; set LINE_* vars manually in ~/.hermes/.env")
+        print("centurion_cli.config not available; set LINE_* vars manually in ~/.centurion/.env")
         return
 
     def _prompt(var: str, prompt: str, *, secret: bool = False) -> None:

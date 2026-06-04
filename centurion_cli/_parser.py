@@ -24,7 +24,7 @@ PRE_ARGPARSE_INHERITED_FLAGS: list[tuple[str, bool]] = [
 
 
 def _inherited_flag(parser, *args, **kwargs):
-    """Register a flag that ``hermes_cli.relaunch`` should carry over when
+    """Register a flag that ``centurion_cli.relaunch`` should carry over when
     the CLI re-execs itself (e.g. after ``sessions browse`` picks a session,
     or after the setup wizard launches chat).
 
@@ -40,7 +40,7 @@ def _inherited_flag(parser, *args, **kwargs):
 _EPILOGUE = """
 Examples:
     hermes                        Start interactive chat
-    hermes chat -q "Hello"        Single query mode
+    centurion chat -q "Hello"        Single query mode
     hermes -c                     Resume the most recent session
     hermes -c "my project"        Resume a session by name (latest in lineage)
     hermes --resume <session_id>  Resume a specific session by ID
@@ -58,7 +58,7 @@ Examples:
     hermes config edit            Edit config in $EDITOR
     hermes config set model gpt-4 Set a config value
     hermes gateway                Run messaging gateway
-    hermes -s hermes-agent-dev,github-auth
+    hermes -s centurion-os-dev,github-auth
     hermes -w                     Start in isolated git worktree
     hermes gateway install        Install gateway background service
     hermes sessions list          List past sessions
@@ -69,10 +69,10 @@ Examples:
     hermes logs errors            View errors.log
     hermes logs --since 1h        Lines from the last hour
     hermes debug share             Upload debug report for support
-    hermes update                 Update to latest version
-    hermes dashboard              Start web UI dashboard (port 9119)
-    hermes dashboard --stop       Stop running dashboard processes
-    hermes dashboard --status     List running dashboard processes
+    centurion update                 Update to latest version
+    centurion dashboard              Start web UI dashboard (port 9119)
+    centurion dashboard --stop       Stop running dashboard processes
+    centurion dashboard --status     List running dashboard processes
 
 For more help on a command:
     hermes <command> --help
@@ -87,7 +87,7 @@ def build_top_level_parser():
     other subparsers via ``subparsers.add_parser(...)``.
     """
     parser = argparse.ArgumentParser(
-        prog="hermes",
+        prog="centurion",
         description="Hermes Agent - AI assistant with tool-calling capabilities",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=_EPILOGUE,
@@ -112,7 +112,7 @@ def build_top_level_parser():
     # --model / --provider are accepted at the top level so they can pair
     # with -z without needing the `chat` subcommand.  If neither -z nor a
     # subcommand consumes them, they fall through harmlessly as None.
-    # Mirrors `hermes chat --model ... --provider ...` semantics.
+    # Mirrors `centurion chat --model ... --provider ...` semantics.
     _inherited_flag(
         parser,
         "-m",
@@ -202,7 +202,7 @@ def build_top_level_parser():
         "--ignore-user-config",
         action="store_true",
         default=False,
-        help="Ignore ~/.hermes/config.yaml and fall back to built-in defaults (credentials in .env are still loaded)",
+        help="Ignore ~/.centurion/config.yaml and fall back to built-in defaults (credentials in .env are still loaded)",
     )
     _inherited_flag(
         parser,
@@ -348,7 +348,7 @@ def build_top_level_parser():
         "--ignore-user-config",
         action="store_true",
         default=argparse.SUPPRESS,
-        help="Ignore ~/.hermes/config.yaml and fall back to built-in defaults (credentials in .env are still loaded). Useful for isolated CI runs, reproduction, and third-party integrations.",
+        help="Ignore ~/.centurion/config.yaml and fall back to built-in defaults (credentials in .env are still loaded). Useful for isolated CI runs, reproduction, and third-party integrations.",
     )
     _inherited_flag(
         chat_parser,

@@ -51,7 +51,7 @@ from agent.tool_guardrails import (
 )
 from centurion_cli.config import cfg_get
 from centurion_cli.timeouts import get_provider_request_timeout
-from centurion_constants import get_hermes_home
+from centurion_constants import get_centurion_home
 from model_tools import check_toolset_requirements, get_tool_definitions
 from utils import base_url_host_matches
 
@@ -247,7 +247,7 @@ def init_agent(
         skip_context_files (bool): If True, skip auto-injection of SOUL.md, AGENTS.md, and .cursorrules
             into the system prompt. Use this for batch processing and data generation to avoid
             polluting trajectories with user-specific persona or project instructions.
-        load_soul_identity (bool): If True, still use ~/.hermes/SOUL.md as the primary
+        load_soul_identity (bool): If True, still use ~/.centurion/SOUL.md as the primary
             identity even when skip_context_files=True. Project context files from the cwd
             remain skipped.
     """
@@ -513,10 +513,10 @@ def init_agent(
     agent._or_cache_hits: int = 0
 
     # Centralized logging — agent.log (INFO+) and errors.log (WARNING+)
-    # both live under ~/.hermes/logs/.  Idempotent, so gateway mode
+    # both live under ~/.centurion/logs/.  Idempotent, so gateway mode
     # (which creates a new AIAgent per message) won't duplicate handlers.
     from centurion_logging import setup_logging, setup_verbose_logging
-    setup_logging(hermes_home=_ra()._hermes_home)
+    setup_logging(centurion_home=_ra()._centurion_home)
 
     if agent.verbose_logging:
         setup_verbose_logging()
@@ -985,11 +985,11 @@ def init_agent(
     except Exception:
         os.environ["HERMES_SESSION_ID"] = agent.session_id
 
-    # Session logs go into ~/.hermes/sessions/ alongside gateway sessions
-    hermes_home = get_hermes_home()
-    agent.logs_dir = hermes_home / "sessions"
+    # Session logs go into ~/.centurion/sessions/ alongside gateway sessions
+    centurion_home = get_centurion_home()
+    agent.logs_dir = centurion_home / "sessions"
     agent.logs_dir.mkdir(parents=True, exist_ok=True)
-    # Per-session JSON snapshot writer (~/.hermes/sessions/session_{sid}.json)
+    # Per-session JSON snapshot writer (~/.centurion/sessions/session_{sid}.json)
     # is opt-in via sessions.write_json_snapshots (default False).  state.db
     # is canonical — the snapshot is only useful for external tooling that
     # reads the JSON files directly.  See run_agent._save_session_log.
@@ -1097,7 +1097,7 @@ def init_agent(
                     _init_kwargs = {
                         "session_id": agent.session_id,
                         "platform": platform or "cli",
-                        "hermes_home": str(get_hermes_home()),
+                        "centurion_home": str(get_centurion_home()),
                         "agent_context": "primary",
                     }
                     # Thread session title for memory provider scoping
@@ -1130,7 +1130,7 @@ def init_agent(
                         from centurion_cli.profiles import get_active_profile_name
                         _profile = get_active_profile_name()
                         _init_kwargs["agent_identity"] = _profile
-                        _init_kwargs["agent_workspace"] = "hermes"
+                        _init_kwargs["agent_workspace"] = "centurion"
                     except Exception:
                         pass
                     agent._memory_manager.initialize_all(**_init_kwargs)
@@ -1507,7 +1507,7 @@ def init_agent(
         try:
             agent.context_compressor.on_session_start(
                 agent.session_id,
-                hermes_home=str(get_hermes_home()),
+                centurion_home=str(get_centurion_home()),
                 platform=agent.platform or "cli",
                 model=agent.model,
                 context_length=getattr(agent.context_compressor, "context_length", 0),

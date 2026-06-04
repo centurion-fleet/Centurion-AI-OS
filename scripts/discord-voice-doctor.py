@@ -176,10 +176,10 @@ def check_env_vars():
 
     # Load .env
     try:
-        from centurion_cli.env_loader import load_hermes_dotenv
+        from centurion_cli.env_loader import load_centurion_dotenv
 
-        load_hermes_dotenv(
-            hermes_home=ENV_FILE.parent,
+        load_centurion_dotenv(
+            centurion_home=ENV_FILE.parent,
             project_env=PROJECT_ROOT / ".env",
         )
     except ImportError:

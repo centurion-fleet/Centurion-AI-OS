@@ -1,4 +1,4 @@
-"""Tests for the Phase 4 s6 dispatch helper in hermes_cli.gateway.
+"""Tests for the Phase 4 s6 dispatch helper in centurion_cli.gateway.
 
 `_dispatch_via_service_manager_if_s6` decides whether a
 `hermes gateway start/stop/restart` invocation should be routed to
@@ -35,11 +35,11 @@ def test_dispatch_returns_false_on_host(monkeypatch: pytest.MonkeyPatch) -> None
     their existing systemd/launchd/windows path."""
     from centurion_cli import gateway as gw
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "systemd",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "systemd",
     )
     # Should not even attempt to construct a manager.
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager",
+        "centurion_cli.service_manager.get_service_manager",
         lambda: pytest.fail("manager should not be constructed on host"),
     )
     assert gw._dispatch_via_service_manager_if_s6("start", profile="x") is False
@@ -51,10 +51,10 @@ def test_dispatch_returns_true_and_calls_start_on_s6(
     from centurion_cli import gateway as gw
     rec = _CallRecorder()
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: rec,
+        "centurion_cli.service_manager.get_service_manager", lambda: rec,
     )
     assert gw._dispatch_via_service_manager_if_s6("start", profile="coder") is True
     assert rec.calls == [("start", "gateway-coder")]
@@ -71,10 +71,10 @@ def test_dispatch_translates_action_to_manager_method(
     from centurion_cli import gateway as gw
     rec = _CallRecorder()
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: rec,
+        "centurion_cli.service_manager.get_service_manager", lambda: rec,
     )
     assert gw._dispatch_via_service_manager_if_s6(action, profile="x") is True
     assert rec.calls == [(expected, "gateway-x")]
@@ -88,10 +88,10 @@ def test_dispatch_unknown_action_returns_false(
     from centurion_cli import gateway as gw
     rec = _CallRecorder()
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: rec,
+        "centurion_cli.service_manager.get_service_manager", lambda: rec,
     )
     assert gw._dispatch_via_service_manager_if_s6("install", profile="x") is False
     assert rec.calls == []
@@ -105,13 +105,13 @@ def test_dispatch_defaults_profile_to_default(
     from centurion_cli import gateway as gw
     rec = _CallRecorder()
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: rec,
+        "centurion_cli.service_manager.get_service_manager", lambda: rec,
     )
     monkeypatch.setattr(
-        "hermes_cli.gateway._profile_suffix", lambda: "",
+        "centurion_cli.gateway._profile_suffix", lambda: "",
     )
     assert gw._dispatch_via_service_manager_if_s6("start") is True
     assert rec.calls == [("start", "gateway-default")]
@@ -138,10 +138,10 @@ def test_dispatch_all_returns_false_on_host(
 ) -> None:
     from centurion_cli import gateway as gw
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "systemd",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "systemd",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager",
+        "centurion_cli.service_manager.get_service_manager",
         lambda: pytest.fail("manager should not be constructed on host"),
     )
     assert gw._dispatch_all_via_service_manager_if_s6("stop") is False
@@ -154,10 +154,10 @@ def test_dispatch_all_iterates_every_profile_on_stop(
     from centurion_cli import gateway as gw
     rec = _ListingRecorder(["coder", "writer", "assistant"])
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: rec,
+        "centurion_cli.service_manager.get_service_manager", lambda: rec,
     )
     assert gw._dispatch_all_via_service_manager_if_s6("stop") is True
     assert rec.calls == [
@@ -176,10 +176,10 @@ def test_dispatch_all_iterates_every_profile_on_restart(
     from centurion_cli import gateway as gw
     rec = _ListingRecorder(["coder", "writer"])
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: rec,
+        "centurion_cli.service_manager.get_service_manager", lambda: rec,
     )
     assert gw._dispatch_all_via_service_manager_if_s6("restart") is True
     assert rec.calls == [
@@ -206,10 +206,10 @@ def test_dispatch_all_handles_partial_failure(
 
     rec = _FailOnWriter(["coder", "writer", "assistant"])
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: rec,
+        "centurion_cli.service_manager.get_service_manager", lambda: rec,
     )
     assert gw._dispatch_all_via_service_manager_if_s6("stop") is True
     # The two successful ones were called; writer raised before recording.
@@ -233,10 +233,10 @@ def test_dispatch_all_empty_list_reports_and_returns_true(
     from centurion_cli import gateway as gw
     rec = _ListingRecorder([])
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: rec,
+        "centurion_cli.service_manager.get_service_manager", lambda: rec,
     )
     assert gw._dispatch_all_via_service_manager_if_s6("stop") is True
     assert rec.calls == []
@@ -250,10 +250,10 @@ def test_dispatch_all_unknown_action_returns_false(
     fall through to the host code path rather than no-op."""
     from centurion_cli import gateway as gw
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager",
+        "centurion_cli.service_manager.get_service_manager",
         lambda: pytest.fail(
             "manager should not be constructed for unsupported --all action",
         ),
@@ -283,10 +283,10 @@ def test_dispatch_renders_gateway_not_registered_friendly(
             raise GatewayNotRegisteredError("typo")
 
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: _RaisesMissing(),
+        "centurion_cli.service_manager.get_service_manager", lambda: _RaisesMissing(),
     )
 
     with pytest.raises(SystemExit) as excinfo:
@@ -320,10 +320,10 @@ def test_dispatch_renders_s6_command_error_friendly(
             )
 
     monkeypatch.setattr(
-        "hermes_cli.service_manager.detect_service_manager", lambda: "s6",
+        "centurion_cli.service_manager.detect_service_manager", lambda: "s6",
     )
     monkeypatch.setattr(
-        "hermes_cli.service_manager.get_service_manager", lambda: _RaisesS6Error(),
+        "centurion_cli.service_manager.get_service_manager", lambda: _RaisesS6Error(),
     )
 
     with pytest.raises(SystemExit) as excinfo:

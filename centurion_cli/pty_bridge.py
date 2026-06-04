@@ -1,9 +1,9 @@
-"""PTY bridge for `hermes dashboard` chat tab.
+"""PTY bridge for `centurion dashboard` chat tab.
 
 Wraps a child process behind a pseudo-terminal so its ANSI output can be
 streamed to a browser-side terminal emulator (xterm.js) and typed
 keystrokes can be fed back in.  The only caller today is the
-``/api/pty`` WebSocket endpoint in ``hermes_cli.web_server``.
+``/api/pty`` WebSocket endpoint in ``centurion_cli.web_server``.
 
 Design constraints:
 

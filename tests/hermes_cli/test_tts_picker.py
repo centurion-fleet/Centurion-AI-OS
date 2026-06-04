@@ -1,4 +1,4 @@
-"""Tests for the TTS plugin picker surface in hermes_cli/tools_config.py (issue #30398).
+"""Tests for the TTS plugin picker surface in centurion_cli/tools_config.py (issue #30398).
 
 Covers ``_plugin_tts_providers()`` and the ``_visible_providers()``
 integration that injects plugin rows into the Text-to-Speech category.

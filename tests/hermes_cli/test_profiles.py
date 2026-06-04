@@ -1,4 +1,4 @@
-"""Comprehensive tests for hermes_cli.profiles module.
+"""Comprehensive tests for centurion_cli.profiles module.
 
 Tests cover: validation, directory resolution, CRUD operations, active profile
 management, export/import, renaming, alias collision checks, profile isolation,
@@ -30,7 +30,7 @@ from centurion_cli.profiles import (
     export_profile,
     import_profile,
     _get_profiles_root,
-    _get_default_hermes_home,
+    _get_default_centurion_home,
     seed_profile_skills,
     has_bundled_skills_opt_out,
     NO_BUNDLED_SKILLS_MARKER,
@@ -46,8 +46,8 @@ def profile_env(tmp_path, monkeypatch):
     """Set up an isolated environment for profile tests.
 
     * Path.home() -> tmp_path  (so _get_profiles_root() = tmp_path/.hermes/profiles)
-    * CENTURION_HOME  -> tmp_path/.hermes  (so get_hermes_home() agrees)
-    * Creates the bare-minimum ~/.hermes directory.
+    * CENTURION_HOME  -> tmp_path/.hermes  (so get_centurion_home() agrees)
+    * Creates the bare-minimum ~/.centurion directory.
     """
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     default_home = tmp_path / ".centurion"
@@ -114,7 +114,7 @@ class TestValidateProfileName:
         with pytest.raises(ValueError):
             validate_profile_name("")
 
-    @pytest.mark.parametrize("name", ["hermes", "test", "tmp", "root", "sudo"])
+    @pytest.mark.parametrize("name", ["centurion", "test", "tmp", "root", "sudo"])
     def test_reserved_names_rejected(self, name):
         """Reserved names collide with the Hermes install itself or with
         common system binaries — reject them at validate time so
@@ -130,7 +130,7 @@ class TestValidateProfileName:
 class TestGetProfileDir:
     """Tests for get_profile_dir()."""
 
-    def test_default_returns_hermes_home(self, profile_env):
+    def test_default_returns_centurion_home(self, profile_env):
         tmp_path = profile_env
         result = get_profile_dir("default")
         assert result == tmp_path / ".centurion"
@@ -226,7 +226,7 @@ class TestCreateProfile:
         assert not (profile_dir / "processes.json").exists()
 
     def test_clone_all_excludes_sibling_profiles_tree(self, profile_env):
-        """--clone-all from default ~/.hermes must not copy profiles/* (nested explosion)."""
+        """--clone-all from default ~/.centurion must not copy profiles/* (nested explosion)."""
         tmp_path = profile_env
         default_home = tmp_path / ".centurion"
         profiles_root = default_home / "profiles"
@@ -243,7 +243,7 @@ class TestCreateProfile:
         assert not (profile_dir / "profiles").exists()
 
     def test_clone_all_excludes_default_infrastructure(self, profile_env):
-        """--clone-all from default profile excludes hermes-agent, .worktrees,
+        """--clone-all from default profile excludes centurion-os, .worktrees,
         bin, node_modules at root, plus __pycache__/*.pyc/*.pyo/*.sock/*.tmp
         at any depth.  Profile data (config, env, skills, sessions, logs,
         state.db) must be preserved — clone-all means "complete snapshot
@@ -252,9 +252,9 @@ class TestCreateProfile:
         tmp_path = profile_env
         default_home = tmp_path / ".centurion"
         # Simulate infrastructure dirs that only the default profile has
-        (default_home / "hermes-agent" / ".git").mkdir(parents=True)
-        (default_home / "hermes-agent" / "venv" / "bin").mkdir(parents=True)
-        (default_home / "hermes-agent" / "README.md").write_text("repo")
+        (default_home / "centurion-os" / ".git").mkdir(parents=True)
+        (default_home / "centurion-os" / "venv" / "bin").mkdir(parents=True)
+        (default_home / "centurion-os" / "README.md").write_text("repo")
         (default_home / ".worktrees" / "some-tree").mkdir(parents=True)
         (default_home / "profiles" / "other").mkdir(parents=True)
         (default_home / "profiles" / "other" / "config.yaml").write_text("x")
@@ -281,7 +281,7 @@ class TestCreateProfile:
         profile_dir = create_profile("cloned", clone_all=True, no_alias=True)
 
         # Infrastructure must be excluded
-        assert not (profile_dir / "hermes-agent").exists()
+        assert not (profile_dir / "centurion-os").exists()
         assert not (profile_dir / ".worktrees").exists()
         assert not (profile_dir / "profiles").exists()
         assert not (profile_dir / "bin").exists()
@@ -353,7 +353,7 @@ class TestNoSkillsOptOut:
 
     def test_seed_profile_skills_respects_marker(self, profile_env):
         """seed_profile_skills() must no-op on opted-out profiles even when
-        called directly (e.g. by `hermes update`'s all-profile sync loop)."""
+        called directly (e.g. by `centurion update`'s all-profile sync loop)."""
         profile_dir = create_profile("orchestrator", no_alias=True, no_skills=True)
 
         # Call seed_profile_skills() directly — it should NOT invoke subprocess,
@@ -431,7 +431,7 @@ class TestDeleteProfile:
         profile_dir = create_profile("coder", no_alias=True)
         assert profile_dir.is_dir()
         # Mock gateway import to avoid real systemd/launchd interaction
-        with patch("hermes_cli.profiles._cleanup_gateway_service"):
+        with patch("centurion_cli.profiles._cleanup_gateway_service"):
             delete_profile("coder", yes=True)
         assert not profile_dir.is_dir()
 
@@ -522,7 +522,7 @@ class TestActiveProfile:
 class TestGetActiveProfileName:
     """Tests for get_active_profile_name()."""
 
-    def test_default_hermes_home_returns_default(self, profile_env):
+    def test_default_centurion_home_returns_default(self, profile_env):
         # CENTURION_HOME points to tmp_path/.hermes which is the default
         assert get_active_profile_name() == "default"
 
@@ -587,7 +587,7 @@ class TestAliasCollision:
         assert result is None
 
     def test_reserved_name_returns_message(self, profile_env):
-        result = check_alias_collision("hermes")
+        result = check_alias_collision("centurion")
         assert result is not None
         assert "reserved" in result.lower()
 
@@ -616,7 +616,7 @@ class TestRenameProfile:
         assert old_dir.is_dir()
 
         # Mock alias collision to avoid subprocess calls
-        with patch("hermes_cli.profiles.check_alias_collision", return_value="skip"):
+        with patch("centurion_cli.profiles.check_alias_collision", return_value="skip"):
             new_dir = rename_profile("oldname", "newname")
 
         assert not old_dir.is_dir()
@@ -636,13 +636,13 @@ class TestRenameProfile:
                     "saveMessages": True,
                     "peerName": "user-peer",
                     "aiPeer": "ssi_health",
-                    "workspace": "hermes",
+                    "workspace": "centurion",
                     "enabled": True,
                 }
             }
         }))
 
-        with patch("hermes_cli.profiles.check_alias_collision", return_value="skip"):
+        with patch("centurion_cli.profiles.check_alias_collision", return_value="skip"):
             rename_profile("ssi_health", "heimdall")
 
         cfg = json.loads(honcho_path.read_text())
@@ -656,17 +656,17 @@ class TestRenameProfile:
         honcho_path = tmp_path / ".centurion" / "honcho.json"
         honcho_path.write_text(json.dumps({
             "hosts": {
-                "hermes.ssi_health": {"workspace": "hermes", "enabled": True}
+                "hermes.ssi_health": {"workspace": "centurion", "enabled": True}
             }
         }))
 
-        with patch("hermes_cli.profiles.check_alias_collision", return_value="skip"):
+        with patch("centurion_cli.profiles.check_alias_collision", return_value="skip"):
             rename_profile("ssi_health", "heimdall")
 
         cfg = json.loads(honcho_path.read_text())
         assert "hermes.ssi_health" not in cfg["hosts"]
         assert cfg["hosts"]["hermes.heimdall"]["aiPeer"] == "ssi_health"
-        assert cfg["hosts"]["hermes.heimdall"]["workspace"] == "hermes"
+        assert cfg["hosts"]["hermes.heimdall"]["workspace"] == "centurion"
 
     def test_does_not_overwrite_existing_honcho_host_on_rename(self, profile_env):
         tmp_path = profile_env
@@ -679,7 +679,7 @@ class TestRenameProfile:
             }
         }))
 
-        with patch("hermes_cli.profiles.check_alias_collision", return_value="skip"):
+        with patch("centurion_cli.profiles.check_alias_collision", return_value="skip"):
             rename_profile("ssi_health", "heimdall")
 
         cfg = json.loads(honcho_path.read_text())
@@ -880,7 +880,7 @@ class TestExportImport:
         (default_dir / "config.yaml").write_text("ok")
 
         # Create dirs/files that should be excluded
-        for d in ("hermes-agent", ".worktrees", "profiles", "bin",
+        for d in ("centurion-os", ".worktrees", "profiles", "bin",
                   "image_cache", "logs", "sandboxes", "checkpoints"):
             sub = default_dir / d
             sub.mkdir(exist_ok=True)
@@ -903,7 +903,7 @@ class TestExportImport:
 
         # Infrastructure excluded
         excluded_prefixes = [
-            "default/hermes-agent", "default/.worktrees", "default/profiles",
+            "default/centurion-os", "default/.worktrees", "default/profiles",
             "default/bin", "default/image_cache", "default/logs",
             "default/sandboxes", "default/checkpoints",
         ]
@@ -1016,20 +1016,20 @@ class TestProfileIsolation:
 # ===================================================================
 
 class TestInternalHelpers:
-    """Tests for _get_profiles_root() and _get_default_hermes_home()."""
+    """Tests for _get_profiles_root() and _get_default_centurion_home()."""
 
     def test_profiles_root_under_home(self, profile_env):
         tmp_path = profile_env
         root = _get_profiles_root()
         assert root == tmp_path / ".centurion" / "profiles"
 
-    def test_default_hermes_home(self, profile_env):
+    def test_default_centurion_home(self, profile_env):
         tmp_path = profile_env
-        home = _get_default_hermes_home()
+        home = _get_default_centurion_home()
         assert home == tmp_path / ".centurion"
 
     def test_profiles_root_docker_deployment(self, tmp_path, monkeypatch):
-        """In Docker (CENTURION_HOME outside ~/.hermes), profiles go under CENTURION_HOME."""
+        """In Docker (CENTURION_HOME outside ~/.centurion), profiles go under CENTURION_HOME."""
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
@@ -1037,17 +1037,17 @@ class TestInternalHelpers:
         root = _get_profiles_root()
         assert root == docker_home / "profiles"
 
-    def test_default_hermes_home_docker(self, tmp_path, monkeypatch):
-        """In Docker, _get_default_hermes_home() returns CENTURION_HOME itself."""
+    def test_default_centurion_home_docker(self, tmp_path, monkeypatch):
+        """In Docker, _get_default_centurion_home() returns CENTURION_HOME itself."""
         docker_home = tmp_path / "opt" / "data"
         docker_home.mkdir(parents=True)
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(docker_home))
-        home = _get_default_hermes_home()
+        home = _get_default_centurion_home()
         assert home == docker_home
 
     def test_profiles_root_profile_mode(self, tmp_path, monkeypatch):
-        """In profile mode (CENTURION_HOME under ~/.hermes), profiles root is still ~/.hermes/profiles."""
+        """In profile mode (CENTURION_HOME under ~/.centurion), profiles root is still ~/.centurion/profiles."""
         native = tmp_path / ".centurion"
         profile_dir = native / "profiles" / "coder"
         profile_dir.mkdir(parents=True)
@@ -1177,7 +1177,7 @@ class TestEdgeCases:
         set_active_profile("coder")
         assert get_active_profile() == "coder"
 
-        with patch("hermes_cli.profiles._cleanup_gateway_service"):
+        with patch("centurion_cli.profiles._cleanup_gateway_service"):
             delete_profile("coder", yes=True)
 
         assert get_active_profile() == "default"

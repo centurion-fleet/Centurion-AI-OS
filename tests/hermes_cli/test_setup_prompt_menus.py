@@ -43,7 +43,7 @@ def test_prompt_choice_falls_back_to_numbered_input(monkeypatch):
 
 def test_prompt_checklist_uses_shared_curses_checklist(monkeypatch):
     monkeypatch.setattr(
-        "hermes_cli.curses_ui.curses_checklist",
+        "centurion_cli.curses_ui.curses_checklist",
         lambda title, items, selected, cancel_returns=None: {0, 2},
     )
 

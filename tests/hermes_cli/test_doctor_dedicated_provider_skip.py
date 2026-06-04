@@ -4,11 +4,11 @@ OpenRouter, Bedrock).
 
 Anthropic's native API requires `x-api-key` + `anthropic-version` headers;
 the generic loop sends `Authorization: Bearer ...` which Anthropic answers
-with HTTP 404. The dedicated check at hermes_cli/doctor.py already covers
+with HTTP 404. The dedicated check at centurion_cli/doctor.py already covers
 Anthropic with the right headers, so the pluggable profile must be
 skipped by `_build_apikey_providers_list()`.
 
-See: NousResearch/hermes-agent#22346
+See: NousResearch/centurion-os#22346
 """
 
 from __future__ import annotations
