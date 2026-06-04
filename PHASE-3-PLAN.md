@@ -1,6 +1,6 @@
 # Phase 3 — Action Plan
 
-**Goal:** Make CenturionAI-OS-v3 runnable and consistently branded.  
+**Goal:** Make Centurion-AI-OS-v4 runnable and consistently branded.  
 **Based on:** CENTURION-OS-AUDIT.md findings  
 **Strategy:** Fix in order of breakage — critical first, cosmetic last.
 

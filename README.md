@@ -5,8 +5,8 @@
 # Centurion AI OS ☤
 
 <p align="center">
-  <a href="https://github.com/TheSpaceFox/CenturionAI-OS-v3"><img src="https://img.shields.io/badge/Docs-CenturionAI--OS-FFD700?style=for-the-badge" alt="Documentation"></a>
-  <a href="https://github.com/TheSpaceFox/CenturionAI-OS-v3/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://github.com/TheSpaceFox/Centurion-AI-OS-v4"><img src="https://img.shields.io/badge/Docs-CenturionAI--OS-FFD700?style=for-the-badge" alt="Documentation"></a>
+  <a href="https://github.com/TheSpaceFox/Centurion-AI-OS-v4/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
 </p>
 
 **The self-improving sovereign AI agent. Forked from [Hermes Agent](https://github.com/NousResearch/hermes-agent) by Nous Research.** 

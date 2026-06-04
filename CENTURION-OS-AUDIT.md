@@ -2,7 +2,7 @@
 
 **Audit date:** 28 May 2026  
 **Auditor:** Titus 🦅  
-**Source:** CenturionAI-OS-v3 fork of Hermes Agent  
+**Source:** Centurion-AI-OS-v4 fork of Hermes Agent (formerly v3)  
 **Upstream:** Nous Research Hermes Agent (v16.2.6)
 
 ---
