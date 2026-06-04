@@ -246,6 +246,9 @@ def load_centurion_dotenv(
 
     return loaded
 
+# Backward-compatible alias for migration compatibility
+load_hermes_dotenv = load_centurion_dotenv
+
 
 def _apply_external_secret_sources(home_path: Path) -> None:
     """Pull secrets from external sources (currently Bitwarden) into env.

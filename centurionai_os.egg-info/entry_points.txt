@@ -1,0 +1,5 @@
+[console_scripts]
+centurion = centurion_cli.main:main
+hermes = centurion_cli.main:main
+hermes-acp = acp_adapter.entry:main
+hermes-agent = run_agent:main

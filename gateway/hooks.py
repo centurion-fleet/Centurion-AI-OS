@@ -26,7 +26,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import yaml
 
-from centurion_cli.config import get_hermes_home
+from centurion_constants import get_hermes_home
 
 
 HOOKS_DIR = get_hermes_home() / "hooks"

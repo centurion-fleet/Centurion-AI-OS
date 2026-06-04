@@ -14,7 +14,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from centurion_cli.config import get_hermes_home
+from centurion_constants import get_hermes_home
 
 logger = logging.getLogger(__name__)
 
