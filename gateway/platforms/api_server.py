@@ -999,6 +999,71 @@ class APIServerAdapter(BasePlatformAdapter):
     # HTTP Handlers
     # ------------------------------------------------------------------
 
+    # ── Fleet Message Handlers ────────────────────────────────────────
+
+    async def _handle_fleet_message(self, request: "web.Request") -> "web.Response":
+        """POST /fleet/message — receive message from another Centurion."""
+        try:
+            payload = await request.json()
+            sender_id = payload.get("sender_id", "")
+            sender_name = payload.get("sender_name", sender_id)
+
+            from centurion.fleet.transport import FleetMessageEnvelope
+            envelope = FleetMessageEnvelope(**payload)
+
+            transport = getattr(self, "_fleet_transport", None)
+            if transport:
+                result = transport.receive_message(envelope)
+            else:
+                logger.info(f"Fleet message from {sender_name} ({sender_id}): {payload.get('subject', '(no subject)')}")
+                result = {"status": "received", "message_id": payload.get("message_id", "")}
+
+            return web.json_response(result, status=200)
+        except Exception as e:
+            logger.error(f"Fleet message handler error: {e}")
+            return web.json_response({"status": "error", "detail": str(e)}, status=400)
+
+    async def _handle_fleet_status(self, request: "web.Request") -> "web.Response":
+        """GET /fleet/status — list fleet peers and their connection status."""
+        from centurion.fleet.peers import FleetPeers
+        peers = FleetPeers()
+        peer_list = []
+        for p in peers.list_all():
+            peer_list.append({
+                "id": p.centurion_id,
+                "name": p.name,
+                "status": p.status,
+                "last_seen": p.last_seen,
+                "address": p.address,
+                "telegram_handle": p.telegram_handle,
+            })
+        return web.json_response({
+            "peers": peer_list,
+            "count": len(peer_list),
+            "timestamp": __import__("time").time(),
+        }, status=200)
+
+    async def _handle_fleet_checkin(self, request: "web.Request") -> "web.Response":
+        """POST /fleet/checkin — receive health check-in from another Centurion."""
+        try:
+            payload = await request.json()
+            centurion_id = payload.get("centurion_id", "")
+            status = payload.get("status", "active")
+            version = payload.get("version", "")
+
+            from centurion.fleet.peers import FleetPeers
+            peers = FleetPeers()
+            peers.update_status(centurion_id, "online",
+                                last_seen=__import__("time").time(),
+                                version=version)
+
+            return web.json_response({"status": "acknowledged", "centurion_id": centurion_id}, status=200)
+        except Exception as e:
+            logger.error(f"Fleet check-in error: {e}")
+            return web.json_response({"status": "error", "detail": str(e)}, status=400)
+
+    # ── Health ────────────────────────────────────────────────────────
+
     async def _handle_health(self, request: "web.Request") -> "web.Response":
         """GET /health — simple health check."""
         return web.json_response({"status": "ok", "platform": "centurion-os"})

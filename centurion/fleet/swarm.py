@@ -14,7 +14,7 @@ The Swarm enables Centurions to:
 import json
 import os
 import time
-from typing import Optional
+from typing import Optional, Callable
 from dataclasses import dataclass, field, asdict
 
 from .registry import (
@@ -51,6 +51,13 @@ class SwarmCoordinator:
     """
     Coordinates task delegation and communication across the fleet.
     Runs on each Centurion — routes tasks based on capabilities.
+
+    Supports two transport modes:
+    - Local (file-based): messages stored in ~/.centurion/fleet/messages/
+    - Network (HTTP): messages sent via FleetTransport to peer machines
+
+    If a FleetTransport is provided, network mode is preferred.
+    File-based messaging remains as fallback for same-machine Centurions.
     """
 
     def __init__(
@@ -58,10 +65,14 @@ class SwarmCoordinator:
         centurion_id: str,
         capabilities: Optional[list] = None,
         registry: Optional[FleetRegistry] = None,
+        transport: Optional[object] = None,
+        centurion_name: str = "",
     ):
         self.centurion_id = centurion_id
         self.capabilities = capabilities or []
         self.registry = registry or FleetRegistry()
+        self.transport = transport  # FleetTransport instance for network mode
+        self.centurion_name = centurion_name
         self._tasks_dir = os.path.join(
             os.environ.get("CENTURION_HOME", os.path.expanduser("~/.centurion")),
             "swarm", "tasks"
@@ -112,13 +123,23 @@ class SwarmCoordinator:
         self._save_task(task)
 
         # Send a fleet message to notify the recipient
-        send_fleet_message(
-            sender_id=self.centurion_id,
-            recipient_id=recipient_id,
-            subject=f"[TASK] {title}",
-            body=f"Type: {task_type}\nPriority: {priority}\n\n{description}\n\nTask ID: {task.task_id}",
-            priority=priority,
-        )
+        if self.transport:
+            # Network mode — send via HTTP
+            self.transport.send_message(
+                recipient_id=recipient_id,
+                subject=f"[TASK] {title}",
+                body=f"Type: {task_type}\nPriority: {priority}\n\n{description}\n\nTask ID: {task.task_id}",
+                priority=priority,
+            )
+        else:
+            # Local mode — file-based messaging
+            send_fleet_message(
+                sender_id=self.centurion_id,
+                recipient_id=recipient_id,
+                subject=f"[TASK] {title}",
+                body=f"Type: {task_type}\nPriority: {priority}\n\n{description}\n\nTask ID: {task.task_id}",
+                priority=priority,
+            )
 
         return task
 
@@ -155,13 +176,21 @@ class SwarmCoordinator:
         self._save_task(task)
 
         # Notify the sender
-        send_fleet_message(
-            sender_id=self.centurion_id,
-            recipient_id=task.sender_id,
-            subject=f"[ACCEPTED] {task.title}",
-            body=f"Task {task.task_id} accepted by {self.centurion_id}.",
-            priority="normal",
-        )
+        if self.transport:
+            self.transport.send_message(
+                recipient_id=task.sender_id,
+                subject=f"[ACCEPTED] {task.title}",
+                body=f"Task {task.task_id} accepted by {self.centurion_id}.",
+                priority="normal",
+            )
+        else:
+            send_fleet_message(
+                sender_id=self.centurion_id,
+                recipient_id=task.sender_id,
+                subject=f"[ACCEPTED] {task.title}",
+                body=f"Task {task.task_id} accepted by {self.centurion_id}.",
+                priority="normal",
+            )
         return task
 
     def complete_task(self, task_id: str, result: str) -> bool:
@@ -174,13 +203,21 @@ class SwarmCoordinator:
         task.completed_at = time.time()
         self._save_task(task)
 
-        send_fleet_message(
-            sender_id=self.centurion_id,
-            recipient_id=task.sender_id,
-            subject=f"[COMPLETED] {task.title}",
-            body=f"Task completed.\n\nResult:\n{result[:1000]}",
-            priority="normal",
-        )
+        if self.transport:
+            self.transport.send_message(
+                recipient_id=task.sender_id,
+                subject=f"[COMPLETED] {task.title}",
+                body=f"Task completed.\n\nResult:\n{result[:1000]}",
+                priority="normal",
+            )
+        else:
+            send_fleet_message(
+                sender_id=self.centurion_id,
+                recipient_id=task.sender_id,
+                subject=f"[COMPLETED] {task.title}",
+                body=f"Task completed.\n\nResult:\n{result[:1000]}",
+                priority="normal",
+            )
         return True
 
     def fail_task(self, task_id: str, reason: str) -> bool:
