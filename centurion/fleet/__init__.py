@@ -9,6 +9,7 @@ Modules:
 - swarm         — Task delegation, messaging, and coordination
 - transport     — HTTP-based network transport for fleet messaging
 - health        — Automated health monitoring and check-ins
+- update        — Upstream update management and selective cherry-picking
 - overseer      — Fleet Overseer (Titus) command center dashboard
 """
 
@@ -17,6 +18,7 @@ from .peers import FleetPeers, FleetPeer
 from .swarm import SwarmCoordinator, SwarmTask
 from .transport import FleetTransport, FleetMessageEnvelope
 from .health import HealthCheckRunner, OverseerHealthMonitor
+from . import update
 from .overseer import OverseerCommandCenter, format_fleet_report
 
 __all__ = [
@@ -26,4 +28,5 @@ __all__ = [
     "FleetTransport", "FleetMessageEnvelope",
     "HealthCheckRunner", "OverseerHealthMonitor",
     "OverseerCommandCenter", "format_fleet_report",
+    "update",
 ]
