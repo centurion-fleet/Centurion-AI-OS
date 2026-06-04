@@ -1,21 +1,25 @@
 """
-Hermes CLI - Unified command-line interface for Hermes Agent.
+Centurion AI OS - Command-line interface for Centurion AI.
+
+The Centurion AI Operating System. A sovereign AI agent platform
+for fleet-aware, self-hosted artificial intelligence.
 
 Provides subcommands for:
-- centurion chat          - Interactive chat (same as ./hermes)
-- hermes gateway       - Run gateway in foreground
-- hermes gateway start - Start gateway service
-- hermes gateway stop  - Stop gateway service
-- hermes setup         - Interactive setup wizard
-- hermes status        - Show status of all components
-- hermes cron          - Manage cron jobs
+- centurion chat              - Interactive chat session
+- centurion gateway           - Run gateway in foreground
+- centurion gateway start     - Start gateway service
+- centurion gateway stop      - Stop gateway service
+- centurion setup             - Interactive setup wizard
+- centurion status            - Show status of all components
+- centurion cron              - Manage cron jobs
+- centurion swarm             - Fleet management & inter-agent messaging
 """
 
 import os
 import sys
 
-__version__ = "0.14.0"
-__release_date__ = "2026.5.16"
+__version__ = "0.3.0"
+__release_date__ = "2026.6.4"
 
 
 def _ensure_utf8():
