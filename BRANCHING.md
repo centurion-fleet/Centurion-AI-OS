@@ -12,10 +12,12 @@ main
   │
   ├── hotfix/<name>             ← urgent fix off main
   │
-  ├── titus                     ← Centurion #3 (Fleet Overseer)
-  ├── eve                       ← Centurion #2 (Strategic AI)
-  ├── adam                      ← Centurion (early deployment)
-  └── <centurion-name>          ← new Centurion = new branch
+  └── centurions/
+        ├── titus               ← Centurion #3 (Fleet Overseer)
+        ├── eve                 ← Centurion #2 (Strategic AI)
+        ├── adam                ← Centurion (early deployment)
+        ├── template            ← template for new Centurions
+        └── <name>              ← new Centurion = new branch
 ```
 
 ## Branch Rules
@@ -27,7 +29,7 @@ main
 | `feature/<name>` | `develop` | `develop` | Isolated work. Delete after merge. |
 | `release/v<version>` | `develop` | `main` + `develop` | Release prep. Bump version, final QA. Delete after merge. |
 | `hotfix/<name>` | `main` | `main` + `develop` | Urgent fix. Delete after merge. |
-| `<centurion-name>` | `develop` | `develop` | Per-AI persistent workspace. Rebased onto develop regularly. |
+| `centurions/<name>` | `develop` | `develop` | Per-Centurion persistent workspace. Rebased onto develop regularly. |
 
 ## Per-Centurion Branches
 
@@ -43,11 +45,12 @@ Each Centurion AI gets a named branch — their persistent workspace.
 
 | Branch | Centurion | Role |
 |--------|-----------|------|
-| `titus` | Titus (#3) | Fleet Overseer, Prefect |
-| `eve` | Eve (#2) | Strategic AI (owned by Steve White) |
-| `adam` | Adam | Early deployment Centurion |
+| `centurions/titus` | Titus (#3) | Fleet Overseer, Prefect |
+| `centurions/eve` | Eve (#2) | Strategic AI (owned by Steve White) |
+| `centurions/adam` | Adam | Early deployment Centurion |
+| `centurions/template` | — | Template for new Centurion branches |
 
-To add a new Centurion: `git branch <name> develop && git push origin <name>`
+To create a new Centurion: `git checkout -b centurions/<name> origin/centurions/template && git push origin centurions/<name>`
 
 ## Naming Conventions
 
