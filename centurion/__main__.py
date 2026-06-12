@@ -7,6 +7,12 @@ Usage:
     python3 -m centurion fleet status      # Show fleet health
     python3 -m centurion fleet list        # List all Centurions
     python3 -m centurion deploy --name ...  # Deploy new Centurion
+    python3 -m centurion doc read <name>   # Read latest version of a document
+    python3 -m centurion doc publish <name> --file <path>  # Publish new version
+    python3 -m centurion doc status <name> # Check current version info
+    python3 -m centurion doc history <name> # View version history
+    python3 -m centurion doc list          # List all tracked documents
+    python3 -m centurion doc verify <name> # Verify @latest pointer integrity
 """
 
 import argparse
@@ -168,6 +174,116 @@ def deploy(args):
     deployer.deploy()
 
 
+# ── Document Versioning Commands ──────────────────────────────────
+
+def doc_read(args):
+    """Read the latest version of a document and print it."""
+    from centurion.docs.manager import DocumentManager, DocumentError
+    dm = DocumentManager()
+    try:
+        content, meta = dm.read(args.name)
+        print(f"─── {args.name} (v{meta.version}) ───")
+        print(f"Published: {meta.published_by} | {meta.lines} lines | {meta.bytes} bytes")
+        print(f"Checksum: {meta.checksum[:16]}...")
+        print(f"Summary: {meta.summary}")
+        print("─" * 40)
+        print(content)
+    except DocumentError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+def doc_publish(args):
+    """Publish a new version from a file."""
+    from centurion.docs.manager import DocumentManager
+    dm = DocumentManager()
+    file_path = args.file
+    if not os.path.exists(file_path):
+        print(f"Error: File not found: {file_path}")
+        sys.exit(1)
+    with open(file_path, "r") as f:
+        content = f.read()
+    version = dm.publish(
+        name=args.name,
+        content=content,
+        published_by=args.author,
+        summary=args.summary,
+    )
+    print(f"✅ Published {args.name} as v{version.version}")
+    print(f"   Path: {version.path}")
+    print(f"   Lines: {version.lines}")
+    print(f"   Checksum: {version.checksum[:16]}...")
+
+
+def doc_status(args):
+    """Show current version info for a document."""
+    from centurion.docs.manager import DocumentManager
+    dm = DocumentManager()
+    status = dm.status(args.name)
+    if status is None:
+        print(f"Document '{args.name}' has never been published.")
+        sys.exit(1)
+    print(f"─── {status['name']} ───")
+    print(f"  Version:       v{status['version']}")
+    print(f"  Path:          {status['path']}")
+    print(f"  On disk:       {'✅' if status['exists_on_disk'] else '❌'}")
+    print(f"  Checksum:      {status['checksum'][:16]}...")
+    print(f"  Bytes:         {status['bytes']:,}")
+    print(f"  Lines:         {status['lines']:,}")
+    print(f"  Published:     {status['published_at']}")
+    print(f"  Published by:  {status['published_by']}")
+    print(f"  Summary:       {status['summary']}")
+
+
+def doc_history(args):
+    """Show publication history for a document."""
+    from centurion.docs.manager import DocumentManager
+    dm = DocumentManager()
+    entries = dm.history(args.name, limit=args.limit)
+    if not entries:
+        print(f"No history for '{args.name}'.")
+        return
+    print(f"─── {args.name} History ───")
+    for e in entries:
+        print(f"  v{e['version']:2d} | {e['published_at']} | {e['published_by']:15s} | {e['checksum'][:12]}...")
+
+def doc_list(args):
+    """List all tracked documents."""
+    from centurion.docs.manager import DocumentManager
+    dm = DocumentManager()
+    docs = dm.list_documents()
+    if not docs:
+        print("No documents have been published yet.")
+        return
+    print(f"─── Tracked Documents ({len(docs)}) ───")
+    for name in docs:
+        st = dm.status(name)
+        if st:
+            v = st["version"]
+            s = st["summary"][:50] if st["summary"] else "(no summary)"
+            print(f"  {name:35s} | v{v:2d} | {s}")
+
+def doc_verify(args):
+    """Verify @latest pointer integrity."""
+    from centurion.docs.manager import DocumentManager
+    dm = DocumentManager()
+    result = dm.verify(args.name)
+    status = result["status"]
+    if status == "verified":
+        print(f"✅ {args.name} @latest is VERIFIED (v{result['version']}, checksum matches)")
+    elif status == "checksum_mismatch":
+        print(f"❌ {args.name} CHECKSUM MISMATCH")
+        print(f"   Expected: {result['expected_checksum'][:16]}...")
+        print(f"   Actual:   {result['actual_checksum'][:16]}...")
+        sys.exit(1)
+    elif status == "never_published":
+        print(f"⚠  {args.name} has never been published.")
+    elif status == "missing_file":
+        print(f"❌ {args.name} pointer exists but file is MISSING")
+        print(f"   Expected at: {result.get('expected_path')}")
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Centurion OS — Fleet Management CLI"
@@ -218,6 +334,43 @@ def main():
     p_dep.add_argument("--api-key", help="API key")
     p_dep.add_argument("--install-path", help="Custom install path")
     p_dep.set_defaults(func=deploy)
+
+    # ── doc ──
+    p_doc = subparsers.add_parser("doc", help="Document version management (@latest system)")
+    doc_sub = p_doc.add_subparsers(dest="doc_action")
+
+    # doc read
+    p_doc_read = doc_sub.add_parser("read", help="Read the latest version of a document")
+    p_doc_read.add_argument("name", help="Document name (e.g., centurion-business-plan)")
+    p_doc_read.set_defaults(func=doc_read)
+
+    # doc publish
+    p_doc_pub = doc_sub.add_parser("publish", help="Publish a new version of a document")
+    p_doc_pub.add_argument("name", help="Document name")
+    p_doc_pub.add_argument("--file", "-f", required=True, help="Path to the new content file")
+    p_doc_pub.add_argument("--author", default="centurion", help="Who is publishing this")
+    p_doc_pub.add_argument("--summary", "-m", default="", help="Summary of changes")
+    p_doc_pub.set_defaults(func=doc_publish)
+
+    # doc status
+    p_doc_st = doc_sub.add_parser("status", help="Show current version info for a document")
+    p_doc_st.add_argument("name", help="Document name")
+    p_doc_st.set_defaults(func=doc_status)
+
+    # doc history
+    p_doc_hist = doc_sub.add_parser("history", help="Show publication history for a document")
+    p_doc_hist.add_argument("name", help="Document name")
+    p_doc_hist.add_argument("--limit", type=int, default=10, help="Max entries")
+    p_doc_hist.set_defaults(func=doc_history)
+
+    # doc list
+    p_doc_ls = doc_sub.add_parser("list", help="List all tracked documents")
+    p_doc_ls.set_defaults(func=doc_list)
+
+    # doc verify
+    p_doc_vfy = doc_sub.add_parser("verify", help="Verify @latest pointer integrity")
+    p_doc_vfy.add_argument("name", help="Document name")
+    p_doc_vfy.set_defaults(func=doc_verify)
 
     args = parser.parse_args()
     if hasattr(args, "func"):
