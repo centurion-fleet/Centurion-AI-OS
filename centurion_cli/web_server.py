@@ -1541,8 +1541,13 @@ async def list_oauth_providers():
           expires_at       ISO timestamp string or null
           has_refresh_token bool
     """
+    from centurion_cli.billing import is_billing_enabled
+
     providers = []
-    for p in _OAUTH_PROVIDER_CATALOG:
+    catalog = _OAUTH_PROVIDER_CATALOG
+    if not is_billing_enabled():
+        catalog = tuple(p for p in catalog if p["id"] != "nous")
+    for p in catalog:
         status = _resolve_provider_status(p["id"], p.get("status_fn"))
         providers.append({
             "id": p["id"],
@@ -1847,6 +1852,15 @@ async def _start_device_code_flow(provider_id: str) -> Dict[str, Any]:
     then spawns a background poller. Returns the user-facing display fields
     so the UI can render the verification page link + user code.
     """
+    if provider_id == "nous":
+        from centurion_cli.billing import is_billing_enabled
+
+        if not is_billing_enabled():
+            raise HTTPException(
+                status_code=503,
+                detail="Centurion subscription billing is not available yet.",
+            )
+
     if provider_id == "nous":
         from centurion_cli.auth import (
             _nous_device_scope_with_env_override,

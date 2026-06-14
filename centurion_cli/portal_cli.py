@@ -1,13 +1,12 @@
-"""``hermes portal`` — small CLI surface for Nous Portal users.
+"""``centurion portal`` — Centurion subscription portal status and routing.
 
 Subcommands:
   status   Show Portal auth state + which Tool Gateway tools are routed.
-  open     Open the Portal subscription page in the user's default browser.
+  open     Open the subscription page in the user's default browser.
   tools    List Tool Gateway tools and which are active in the current config.
 
-This command is intentionally minimal — it does not duplicate functionality
-already in ``hermes auth`` or ``centurion tools``. It's a discovery + status
-surface for the Portal subscription itself.
+When ``billing.enabled`` is false (default until portal.personal-centurion.com
+is live), commands explain how to use bring-your-own-key providers instead.
 """
 from __future__ import annotations
 
@@ -15,11 +14,16 @@ import sys
 import webbrowser
 from typing import Optional
 
+from centurion_cli.billing import (
+    DEFAULT_CENTURION_PORTAL_URL,
+    billing_unavailable_message,
+    is_billing_enabled,
+)
 from centurion_cli.colors import Colors, color
 from centurion_cli.config import load_config
 
-DEFAULT_PORTAL_URL = "https://portal.nousresearch.com"
-SUBSCRIPTION_URL = "https://portal.nousresearch.com/manage-subscription"
+DEFAULT_PORTAL_URL = DEFAULT_CENTURION_PORTAL_URL
+SUBSCRIPTION_URL = f"{DEFAULT_CENTURION_PORTAL_URL}/manage-subscription"
 DOCS_URL = "https://centurion-os.nousresearch.com/docs/user-guide/features/tool-gateway"
 
 
@@ -36,8 +40,20 @@ def _nous_portal_base_url() -> str:
     return DEFAULT_PORTAL_URL
 
 
+def _billing_gate() -> bool:
+    """Print billing-unavailable message and return False if billing is off."""
+    if is_billing_enabled():
+        return True
+    print()
+    print(billing_unavailable_message())
+    return False
+
+
 def _cmd_status(args) -> int:
     """Show Portal auth + Tool Gateway routing summary."""
+    if not _billing_gate():
+        return 0
+
     from centurion_cli.auth import get_nous_auth_status
     from centurion_cli.nous_subscription import get_nous_subscription_features
 
@@ -51,8 +67,8 @@ def _cmd_status(args) -> int:
     logged_in = bool(auth.get("logged_in"))
 
     print()
-    print(color("  Nous Portal", Colors.MAGENTA))
-    print(color("  ───────────", Colors.MAGENTA))
+    print(color("  Centurion Portal", Colors.MAGENTA))
+    print(color("  ────────────────", Colors.MAGENTA))
     if logged_in:
         portal = auth.get("portal_base_url") or DEFAULT_PORTAL_URL
         print(f"  Auth:    {color('✓ logged in', Colors.GREEN)}")
@@ -63,17 +79,15 @@ def _cmd_status(args) -> int:
     else:
         print(f"  Auth:    {color('not logged in', Colors.YELLOW)}")
         print(f"  Sign up: {SUBSCRIPTION_URL}")
-        print(f"  Login:   hermes auth add nous --type oauth")
+        print(f"  Login:   centurion auth add nous --type oauth")
 
-    # Provider selection (independent of auth)
     model_cfg = config.get("model") if isinstance(config.get("model"), dict) else {}
     provider = str(model_cfg.get("provider") or "").strip().lower()
     if provider == "nous":
-        print(f"  Model:   {color('✓ using Nous as inference provider', Colors.GREEN)}")
+        print(f"  Model:   {color('✓ using Centurion Portal as inference provider', Colors.GREEN)}")
     elif provider:
-        print(f"  Model:   currently {provider} (switch with `hermes model`)")
+        print(f"  Model:   currently {provider} (switch with `centurion model`)")
 
-    # Tool Gateway routing
     print()
     print(color("  Tool Gateway", Colors.MAGENTA))
     print(color("  ────────────", Colors.MAGENTA))
@@ -89,7 +103,7 @@ def _cmd_status(args) -> int:
     rows = []
     for feat in features.items():
         if feat.managed_by_nous:
-            state = color("via Nous Portal", Colors.GREEN)
+            state = color("via Centurion Portal", Colors.GREEN)
         elif feat.active and feat.current_provider:
             state = feat.current_provider
         elif feat.active:
@@ -110,6 +124,9 @@ def _cmd_status(args) -> int:
 
 def _cmd_open(args) -> int:
     """Open the Portal subscription page in the default browser."""
+    if not _billing_gate():
+        return 1
+
     target = SUBSCRIPTION_URL
     print(f"Opening {target}")
     try:
@@ -125,6 +142,9 @@ def _cmd_open(args) -> int:
 
 def _cmd_tools(args) -> int:
     """List the Tool Gateway catalog + current routing."""
+    if not _billing_gate():
+        return 1
+
     from centurion_cli.nous_subscription import get_nous_subscription_features
 
     config = load_config() or {}
@@ -134,7 +154,6 @@ def _cmd_tools(args) -> int:
         print("Could not resolve Tool Gateway state.", file=sys.stderr)
         return 1
 
-    # Static catalog — the partners Tool Gateway routes to today.
     catalog = [
         ("web",       "Web search & extract",  "Firecrawl"),
         ("image_gen", "Image generation",      "FAL"),
@@ -148,7 +167,7 @@ def _cmd_tools(args) -> int:
     print(color("  ────────────────────", Colors.MAGENTA))
 
     if not features.nous_auth_present:
-        print(color("  Not logged into Nous Portal — sign in with `hermes auth add nous --type oauth`.", Colors.YELLOW))
+        print(color("  Not logged into Centurion Portal — sign in with `centurion auth add nous --type oauth`.", Colors.YELLOW))
         print()
 
     label_width = max(len(label) for _, label, _ in catalog)
@@ -157,7 +176,7 @@ def _cmd_tools(args) -> int:
         if feat is None:
             state = color("unknown", Colors.DIM)
         elif feat.managed_by_nous:
-            state = color("✓ via Nous Portal", Colors.GREEN)
+            state = color("✓ via Centurion Portal", Colors.GREEN)
         elif feat.active and feat.current_provider:
             state = feat.current_provider
         elif feat.active:
@@ -173,11 +192,9 @@ def _cmd_tools(args) -> int:
 
 
 def portal_command(args) -> int:
-    """Top-level dispatch for `hermes portal <subcommand>`."""
+    """Top-level dispatch for `centurion portal <subcommand>`."""
     sub = getattr(args, "portal_command", None)
     if sub in {None, ""}:
-        # Default to status — matches gh / kubectl conventions where the
-        # subcommand-less form gives a useful overview.
         return _cmd_status(args)
     if sub == "status":
         return _cmd_status(args)
@@ -186,19 +203,18 @@ def portal_command(args) -> int:
     if sub == "tools":
         return _cmd_tools(args)
     print(f"Unknown portal subcommand: {sub}", file=sys.stderr)
-    print("Run `hermes portal -h` for usage.", file=sys.stderr)
+    print("Run `centurion portal -h` for usage.", file=sys.stderr)
     return 1
 
 
 def add_parser(subparsers) -> None:
-    """Register `hermes portal` on the given argparse subparsers object."""
+    """Register `centurion portal` on the given argparse subparsers object."""
     portal_parser = subparsers.add_parser(
         "portal",
-        help="Nous Portal status, subscription, and Tool Gateway routing",
+        help="Centurion Portal status, subscription, and Tool Gateway routing",
         description=(
-            "Inspect Nous Portal auth, Tool Gateway routing, and open the "
-            "Portal subscription page. Subcommands: status (default), "
-            "open, tools."
+            "Inspect Centurion Portal auth, Tool Gateway routing, and open the "
+            "subscription page. Subcommands: status (default), open, tools."
         ),
     )
     portal_sub = portal_parser.add_subparsers(dest="portal_command")
@@ -209,11 +225,11 @@ def add_parser(subparsers) -> None:
     )
     portal_sub.add_parser(
         "open",
-        help="Open the Portal subscription page in your default browser",
+        help="Open the subscription page in your default browser",
     )
     portal_sub.add_parser(
         "tools",
-        help="List Tool Gateway tools and which are routed via Nous",
+        help="List Tool Gateway tools and which are routed via Centurion Portal",
     )
 
     portal_parser.set_defaults(func=portal_command)

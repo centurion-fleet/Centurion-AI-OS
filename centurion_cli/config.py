@@ -1714,6 +1714,15 @@ DEFAULT_CONFIG = {
         "force_ipv4": False,
     },
 
+    # Centurion subscription billing (portal.personal-centurion.com + Lago).
+    # When false (default), Nous/Hermes Portal OAuth is hidden and users
+    # configure bring-your-own-key providers via centurion setup / model.
+    "billing": {
+        "enabled": False,
+        "portal_url": "https://portal.personal-centurion.com",
+        "inference_url": "https://inference-api.personal-centurion.com/v1",
+    },
+
     # Gateway settings — control how messaging platforms (Telegram, Discord,
     # Slack, etc.) deliver agent-produced files as native attachments.
     "gateway": {

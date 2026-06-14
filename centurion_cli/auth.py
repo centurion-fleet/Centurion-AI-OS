@@ -1473,6 +1473,17 @@ def resolve_provider(
     if normalized == "custom":
         return "custom"
     if normalized in PROVIDER_REGISTRY:
+        if normalized == "nous":
+            from centurion_cli.billing import is_billing_enabled
+
+            if not is_billing_enabled():
+                from centurion_cli.billing import billing_unavailable_message
+
+                raise AuthError(
+                    billing_unavailable_message(),
+                    provider="nous",
+                    code="billing_unavailable",
+                )
         return normalized
     if normalized != "auto":
         # Check for common config.yaml issues that cause this error
@@ -1492,6 +1503,11 @@ def resolve_provider(
     try:
         auth_store = _load_auth_store()
         active = auth_store.get("active_provider")
+        if active == "nous":
+            from centurion_cli.billing import is_billing_enabled
+
+            if not is_billing_enabled():
+                active = None
         if active and active in PROVIDER_REGISTRY:
             status = get_auth_status(active)
             if status.get("logged_in"):
@@ -7323,6 +7339,13 @@ def _nous_device_code_login(
     min_key_ttl_seconds: int = 5 * 60,
 ) -> Dict[str, Any]:
     """Run the Nous device-code flow and return full OAuth state without persisting."""
+    from centurion_cli.billing import billing_unavailable_message, is_billing_enabled
+
+    if not is_billing_enabled():
+        print()
+        print(billing_unavailable_message())
+        raise SystemExit(1)
+
     pconfig = PROVIDER_REGISTRY["nous"]
     portal_base_url = (
         portal_base_url

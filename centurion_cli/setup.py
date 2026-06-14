@@ -178,19 +178,19 @@ def is_interactive_stdin() -> bool:
 def print_noninteractive_setup_guidance(reason: str | None = None) -> None:
     """Print guidance for headless/non-interactive setup flows."""
     print()
-    print(color("⚕ Hermes Setup — Non-interactive mode", Colors.CYAN, Colors.BOLD))
+    print(color("⚕ Centurion Setup — Non-interactive mode", Colors.CYAN, Colors.BOLD))
     print()
     if reason:
         print_info(reason)
     print_info("The interactive wizard cannot be used here.")
     print()
-    print_info("Configure Hermes using environment variables or config commands:")
-    print_info("  hermes config set model.provider custom")
-    print_info("  hermes config set model.base_url http://localhost:8080/v1")
-    print_info("  hermes config set model.default your-model-name")
+    print_info("Configure Centurion using environment variables or config commands:")
+    print_info("  centurion config set model.provider custom")
+    print_info("  centurion config set model.base_url http://localhost:8080/v1")
+    print_info("  centurion config set model.default your-model-name")
     print()
     print_info("Or set OPENROUTER_API_KEY / OPENAI_API_KEY in your environment.")
-    print_info("Run 'hermes setup' in an interactive terminal to use the full wizard.")
+    print_info("Run 'centurion setup' in an interactive terminal to use the full wizard.")
     print()
 
 
@@ -814,7 +814,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
     except Exception as exc:
         logger.debug("select_provider_and_model error during setup: %s", exc)
         print_warning(f"Provider setup encountered an error: {exc}")
-        print_info("You can try again later with: hermes model")
+        print_info("You can try again later with: centurion model")
 
     # Re-sync the wizard's config dict from what cmd_model saved to disk.
     # This is critical: cmd_model writes to disk via its own load/save cycle,
@@ -3046,14 +3046,33 @@ SETUP_SECTIONS = [
 
 
 def _run_portal_one_shot(config: dict) -> None:
-    """One-shot Nous Portal setup — OAuth + provider switch + Tool Gateway.
+    """One-shot Centurion Portal setup — OAuth + provider switch + Tool Gateway.
 
-    Wired into ``hermes setup --portal``. Does NOT prompt for anything
-    besides what the underlying OAuth + Tool Gateway prompts already need.
-    Designed to be shareable as a single command (``hermes setup --portal``)
-    that gets a brand-new user from zero to a fully working Hermes session
-    with web/image/tts/browser tools all routed via their Portal sub.
+    Wired into ``centurion setup --portal``. Requires ``billing.enabled`` in
+    config.yaml. When billing is not yet live, directs users to BYOK setup.
     """
+    from centurion_cli.billing import billing_unavailable_message, is_billing_enabled
+
+    if not is_billing_enabled(config):
+        print()
+        print(
+            color(
+                "┌─────────────────────────────────────────────────────────┐",
+                Colors.MAGENTA,
+            )
+        )
+        print(color("│     ⚕ Centurion Setup — Subscription (not yet live)    │", Colors.MAGENTA))
+        print(
+            color(
+                "└─────────────────────────────────────────────────────────┘",
+                Colors.MAGENTA,
+            )
+        )
+        print()
+        print(billing_unavailable_message())
+        print()
+        return
+
     from types import SimpleNamespace
 
     from centurion_cli.auth_commands import auth_add_command
@@ -3068,7 +3087,7 @@ def _run_portal_one_shot(config: dict) -> None:
             Colors.MAGENTA,
         )
     )
-    print(color("│     ⚕ Hermes Setup — Nous Portal (one-shot)             │", Colors.MAGENTA))
+    print(color("│     ⚕ Centurion Setup — Portal (one-shot)               │", Colors.MAGENTA))
     print(
         color(
             "└─────────────────────────────────────────────────────────┘",
@@ -3078,9 +3097,11 @@ def _run_portal_one_shot(config: dict) -> None:
     print()
     print_info("  One subscription, 300+ models, plus the Tool Gateway:")
     print_info("    web search, image generation, TTS, browser automation")
-    print_info("    — all routed through your Nous Portal sub.")
+    print_info("    — all routed through your Centurion Portal subscription.")
     print()
-    print_info("  Sign up: https://portal.nousresearch.com/manage-subscription")
+    from centurion_cli.billing import DEFAULT_CENTURION_PORTAL_URL
+
+    print_info(f"  Sign up: {DEFAULT_CENTURION_PORTAL_URL}/manage-subscription")
     print()
 
     # Skip OAuth if already logged in (don't re-prompt every time the user
@@ -3092,7 +3113,7 @@ def _run_portal_one_shot(config: dict) -> None:
         already_logged_in = False
 
     if already_logged_in:
-        print_success("  Already logged into Nous Portal.")
+        print_success("  Already logged into Centurion Portal.")
     else:
         # Hand off to the shared auth wiring so the device-code flow is
         # identical to `hermes auth add nous --type oauth`. SimpleNamespace
@@ -3117,7 +3138,7 @@ def _run_portal_one_shot(config: dict) -> None:
         except SystemExit as e:
             print()
             print_error(f"  Nous Portal login failed (exit {e.code}).")
-            print_info("  You can retry later with `hermes auth add nous --type oauth`.")
+            print_info("  You can retry later with `centurion auth add nous --type oauth`.")
             return
         except (KeyboardInterrupt, EOFError):
             print()
@@ -3126,7 +3147,7 @@ def _run_portal_one_shot(config: dict) -> None:
         except Exception as exc:
             print()
             print_error(f"  Nous Portal login failed: {exc}")
-            print_info("  You can retry later with `hermes auth add nous --type oauth`.")
+            print_info("  You can retry later with `centurion auth add nous --type oauth`.")
             return
 
     # Set provider → nous so the model picker, status surfaces, and
@@ -3230,7 +3251,7 @@ def run_setup_wizard(args):
                         Colors.MAGENTA,
                     )
                 )
-                print(color(f"│     ⚕ Hermes Setup — {label:<34s} │", Colors.MAGENTA))
+                print(color(f"│     ⚕ Centurion Setup — {label:<34s} │", Colors.MAGENTA))
                 print(
                     color(
                         "└─────────────────────────────────────────────────────────┘",
@@ -3266,7 +3287,7 @@ def run_setup_wizard(args):
     )
     print(
         color(
-            "│             ⚕ Hermes Agent Setup Wizard                │", Colors.MAGENTA
+            "│             ⚕ Centurion AI OS Setup Wizard             │", Colors.MAGENTA
         )
     )
     print(
@@ -3277,7 +3298,7 @@ def run_setup_wizard(args):
     )
     print(
         color(
-            "│  Let's configure your Hermes Agent installation.       │", Colors.MAGENTA
+            "│  Let's configure your Centurion AI OS installation.    │", Colors.MAGENTA
         )
     )
     print(
@@ -3306,11 +3327,11 @@ def run_setup_wizard(args):
 
         print()
         print_header("Reconfigure")
-        print_success("You already have Hermes configured.")
+        print_success("You already have Centurion configured.")
         print_info("Running the full wizard — each prompt shows your current value.")
         print_info("Press Enter to keep it, or type a new value to change it.")
         print_info("")
-        print_info("Tip: jump straight to a section with 'hermes setup model|terminal|")
+        print_info("Tip: jump straight to a section with 'centurion setup model|terminal|")
         print_info("     gateway|tools|agent', or fill only missing items with --quick.")
         # Fall through to the "Full Setup — run all sections" block below.
         # --reconfigure is now the default on existing installs; the flag
@@ -3330,7 +3351,7 @@ def run_setup_wizard(args):
         if migration_ran:
             config = load_config()
 
-        setup_mode = prompt_choice("How would you like to set up Hermes?", [
+        setup_mode = prompt_choice("How would you like to set up Centurion?", [
             "Quick setup — provider, model & messaging (recommended)",
             "Full setup — configure everything",
         ], 0)
@@ -3346,7 +3367,7 @@ def run_setup_wizard(args):
     print_info(f"Data folder:  {centurion_home}")
     print_info(f"Install dir:  {PROJECT_ROOT}")
     print()
-    print_info("You can edit these files directly or use 'hermes config edit'")
+    print_info("You can edit these files directly or use 'centurion config edit'")
 
     if migration_ran:
         print()

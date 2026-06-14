@@ -247,6 +247,13 @@ def auth_add_command(args) -> None:
         return
 
     if provider == "nous":
+        from centurion_cli.billing import billing_unavailable_message, is_billing_enabled
+
+        if not is_billing_enabled():
+            print()
+            print(billing_unavailable_message())
+            raise SystemExit(1)
+
         # Codex-style auto-import: if a shared Nous credential lives at
         # <hermes-root>/shared/nous_auth.json (written by any previous
         # successful login), offer to import it instead of running the

@@ -2314,7 +2314,7 @@ def select_provider_and_model(args=None):
     if active == "openrouter" and get_env_value("OPENAI_BASE_URL"):
         active = "custom"
 
-    from centurion_cli.models import CANONICAL_PROVIDERS, _PROVIDER_LABELS
+    from centurion_cli.models import CANONICAL_PROVIDERS, _PROVIDER_LABELS, get_picker_providers
 
     provider_labels = dict(_PROVIDER_LABELS)  # derive from canonical list
     if active and active in _custom_provider_map:
@@ -2327,8 +2327,8 @@ def select_provider_and_model(args=None):
     print(f"  Active provider:  {active_label}")
     print()
 
-    # Step 1: Provider selection — flat list from CANONICAL_PROVIDERS
-    all_providers = [(p.slug, p.tui_desc) for p in CANONICAL_PROVIDERS]
+    # Step 1: Provider selection — flat list from get_picker_providers()
+    all_providers = [(p.slug, p.tui_desc) for p in get_picker_providers()]
 
     for key, provider_info in _custom_provider_map.items():
         name = provider_info["name"]
@@ -3017,6 +3017,14 @@ def _model_flow_ai_gateway(config, current_model=""):
 
 def _model_flow_nous(config, current_model="", args=None):
     """Nous Portal provider: ensure logged in, then pick model."""
+    from centurion_cli.billing import billing_unavailable_message, is_billing_enabled
+
+    if not is_billing_enabled(config):
+        print()
+        print(billing_unavailable_message())
+        print()
+        return
+
     from centurion_cli.auth import (
         get_provider_auth_state,
         _prompt_model_selection,
