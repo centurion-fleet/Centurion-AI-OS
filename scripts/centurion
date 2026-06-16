@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+"""Development launcher — delegates to centurion_cli.main."""
+
+from centurion_cli.main import main
+
+if __name__ == "__main__":
+    main()

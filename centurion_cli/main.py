@@ -6199,6 +6199,13 @@ def cmd_kanban(args):
     return kanban_command(args)
 
 
+def cmd_fleet(args):
+    """Fleet registry, health, policies, and deployment."""
+    from centurion_cli.fleet import fleet_command
+
+    return fleet_command(args)
+
+
 def cmd_hooks(args):
     """Shell-hook inspection and management."""
     from centurion_cli.hooks import hooks_command
@@ -6792,7 +6799,7 @@ def _print_curator_first_run_notice() -> None:
     print("  Preview now:  centurion curator run --dry-run")
     print("  Pause it:     centurion curator pause")
     print(
-        "  Docs:         https://centurion-os.nousresearch.com/docs/user-guide/features/curator"
+        "  Docs:         https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs/user-guide/features/curator"
     )
 
 
@@ -6998,7 +7005,7 @@ def _update_via_zip(args):
 
     branch = "main"
     zip_url = (
-        f"https://github.com/NousResearch/centurion-os/archive/refs/heads/{branch}.zip"
+        f"https://github.com/centurion-fleet/Centurion-AI-OS/archive/refs/heads/{branch}.zip"
     )
 
     print("→ Downloading latest version...")
@@ -7336,12 +7343,12 @@ def _restore_stashed_changes(
 # =========================================================================
 
 OFFICIAL_REPO_URLS = {
-    "https://github.com/NousResearch/centurion-os.git",
-    "git@github.com:NousResearch/centurion-os.git",
-    "https://github.com/NousResearch/centurion-os",
-    "git@github.com:NousResearch/centurion-os",
+    "https://github.com/centurion-fleet/Centurion-AI-OS.git",
+    "https://github.com/centurion-fleet/Centurion-AI-OS",
+    "git@github.com:centurion-fleet/Centurion-AI-OS.git",
+    "git@github.com:centurion-fleet/Centurion-AI-OS",
 }
-OFFICIAL_REPO_URL = "https://github.com/NousResearch/centurion-os.git"
+OFFICIAL_REPO_URL = "https://github.com/centurion-fleet/Centurion-AI-OS.git"
 SKIP_UPSTREAM_PROMPT_FILE = ".skip_upstream_prompt"
 
 
@@ -7475,7 +7482,7 @@ def _sync_with_upstream_if_needed(git_cmd: list[str], cwd: Path) -> None:
         # Ask user if they want to add upstream
         print()
         print("ℹ Your fork is not tracking the official Centurion repository.")
-        print("  This means you may miss updates from NousResearch/centurion-os.")
+        print("  This means you may miss updates from centurion-fleet/Centurion-AI-OS.")
         print()
         try:
             response = (
@@ -7489,7 +7496,7 @@ def _sync_with_upstream_if_needed(git_cmd: list[str], cwd: Path) -> None:
             print("→ Adding upstream remote...")
             if _add_upstream_remote(git_cmd, cwd):
                 print(
-                    "  ✓ Added upstream: https://github.com/NousResearch/centurion-os.git"
+                    "  ✓ Added upstream: https://github.com/centurion-fleet/Centurion-AI-OS.git"
                 )
                 has_upstream = True
             else:
@@ -7497,7 +7504,7 @@ def _sync_with_upstream_if_needed(git_cmd: list[str], cwd: Path) -> None:
                 return
         else:
             print(
-                "  Skipped. Run 'git remote add upstream https://github.com/NousResearch/centurion-os.git' to add later."
+                "  Skipped. Run 'git remote add upstream https://github.com/centurion-fleet/Centurion-AI-OS.git' to add later."
             )
             _mark_skip_upstream_prompt()
             return
@@ -8766,7 +8773,7 @@ def _cmd_update_impl(args, gateway_mode: bool):
                 return
             print("✗ Not a git repository. Please reinstall:")
             print(
-                "  curl -fsSL https://raw.githubusercontent.com/NousResearch/centurion-os/main/scripts/install.sh | bash"
+                "  curl -fsSL https://raw.githubusercontent.com/centurion-fleet/Centurion-AI-OS/main/scripts/install.sh | bash"
             )
             sys.exit(1)
 
@@ -10767,7 +10774,7 @@ _BUILTIN_SUBCOMMANDS = frozenset(
         "acp", "auth", "backup", "bundles", "checkpoints", "claw", "completion",
         "computer-use",
         "config", "cron", "curator", "dashboard", "debug", "doctor",
-        "dump", "fallback", "gateway", "hooks", "import", "insights",
+        "dump", "fallback", "fleet", "gateway", "hooks", "import", "insights",
         "kanban", "login", "logout", "logs", "lsp", "mcp", "memory", "migrate",
         "model", "pairing", "plugins", "portal", "postinstall", "profile", "proxy",
         "send", "sessions", "setup",
@@ -11134,7 +11141,7 @@ def main():
             "Manage the fallback provider chain.  Fallback providers are tried "
             "in order when the primary model fails with rate-limit, overload, or "
             "connection errors.  See: "
-            "https://centurion-os.nousresearch.com/docs/user-guide/features/fallback-providers"
+            "https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs/user-guide/features/fallback-providers"
         ),
     )
     fallback_subparsers = fallback_parser.add_subparsers(dest="fallback_command")
@@ -11168,7 +11175,7 @@ def main():
             "Pull API keys from an external secret manager at process startup "
             "instead of storing them in ~/.centurion/.env.  Currently supports "
             "Bitwarden Secrets Manager.  See: "
-            "https://centurion-os.nousresearch.com/docs/user-guide/secrets/bitwarden"
+            "https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs/user-guide/secrets/bitwarden"
         ),
     )
     secrets_subparsers = secrets_parser.add_subparsers(dest="secrets_command")
@@ -12001,6 +12008,14 @@ def main():
 
     kanban_parser = _build_kanban_parser(subparsers)
     kanban_parser.set_defaults(func=cmd_kanban)
+
+    # =========================================================================
+    # fleet command — registry, health, policies, deploy
+    # =========================================================================
+    from centurion_cli.fleet import build_parser as _build_fleet_parser
+
+    fleet_parser = _build_fleet_parser(subparsers)
+    fleet_parser.set_defaults(func=cmd_fleet)
 
     # =========================================================================
     # hooks command — shell-hook inspection and management

@@ -8,7 +8,7 @@ from pathlib import Path
 
 def test_launcher_delegates_to_argparse_entrypoint(monkeypatch):
     """`./centurion` should use `centurion_cli.main`, not the legacy Fire wrapper."""
-    launcher_path = Path(__file__).resolve().parents[2] / "centurion"
+    launcher_path = Path(__file__).resolve().parents[2] / "scripts" / "centurion"
     called = []
 
     fake_main_module = types.ModuleType("centurion_cli.main")
