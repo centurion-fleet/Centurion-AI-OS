@@ -13913,7 +13913,7 @@ class GatewayRunner:
 
         hermes_cmd = _resolve_centurion_bin()
         if not hermes_cmd:
-            return t("gateway.update.hermes_cmd_not_found")
+            return t("gateway.update.centurion_cmd_not_found")
 
         pending_path = _centurion_home / ".update_pending.json"
         output_path = _centurion_home / ".update_output.txt"
