@@ -73,7 +73,7 @@ def _find_git_root(start: Path) -> Optional[Path]:
     return None
 
 
-_HERMES_MD_NAMES = (".centurion.md", "CENTURION.md")
+_CENTURION_MD_NAMES = (".centurion.md", "CENTURION.md")
 
 
 def _find_centurion_md(cwd: Path) -> Optional[Path]:
@@ -87,7 +87,7 @@ def _find_centurion_md(cwd: Path) -> Optional[Path]:
     current = cwd.resolve()
 
     for directory in [current, *current.parents]:
-        for name in _HERMES_MD_NAMES:
+        for name in _CENTURION_MD_NAMES:
             candidate = directory / name
             if candidate.is_file():
                 return candidate
@@ -128,7 +128,7 @@ DEFAULT_AGENT_IDENTITY = (
     "Be targeted and efficient in your exploration and investigations."
 )
 
-HERMES_AGENT_HELP_GUIDANCE = (
+CENTURION_AGENT_HELP_GUIDANCE = (
     "If the user asks about configuring, setting up, or using Centurion AI OS "
     "itself, load the `centurion-os` skill with skill_view(name='centurion-os') "
     "before answering. Docs: https://centurion-os.nousresearch.com/docs"
@@ -176,7 +176,7 @@ KANBAN_GUIDANCE = (
     "# Kanban task execution protocol\n"
     "You have been assigned ONE task from "
     "the shared board at `~/.centurion/kanban.db`. Your task id is in "
-    "`$HERMES_KANBAN_TASK`; your workspace is `$HERMES_KANBAN_WORKSPACE`. "
+    "`$CENTURION_KANBAN_TASK`; your workspace is `$CENTURION_KANBAN_WORKSPACE`. "
     "The `kanban_*` tools in your schema are your primary coordination surface — "
     "they write directly to the shared SQLite DB and work regardless of terminal "
     "backend (local/docker/modal/ssh).\n"
@@ -188,7 +188,7 @@ KANBAN_GUIDANCE = (
     "metadata), any prior attempts on this task if you're a retry, the full "
     "comment thread, and a pre-formatted `worker_context` you can treat as "
     "ground truth.\n"
-    "2. **Work inside the workspace.** `cd $HERMES_KANBAN_WORKSPACE` before "
+    "2. **Work inside the workspace.** `cd $CENTURION_KANBAN_WORKSPACE` before "
     "any file operations. The workspace is yours for this run. Don't modify "
     "files outside it unless the task explicitly asks.\n"
     "3. **Heartbeat on long operations.** Call `kanban_heartbeat(note=...)` "
@@ -1010,8 +1010,8 @@ def build_skills_system_prompt(
     # produce distinct cache entries (gateway serves multiple platforms).
     from gateway.session_context import get_session_env
     _platform_hint = (
-        os.environ.get("HERMES_PLATFORM")
-        or get_session_env("HERMES_SESSION_PLATFORM")
+        os.environ.get("CENTURION_PLATFORM")
+        or get_session_env("CENTURION_SESSION_PLATFORM")
         or ""
     )
     disabled = get_disabled_skill_names()
@@ -1337,7 +1337,7 @@ def _load_centurion_md(cwd_path: Path) -> str:
         content = _strip_yaml_frontmatter(content)
         rel = centurion_md_path.name
         try:
-            rel = str(hermes_md_path.relative_to(cwd_path))
+            rel = str(centurion_md_path.relative_to(cwd_path))
         except ValueError:
             pass
         content = _scan_context_content(content, rel)

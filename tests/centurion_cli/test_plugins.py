@@ -106,7 +106,7 @@ class TestPluginDiscovery:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         monkeypatch.chdir(project_dir)
-        monkeypatch.setenv("HERMES_ENABLE_PROJECT_PLUGINS", "true")
+        monkeypatch.setenv("CENTURION_ENABLE_PROJECT_PLUGINS", "true")
         plugins_dir = project_dir / ".centurion" / "plugins"
         _make_plugin_dir(plugins_dir, "proj_plugin")
 
@@ -244,12 +244,12 @@ class TestPluginLoading:
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path / "centurion_test"))
 
         # Clean up any prior namespace module
-        sys.modules.pop("hermes_plugins.ns_plugin", None)
+        sys.modules.pop("centurion_plugins.ns_plugin", None)
 
         mgr = PluginManager()
         mgr.discover_and_load()
 
-        assert "hermes_plugins.ns_plugin" in sys.modules
+        assert "centurion_plugins.ns_plugin" in sys.modules
 
     def test_user_memory_plugin_auto_coerced_to_exclusive(self, tmp_path, monkeypatch):
         """User-installed memory plugins must NOT be loaded by the general
@@ -1447,11 +1447,11 @@ class TestPluginDispatchTool:
 
 
 class TestPluginDebugLogging:
-    """HERMES_PLUGINS_DEBUG opt-in stderr handler for plugin developers."""
+    """CENTURION_PLUGINS_DEBUG opt-in stderr handler for plugin developers."""
 
     def test_debug_handler_not_installed_when_env_var_absent(self, monkeypatch):
         """Without the env var, no stderr handler is attached."""
-        monkeypatch.delenv("HERMES_PLUGINS_DEBUG", raising=False)
+        monkeypatch.delenv("CENTURION_PLUGINS_DEBUG", raising=False)
         from centurion_cli import plugins as plugins_mod
 
         # Snapshot, then force a re-evaluation.
@@ -1471,8 +1471,8 @@ class TestPluginDebugLogging:
             plugins_mod.logger.handlers = original_handlers
 
     def test_debug_handler_installed_when_env_var_set(self, monkeypatch):
-        """With HERMES_PLUGINS_DEBUG=1, a DEBUG-level stderr handler is attached."""
-        monkeypatch.setenv("HERMES_PLUGINS_DEBUG", "1")
+        """With CENTURION_PLUGINS_DEBUG=1, a DEBUG-level stderr handler is attached."""
+        monkeypatch.setenv("CENTURION_PLUGINS_DEBUG", "1")
         from centurion_cli import plugins as plugins_mod
 
         original_installed = plugins_mod._DEBUG_HANDLER_INSTALLED
@@ -1499,7 +1499,7 @@ class TestPluginDebugLogging:
 
     def test_debug_handler_idempotent(self, monkeypatch):
         """Calling install twice (without force) does not double-attach."""
-        monkeypatch.setenv("HERMES_PLUGINS_DEBUG", "1")
+        monkeypatch.setenv("CENTURION_PLUGINS_DEBUG", "1")
         from centurion_cli import plugins as plugins_mod
 
         original_installed = plugins_mod._DEBUG_HANDLER_INSTALLED

@@ -3,8 +3,8 @@ version: "1.0.0"
 description: "Optional Langfuse observability for Centurion — traces conversations, LLM calls, and tool usage. Opt-in via `centurion plugins enable observability/langfuse` (or check the box in `centurion plugins`)."
 author: NousResearch
 requires_env:
-  - HERMES_LANGFUSE_PUBLIC_KEY
-  - HERMES_LANGFUSE_SECRET_KEY
+  - CENTURION_LANGFUSE_PUBLIC_KEY
+  - CENTURION_LANGFUSE_SECRET_KEY
 hooks:
   - pre_api_request
   - post_api_request

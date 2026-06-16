@@ -447,7 +447,7 @@ def cmd_setup(args) -> None:
         centurion_host["observationMode"] = "directional"
 
     # --- 5. Write frequency ---
-    current_wf = str(hermes_host.get("writeFrequency") or cfg.get("writeFrequency", "async"))
+    current_wf = str(centurion_host.get("writeFrequency") or cfg.get("writeFrequency", "async"))
     print("\n  Write frequency:")
     print("    async   -- background thread, no token cost (recommended)")
     print("    turn    -- sync write after every turn")
@@ -490,7 +490,7 @@ def cmd_setup(args) -> None:
             pass  # keep current
 
     # --- 7b. Dialectic cadence ---
-    current_dialectic = str(hermes_host.get("dialecticCadence") or cfg.get("dialecticCadence") or "2")
+    current_dialectic = str(centurion_host.get("dialecticCadence") or cfg.get("dialecticCadence") or "2")
     print("\n  Dialectic cadence:")
     print("    How often Honcho rebuilds its user model (LLM call on Honcho backend).")
     print("    1 = every turn, 2 = every other turn, 3+ = sparser.")

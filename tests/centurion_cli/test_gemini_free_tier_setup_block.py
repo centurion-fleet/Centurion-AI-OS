@@ -16,9 +16,9 @@ def config_home(tmp_path, monkeypatch):
     monkeypatch.setenv("CENTURION_HOME", str(home))
     # Clear any ambient env that could alter provider resolution
     for var in (
-        "HERMES_MODEL",
+        "CENTURION_MODEL",
         "LLM_MODEL",
-        "HERMES_INFERENCE_PROVIDER",
+        "CENTURION_INFERENCE_PROVIDER",
         "OPENAI_BASE_URL",
         "OPENAI_API_KEY",
         "GEMINI_BASE_URL",

@@ -549,8 +549,8 @@ class VercelSandboxEnvironment(BaseEnvironment):
             if self._remote_home == "/"
             else f"{self._remote_home.rstrip('/')}/.centurion"
         )
-        archive_member = remote_hermes.lstrip("/")
-        remote_tar = f"/tmp/.hermes_sync.{os.getpid()}.tar"
+        archive_member = remote_centurion.lstrip("/")
+        remote_tar = f"/tmp/.centurion_sync.{os.getpid()}.tar"
         sandbox = self._sandbox
         if sandbox is None:
             raise RuntimeError("Vercel sandbox is not attached")

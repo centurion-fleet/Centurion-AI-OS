@@ -11,7 +11,7 @@ The `execute_code` tool lets the agent write Python scripts that call Centurion 
 ## How It Works
 
 1. The agent writes a Python script using `from centurion_tools import ...`
-2. Centurion generates a `hermes_tools.py` stub module with RPC functions
+2. Centurion generates a `centurion_tools.py` stub module with RPC functions
 3. Centurion opens a Unix domain socket and starts an RPC listener thread
 4. The script runs in a child process — tool calls travel over the socket back to Centurion
 5. Only the script's `print()` output is returned to the LLM; intermediate tool results never enter the context window
@@ -219,7 +219,7 @@ terminal:
 
 See the [Security guide](/user-guide/security#environment-variable-passthrough) for full details.
 
-Centurion always writes the script and the auto-generated `hermes_tools.py` RPC stub into a temp staging directory that is cleaned up after execution. In `strict` mode the script also *runs* there; in `project` mode it runs in the session's working directory (the staging directory stays on `PYTHONPATH` so imports still resolve). The child process runs in its own process group so it can be cleanly killed on timeout or interruption.
+Centurion always writes the script and the auto-generated `centurion_tools.py` RPC stub into a temp staging directory that is cleaned up after execution. In `strict` mode the script also *runs* there; in `project` mode it runs in the session's working directory (the staging directory stays on `PYTHONPATH` so imports still resolve). The child process runs in its own process group so it can be cleanly killed on timeout or interruption.
 
 ## execute_code vs terminal
 

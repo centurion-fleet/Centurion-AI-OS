@@ -104,7 +104,7 @@ def adapter():
         tree=FakeTree(),
         get_channel=lambda _id: None,
         fetch_channel=AsyncMock(),
-        user=SimpleNamespace(id=99999, name="HermesBot"),
+        user=SimpleNamespace(id=99999, name="CenturionBot"),
     )
     adapter._text_batch_delay_seconds = 0  # disable batching for tests
     # Slash auth is exercised in test_discord_slash_auth.py — bypass it here
@@ -769,7 +769,7 @@ def test_discord_auto_thread_config_bridge(monkeypatch, tmp_path):
     }))
 
     monkeypatch.delenv("DISCORD_AUTO_THREAD", raising=False)
-    monkeypatch.setenv("CENTURION_HOME", str(hermes_dir))
+    monkeypatch.setenv("CENTURION_HOME", str(centurion_dir))
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
     from gateway.config import load_gateway_config

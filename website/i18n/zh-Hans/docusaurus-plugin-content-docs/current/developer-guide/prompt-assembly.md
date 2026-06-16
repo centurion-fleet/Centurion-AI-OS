@@ -241,7 +241,7 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 - 项目上下文文件，如 `.centurion.md`、`CENTURION.md`、`AGENTS.md`、`CLAUDE.md` 或 `.cursorrules` — 注入仓库特定的工作规则。
 - Skills — 打包可复用的工作流和参考资料，无需编辑核心 prompt 代码。
 - 可选系统 prompt 配置 / API 覆盖 — 添加部署特定的指令文本，无需 fork Centurion。
-- 临时覆盖层，如 `HERMES_EPHEMERAL_SYSTEM_PROMPT` 或 prefill 消息 — 添加不应成为已缓存 prompt 前缀一部分的轮次级指导。
+- 临时覆盖层，如 `CENTURION_EPHEMERAL_SYSTEM_PROMPT` 或 prefill 消息 — 添加不应成为已缓存 prompt 前缀一部分的轮次级指导。
 
 ### 何时应编辑代码
 

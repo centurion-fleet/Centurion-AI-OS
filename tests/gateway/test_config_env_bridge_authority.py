@@ -1,6 +1,6 @@
 """Regression tests for the config.yaml → env var bridge in gateway/run.py.
 
-Guards against the 60-vs-500 bug where a stale `.env HERMES_MAX_ITERATIONS=60`
+Guards against the 60-vs-500 bug where a stale `.env CENTURION_MAX_ITERATIONS=60`
 entry silently shadowed `agent.max_turns: 500` in config.yaml because the
 bridge used `if X not in os.environ` guards. After PR#18413 the bridge
 treats config.yaml as authoritative and unconditionally overwrites .env
@@ -41,12 +41,12 @@ def _run_gateway_import(centurion_home: Path, initial_env: dict[str, str]) -> di
             sys.exit(2)
 
         for k in (
-            "HERMES_MAX_ITERATIONS",
-            "HERMES_AGENT_TIMEOUT",
-            "HERMES_AGENT_TIMEOUT_WARNING",
-            "HERMES_GATEWAY_BUSY_INPUT_MODE",
-            "HERMES_GATEWAY_BUSY_TEXT_MODE",
-            "HERMES_TIMEZONE",
+            "CENTURION_MAX_ITERATIONS",
+            "CENTURION_AGENT_TIMEOUT",
+            "CENTURION_AGENT_TIMEOUT_WARNING",
+            "CENTURION_GATEWAY_BUSY_INPUT_MODE",
+            "CENTURION_GATEWAY_BUSY_TEXT_MODE",
+            "CENTURION_TIMEZONE",
         ):
             v = os.environ.get(k)
             if v is not None:
@@ -108,12 +108,12 @@ def centurion_home(tmp_path: Path) -> Path:
 def test_config_max_turns_wins_over_stale_env(centurion_home: Path) -> None:
     """Regression: config.yaml:agent.max_turns=500 must beat .env=60."""
     _write_config(centurion_home, agent_cfg={"max_turns": 500})
-    _write_env(centurion_home, {"HERMES_MAX_ITERATIONS": "60"})
+    _write_env(centurion_home, {"CENTURION_MAX_ITERATIONS": "60"})
 
     env = _run_gateway_import(centurion_home, initial_env={})
 
-    assert env.get("HERMES_MAX_ITERATIONS") == "500", (
-        f"expected config.yaml max_turns=500 to win; got {env.get('HERMES_MAX_ITERATIONS')!r}. "
+    assert env.get("CENTURION_MAX_ITERATIONS") == "500", (
+        f"expected config.yaml max_turns=500 to win; got {env.get('CENTURION_MAX_ITERATIONS')!r}. "
         "Stale .env value is shadowing config — the bridge lost its override."
     )
 
@@ -125,41 +125,41 @@ def test_config_gateway_timeout_wins_over_stale_env(centurion_home: Path) -> Non
         "gateway_timeout_warning": 900,
     })
     _write_env(centurion_home, {
-        "HERMES_AGENT_TIMEOUT": "60",
-        "HERMES_AGENT_TIMEOUT_WARNING": "30",
+        "CENTURION_AGENT_TIMEOUT": "60",
+        "CENTURION_AGENT_TIMEOUT_WARNING": "30",
     })
 
     env = _run_gateway_import(centurion_home, initial_env={})
 
-    assert env.get("HERMES_AGENT_TIMEOUT") == "1800"
-    assert env.get("HERMES_AGENT_TIMEOUT_WARNING") == "900"
+    assert env.get("CENTURION_AGENT_TIMEOUT") == "1800"
+    assert env.get("CENTURION_AGENT_TIMEOUT_WARNING") == "900"
 
 
 def test_config_display_busy_input_mode_wins_over_stale_env(centurion_home: Path) -> None:
     _write_config(centurion_home, display_cfg={"busy_input_mode": "interrupt"})
-    _write_env(centurion_home, {"HERMES_GATEWAY_BUSY_INPUT_MODE": "queue"})
+    _write_env(centurion_home, {"CENTURION_GATEWAY_BUSY_INPUT_MODE": "queue"})
 
     env = _run_gateway_import(centurion_home, initial_env={})
 
-    assert env.get("HERMES_GATEWAY_BUSY_INPUT_MODE") == "interrupt"
+    assert env.get("CENTURION_GATEWAY_BUSY_INPUT_MODE") == "interrupt"
 
 
 def test_config_display_busy_text_mode_wins_over_stale_env(centurion_home: Path) -> None:
     _write_config(centurion_home, display_cfg={"busy_text_mode": "queue"})
-    _write_env(centurion_home, {"HERMES_GATEWAY_BUSY_TEXT_MODE": "interrupt"})
+    _write_env(centurion_home, {"CENTURION_GATEWAY_BUSY_TEXT_MODE": "interrupt"})
 
     env = _run_gateway_import(centurion_home, initial_env={})
 
-    assert env.get("HERMES_GATEWAY_BUSY_TEXT_MODE") == "queue"
+    assert env.get("CENTURION_GATEWAY_BUSY_TEXT_MODE") == "queue"
 
 
 def test_config_timezone_wins_over_stale_env(centurion_home: Path) -> None:
     _write_config(centurion_home, timezone="America/Los_Angeles")
-    _write_env(centurion_home, {"HERMES_TIMEZONE": "UTC"})
+    _write_env(centurion_home, {"CENTURION_TIMEZONE": "UTC"})
 
     env = _run_gateway_import(centurion_home, initial_env={})
 
-    assert env.get("HERMES_TIMEZONE") == "America/Los_Angeles"
+    assert env.get("CENTURION_TIMEZONE") == "America/Los_Angeles"
 
 
 def test_env_value_survives_when_config_omits_key(centurion_home: Path) -> None:
@@ -169,8 +169,8 @@ def test_env_value_survives_when_config_omits_key(centurion_home: Path) -> None:
     config key should NOT clobber the .env value.
     """
     _write_config(centurion_home, agent_cfg={})  # no max_turns
-    _write_env(centurion_home, {"HERMES_MAX_ITERATIONS": "123"})
+    _write_env(centurion_home, {"CENTURION_MAX_ITERATIONS": "123"})
 
     env = _run_gateway_import(centurion_home, initial_env={})
 
-    assert env.get("HERMES_MAX_ITERATIONS") == "123"
+    assert env.get("CENTURION_MAX_ITERATIONS") == "123"

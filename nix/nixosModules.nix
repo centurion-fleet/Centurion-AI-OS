@@ -61,7 +61,7 @@
         lib.mapAttrsToList (name: value:
           if builtins.isPath value || lib.isStorePath value
           then "cp ${value} $out/${name}"
-          else "cat > $out/${name} <<'HERMES_DOC_EOF'\n${value}\nHERMES_DOC_EOF"
+          else "cat > $out/${name} <<'CENTURION_DOC_EOF'\n${value}\nCENTURION_DOC_EOF"
         ) cfg.documents
       )
     );
@@ -760,13 +760,13 @@
           # container instead of running locally. Removed when container mode
           # is disabled so the host CLI falls back to native execution.
           ${if cfg.container.enable then ''
-            cat > ${cfg.stateDir}/.centurion/.container-mode <<'HERMES_CONTAINER_MODE_EOF'
+            cat > ${cfg.stateDir}/.centurion/.container-mode <<'CENTURION_CONTAINER_MODE_EOF'
     # Written by NixOS activation script. Do not edit manually.
     backend=${cfg.container.backend}
     container_name=${containerName}
     exec_user=${cfg.user}
     centurion_bin=${containerDataDir}/current-package/bin/centurion
-    HERMES_CONTAINER_MODE_EOF
+    CENTURION_CONTAINER_MODE_EOF
             chown ${cfg.user}:${cfg.group} ${cfg.stateDir}/.centurion/.container-mode
             chmod 0644 ${cfg.stateDir}/.centurion/.container-mode
           '' else ''
@@ -826,9 +826,9 @@
           ${lib.optionalString (cfg.environment != {} || cfg.environmentFiles != []) ''
             ENV_FILE="${cfg.stateDir}/.centurion/.env"
             install -o ${cfg.user} -g ${cfg.group} -m 0640 /dev/null "$ENV_FILE"
-            cat > "$ENV_FILE" <<'HERMES_NIX_ENV_EOF'
+            cat > "$ENV_FILE" <<'CENTURION_NIX_ENV_EOF'
     ${envFileContent}
-    HERMES_NIX_ENV_EOF
+    CENTURION_NIX_ENV_EOF
             ${lib.concatStringsSep "\n" (map (f: ''
               if [ -f "${f}" ]; then
                 echo "" >> "$ENV_FILE"

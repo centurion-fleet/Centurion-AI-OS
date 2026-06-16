@@ -5,8 +5,8 @@
   // Bundled into centurion-agent. Upstream repo remains the staging ground for new
   // badges and UI iteration; the in-progress scan banner below is a small addition
   // layered on top of the original dist bundle.
-  const SDK = window.__HERMES_PLUGIN_SDK__;
-  if (!SDK || !window.__HERMES_PLUGINS__) return;
+  const SDK = window.__CENTURION_PLUGIN_SDK__;
+  if (!SDK || !window.__CENTURION_PLUGINS__) return;
 
   const React = SDK.React;
   const hooks = SDK.hooks;
@@ -50,7 +50,7 @@
 
   async function api(path, options) {
     const url = "/api/plugins/centurion-achievements" + path;
-    const token = window.__HERMES_SESSION_TOKEN__ || "";
+    const token = window.__CENTURION_SESSION_TOKEN__ || "";
     const headers = { ...((options && options.headers) || {}) };
     if (token) headers["X-Centurion-Session-Token"] = token;
     const res = await fetch(url, { ...(options || {}), headers });
@@ -263,7 +263,7 @@
     ctx.fillStyle = "#8b95a8";
     ctx.font = "600 20px ui-monospace, 'SF Mono', Menlo, monospace";
     ctx.textBaseline = "bottom";
-    ctx.fillText("HERMES AGENT  ·  centurion-agent.nousresearch.com", 70, H - 40);
+    ctx.fillText("CENTURION AI OS  ·  centurion-agent.nousresearch.com", 70, H - 40);
 
     // "UNLOCKED" stamp upper-right
     ctx.textBaseline = "top";
@@ -728,5 +728,5 @@
     );
   }
 
-  window.__HERMES_PLUGINS__.register("centurion-achievements", AchievementsPage);
+  window.__CENTURION_PLUGINS__.register("centurion-achievements", AchievementsPage);
 })();

@@ -121,7 +121,7 @@ THREAT_PATTERNS = [
      "docker_dir_access", "high", "exfiltration",
      "references Docker config (may contain registry creds)"),
     (r'\$HOME/\.centurion/\.env|\~/.centurion/\.env',
-     "hermes_env_access", "critical", "exfiltration",
+     "centurion_env_access", "critical", "exfiltration",
      "directly references Centurion secrets file"),
     (r'cat\s+[^\n]*(\.env|credentials|\.netrc|\.pgpass|\.npmrc|\.pypirc)',
      "read_secrets_file", "critical", "exfiltration",

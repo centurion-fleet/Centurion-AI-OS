@@ -74,7 +74,7 @@ from gateway.platforms.yuanbao_proto import (
     _parse_fields,
     WS_HEARTBEAT_RUNNING,
     WS_HEARTBEAT_FINISH,
-    HERMES_INSTANCE_ID,
+    CENTURION_INSTANCE_ID,
     decode_conn_msg,
     decode_inbound_push,
     decode_query_group_info_rsp,
@@ -98,13 +98,13 @@ logger = logging.getLogger(__name__)
 # Version / platform constants (used in AUTH_BIND and sign-token headers)
 # ---------------------------------------------------------------------------
 try:
-    from centurion_cli import __version__ as _HERMES_VERSION
+    from centurion_cli import __version__ as _CENTURION_VERSION
 except ImportError:
-    _HERMES_VERSION = "0.0.0"
+    _CENTURION_VERSION = "0.0.0"
 
-_APP_VERSION = _HERMES_VERSION
-_BOT_VERSION = _HERMES_VERSION
-_YUANBAO_INSTANCE_ID = str(HERMES_INSTANCE_ID)  # single source: yuanbao_proto.HERMES_INSTANCE_ID
+_APP_VERSION = _CENTURION_VERSION
+_BOT_VERSION = _CENTURION_VERSION
+_YUANBAO_INSTANCE_ID = str(CENTURION_INSTANCE_ID)  # single source: yuanbao_proto.CENTURION_INSTANCE_ID
 _OPERATION_SYSTEM = sys.platform
 
 # ---------------------------------------------------------------------------

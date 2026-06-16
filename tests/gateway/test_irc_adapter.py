@@ -220,7 +220,7 @@ class TestIRCAdapterMessageParsing:
         adapter._writer = writer
 
         await adapter._handle_line(":server 433 * centurion :Nickname in use")
-        assert adapter._current_nick == "hermes_"
+        assert adapter._current_nick == "centurion_"
         sent = writer.write.call_args[0][0]
         assert b"NICK centurion_" in sent
 
@@ -376,11 +376,11 @@ class TestIRCAdapterMessageParsing:
         adapter._writer = writer
 
         await adapter._handle_line(":server 433 * centurion :Nickname in use")
-        assert adapter._current_nick == "hermes_"
+        assert adapter._current_nick == "centurion_"
         await adapter._handle_line(":server 433 * centurion_ :Nickname in use")
-        assert adapter._current_nick == "hermes_1"
+        assert adapter._current_nick == "centurion_1"
         await adapter._handle_line(":server 433 * centurion_1 :Nickname in use")
-        assert adapter._current_nick == "hermes_2"
+        assert adapter._current_nick == "centurion_2"
 
 
 class TestIRCAdapterSplitting:
@@ -557,7 +557,7 @@ class TestIRCStandaloneSend:
 
         monkeypatch.setenv("IRC_SERVER", "irc.test.net")
         monkeypatch.setenv("IRC_CHANNEL", "#cron")
-        monkeypatch.setenv("IRC_NICKNAME", "hermesbot")
+        monkeypatch.setenv("IRC_NICKNAME", "centurionbot")
         monkeypatch.setenv("IRC_USE_TLS", "false")
 
         # Server greets us with 001 RPL_WELCOME, then nothing for QUIT drain.
@@ -608,7 +608,7 @@ class TestIRCStandaloneSend:
 
         monkeypatch.setenv("IRC_SERVER", "irc.test.net")
         monkeypatch.setenv("IRC_CHANNEL", "#cron")
-        monkeypatch.setenv("IRC_NICKNAME", "hermesbot")
+        monkeypatch.setenv("IRC_NICKNAME", "centurionbot")
         monkeypatch.setenv("IRC_USE_TLS", "false")
 
         # No 001 response: the readuntil call returns IncompleteReadError so
@@ -644,7 +644,7 @@ class TestIRCStandaloneSend:
 
         monkeypatch.setenv("IRC_SERVER", "irc.test.net")
         monkeypatch.setenv("IRC_CHANNEL", "#cron")
-        monkeypatch.setenv("IRC_NICKNAME", "hermesbot")
+        monkeypatch.setenv("IRC_NICKNAME", "centurionbot")
         monkeypatch.setenv("IRC_USE_TLS", "false")
 
         # Attempt to inject a second IRC command via CRLF in chat_id
@@ -663,7 +663,7 @@ class TestIRCStandaloneSend:
 
         monkeypatch.setenv("IRC_SERVER", "irc.test.net")
         monkeypatch.setenv("IRC_CHANNEL", "#cron")
-        monkeypatch.setenv("IRC_NICKNAME", "hermesbot")
+        monkeypatch.setenv("IRC_NICKNAME", "centurionbot")
         monkeypatch.setenv("IRC_USE_TLS", "false")
 
         conn = _FakeIRCConnection([b":server 001 centurionbot-cron :Welcome"])
@@ -695,7 +695,7 @@ class TestIRCStandaloneSend:
 
         monkeypatch.setenv("IRC_SERVER", "irc.test.net")
         monkeypatch.setenv("IRC_CHANNEL", "#cron")
-        monkeypatch.setenv("IRC_NICKNAME", "hermesbot")
+        monkeypatch.setenv("IRC_NICKNAME", "centurionbot")
         monkeypatch.setenv("IRC_USE_TLS", "false")
 
         # Register, then accept JOIN with 366 RPL_ENDOFNAMES, then PRIVMSG.

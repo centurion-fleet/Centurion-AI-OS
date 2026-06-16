@@ -1,6 +1,6 @@
 import { withInkSuspended } from '@centurion/ink'
 
-import { launchHermesCommand } from '../../../lib/externalCli.js'
+import { launchCenturionCommand } from '../../../lib/externalCli.js'
 import { runExternalSetup } from '../../setupHandoff.js'
 import type { SlashCommand } from '../types.js'
 
@@ -13,7 +13,7 @@ export const setupCommands: SlashCommand[] = [
         args: ['setup', ...arg.split(/\s+/).filter(Boolean)],
         ctx,
         done: 'setup complete — starting session…',
-        launcher: launchHermesCommand,
+        launcher: launchCenturionCommand,
         suspend: withInkSuspended
       })
   }

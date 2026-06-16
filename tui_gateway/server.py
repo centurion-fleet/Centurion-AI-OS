@@ -716,9 +716,9 @@ def _clear_session_context(tokens: list) -> None:
 
 def _enable_gateway_prompts() -> None:
     """Route approvals through gateway callbacks instead of CLI input()."""
-    os.environ["HERMES_GATEWAY_SESSION"] = "1"
-    os.environ["HERMES_EXEC_ASK"] = "1"
-    os.environ["HERMES_INTERACTIVE"] = "1"
+    os.environ["CENTURION_GATEWAY_SESSION"] = "1"
+    os.environ["CENTURION_EXEC_ASK"] = "1"
+    os.environ["CENTURION_INTERACTIVE"] = "1"
 
 
 # ── Blocking prompt factory ──────────────────────────────────────────
@@ -774,8 +774,8 @@ def resolve_skin() -> dict:
 
 def _resolve_model() -> str:
     env = (
-        os.environ.get("HERMES_MODEL", "")
-        or os.environ.get("HERMES_INFERENCE_MODEL", "")
+        os.environ.get("CENTURION_MODEL", "")
+        or os.environ.get("CENTURION_INFERENCE_MODEL", "")
     ).strip()
     if env:
         return env
@@ -794,8 +794,8 @@ def _resolve_startup_runtime() -> tuple[str, str | None]:
         return model, explicit_provider
 
     explicit_model = (
-        os.environ.get("HERMES_MODEL", "")
-        or os.environ.get("HERMES_INFERENCE_MODEL", "")
+        os.environ.get("CENTURION_MODEL", "")
+        or os.environ.get("CENTURION_INFERENCE_MODEL", "")
     ).strip()
     if not explicit_model:
         return model, None
@@ -810,7 +810,7 @@ def _resolve_startup_runtime() -> tuple[str, str | None]:
                 if isinstance(cfg, dict)
                 else ""
             )
-            or os.environ.get("HERMES_INFERENCE_PROVIDER", "").strip().lower()
+            or os.environ.get("CENTURION_INFERENCE_PROVIDER", "").strip().lower()
             or "auto"
         )
         detected = detect_static_provider_for_model(explicit_model, current_provider)
@@ -1171,8 +1171,8 @@ def _apply_model_switch(sid: str, session: dict, raw_input: str) -> dict:
         _restart_slash_worker(session)
         _emit("session.info", sid, _session_info(agent))
 
-    os.environ["HERMES_MODEL"] = result.new_model
-    os.environ["HERMES_INFERENCE_MODEL"] = result.new_model
+    os.environ["CENTURION_MODEL"] = result.new_model
+    os.environ["CENTURION_INFERENCE_MODEL"] = result.new_model
     # Keep the process-level provider env vars in sync with the user's
     # explicit choice so any ambient re-resolution (credential pool refresh,
     # compressor rebuild, aux clients) and startup re-resolution on /new
@@ -1184,7 +1184,7 @@ def _apply_model_switch(sid: str, session: dict, raw_input: str) -> dict:
     # /model so /new can't fall through to static-catalog detection and
     # pick a coincidentally-matching native provider (fixes #16857).
     if result.target_provider:
-        os.environ["HERMES_INFERENCE_PROVIDER"] = result.target_provider
+        os.environ["CENTURION_INFERENCE_PROVIDER"] = result.target_provider
         os.environ["CENTURION_TUI_PROVIDER"] = result.target_provider
     if persist_global:
         _persist_model_switch(result)
@@ -2047,8 +2047,8 @@ def _make_agent(sid: str, key: str, session_id: str | None = None):
         ephemeral_system_prompt=system_prompt or None,
         checkpoints_enabled=is_truthy_value(os.environ.get("CENTURION_TUI_CHECKPOINTS")),
         pass_session_id=is_truthy_value(os.environ.get("CENTURION_TUI_PASS_SESSION_ID")),
-        skip_context_files=is_truthy_value(os.environ.get("HERMES_IGNORE_RULES")),
-        skip_memory=is_truthy_value(os.environ.get("HERMES_IGNORE_RULES")),
+        skip_context_files=is_truthy_value(os.environ.get("CENTURION_IGNORE_RULES")),
+        skip_memory=is_truthy_value(os.environ.get("CENTURION_IGNORE_RULES")),
         **_agent_cbs(sid),
     )
 
@@ -2302,7 +2302,7 @@ def _(rid, params: dict) -> dict:
         # Resume picker should surface human conversation sessions from every
         # user-facing surface — CLI, TUI, all gateway platforms (including new
         # ones not enumerated here), ACP adapter clients, webhook sessions,
-        # custom `HERMES_SESSION_SOURCE` values, and older installs with
+        # custom `CENTURION_SESSION_SOURCE` values, and older installs with
         # different source labels. We deny-list only the noisy internal
         # sources (``tool`` sub-agent runs) rather than allow-listing a
         # fixed set of platform names that goes stale whenever a new
@@ -4044,12 +4044,12 @@ def _(rid, params: dict) -> dict:
                     enable_session_yolo(session["session_key"])
                     nv = "1"
             else:
-                current = is_truthy_value(os.environ.get("HERMES_YOLO_MODE"))
+                current = is_truthy_value(os.environ.get("CENTURION_YOLO_MODE"))
                 if current:
-                    os.environ.pop("HERMES_YOLO_MODE", None)
+                    os.environ.pop("CENTURION_YOLO_MODE", None)
                     nv = "0"
                 else:
-                    os.environ["HERMES_YOLO_MODE"] = "1"
+                    os.environ["CENTURION_YOLO_MODE"] = "1"
                     nv = "1"
             return _ok(rid, {"key": key, "value": nv})
         except Exception as e:
@@ -5785,12 +5785,12 @@ def _voice_mode_enabled() -> bool:
     avoids the TUI auto-starting in REC the next time the user opens it
     just because they happened to enable voice in a prior session.
     """
-    return os.environ.get("HERMES_VOICE", "").strip() == "1"
+    return os.environ.get("CENTURION_VOICE", "").strip() == "1"
 
 
 def _voice_tts_enabled() -> bool:
     """Whether agent replies should be spoken back via TTS (runtime only)."""
-    return os.environ.get("HERMES_VOICE_TTS", "").strip() == "1"
+    return os.environ.get("CENTURION_VOICE_TTS", "").strip() == "1"
 
 
 def _voice_cfg_dict() -> dict:
@@ -5866,7 +5866,7 @@ def _(rid, params: dict) -> dict:
         # Runtime-only flag (CLI parity) — no _write_config_key, so the
         # next TUI launch starts with voice OFF instead of auto-REC from a
         # persisted stale toggle.
-        os.environ["HERMES_VOICE"] = "1" if enabled else "0"
+        os.environ["CENTURION_VOICE"] = "1" if enabled else "0"
 
         if not enabled:
             # Disabling the mode must tear the continuous loop down; the
@@ -5881,7 +5881,7 @@ def _(rid, params: dict) -> dict:
                 logger.warning("voice: stop_continuous failed during toggle off: %s", e)
 
             # Clear TTS so it can be toggled independently after voice is off.
-            os.environ["HERMES_VOICE_TTS"] = "0"
+            os.environ["CENTURION_VOICE_TTS"] = "0"
 
         return _ok(
             rid,
@@ -5897,7 +5897,7 @@ def _(rid, params: dict) -> dict:
             return _err(rid, 4014, "enable voice mode first: /voice on")
         new_value = not _voice_tts_enabled()
         # Runtime-only flag (CLI parity) — see voice.toggle on/off above.
-        os.environ["HERMES_VOICE_TTS"] = "1" if new_value else "0"
+        os.environ["CENTURION_VOICE_TTS"] = "1" if new_value else "0"
         # Include ``record_key`` on every branch so a /voice tts toggle
         # doesn't reset the TUI's cached shortcut to the default when a
         # user has a custom binding configured (Copilot review, round 2
@@ -6407,9 +6407,9 @@ def _(rid, params: dict) -> dict:
     try:
         cfg = _load_cfg()
         model = _resolve_model()
-        api_key = os.environ.get("HERMES_API_KEY", "") or cfg.get("api_key", "")
+        api_key = os.environ.get("CENTURION_API_KEY", "") or cfg.get("api_key", "")
         masked = f"****{api_key[-4:]}" if len(api_key) > 4 else "(not set)"
-        base_url = os.environ.get("HERMES_BASE_URL", "") or cfg.get("base_url", "")
+        base_url = os.environ.get("CENTURION_BASE_URL", "") or cfg.get("base_url", "")
 
         sections = [
             {

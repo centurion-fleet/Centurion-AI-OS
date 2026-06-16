@@ -47,8 +47,8 @@ def fresh_home(tmp_path, monkeypatch):
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
     for var in (
-        "HERMES_KANBAN_DB",
-        "HERMES_KANBAN_WORKSPACES_ROOT",
+        "CENTURION_KANBAN_DB",
+        "CENTURION_KANBAN_WORKSPACES_ROOT",
         "CENTURION_KANBAN_HOME",
         "CENTURION_KANBAN_BOARD",
     ):
@@ -127,15 +127,15 @@ class TestPathResolution:
         )
 
     def test_env_var_db_override_still_wins(self, fresh_home, tmp_path, monkeypatch):
-        """``HERMES_KANBAN_DB`` pins the file regardless of board= arg."""
+        """``CENTURION_KANBAN_DB`` pins the file regardless of board= arg."""
         forced = tmp_path / "custom.db"
-        monkeypatch.setenv("HERMES_KANBAN_DB", str(forced))
+        monkeypatch.setenv("CENTURION_KANBAN_DB", str(forced))
         assert kb.kanban_db_path() == forced
         assert kb.kanban_db_path(board="ignored") == forced
 
     def test_env_var_workspaces_override(self, fresh_home, tmp_path, monkeypatch):
         forced = tmp_path / "ws"
-        monkeypatch.setenv("HERMES_KANBAN_WORKSPACES_ROOT", str(forced))
+        monkeypatch.setenv("CENTURION_KANBAN_WORKSPACES_ROOT", str(forced))
         assert kb.workspaces_root(board="any") == forced
 
 
@@ -422,12 +422,12 @@ class TestWorkerSpawnEnv:
 
         env = captured["env"]
         assert env["CENTURION_KANBAN_BOARD"] == "spawntest"
-        assert env["HERMES_KANBAN_TASK"] == "t_abc"
+        assert env["CENTURION_KANBAN_TASK"] == "t_abc"
         # DB path should match the per-board DB, not the legacy default.
         expected_db = fresh_home / "kanban" / "boards" / "spawntest" / "kanban.db"
-        assert env["HERMES_KANBAN_DB"] == str(expected_db)
+        assert env["CENTURION_KANBAN_DB"] == str(expected_db)
         expected_ws = fresh_home / "kanban" / "boards" / "spawntest" / "workspaces"
-        assert env["HERMES_KANBAN_WORKSPACES_ROOT"] == str(expected_ws)
+        assert env["CENTURION_KANBAN_WORKSPACES_ROOT"] == str(expected_ws)
 
     def test_default_board_spawn_keeps_legacy_paths(self, fresh_home, monkeypatch):
         captured = {}
@@ -460,7 +460,7 @@ class TestWorkerSpawnEnv:
         kb._default_spawn(task, str(fresh_home / "ws"), board=None)
         env = captured["env"]
         assert env["CENTURION_KANBAN_BOARD"] == "default"
-        assert env["HERMES_KANBAN_DB"] == str(fresh_home / "kanban.db")
+        assert env["CENTURION_KANBAN_DB"] == str(fresh_home / "kanban.db")
 
 
 # ---------------------------------------------------------------------------

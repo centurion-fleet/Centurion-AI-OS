@@ -250,7 +250,7 @@ class TestResolveXaiOAuthForAux:
             "providers": {},
         }))
         monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
-        monkeypatch.delenv("HERMES_XAI_BASE_URL", raising=False)
+        monkeypatch.delenv("CENTURION_XAI_BASE_URL", raising=False)
         monkeypatch.delenv("XAI_BASE_URL", raising=False)
 
         pool = load_pool("xai-oauth")
@@ -282,7 +282,7 @@ class TestResolveXaiOAuthForAux:
             "providers": {},
         }))
         monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
-        monkeypatch.setenv("HERMES_XAI_BASE_URL", "https://example.x.ai/v1/")
+        monkeypatch.setenv("CENTURION_XAI_BASE_URL", "https://example.x.ai/v1/")
 
         pool = load_pool("xai-oauth")
         pool.add_entry(PooledCredential(

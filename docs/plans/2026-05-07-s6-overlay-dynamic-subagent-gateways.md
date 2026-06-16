@@ -85,7 +85,7 @@ old `docker/entrypoint.sh`:
    `$CENTURION_HOME` if missing.
 3. Synced bundled skills via `tools/skills_sync.py`.
 4. Optionally backgrounded `centurion dashboard` in a subshell when
-   `HERMES_DASHBOARD=1` — **not supervised**, no restart.
+   `CENTURION_DASHBOARD=1` — **not supervised**, no restart.
 5. `exec centurion "$@"` — tini's sole direct child.
 
 Known limitations: dashboard crash → stays dead; dashboard fails at startup →
@@ -336,7 +336,7 @@ And in `docker/s6-rc.d/main-centurion/run`:
 if [ -f /var/run/s6/container_environment/CENTURION_TUI_MODE ]; then
     exec sleep infinity   # s6-overlay will exec CMD as the TTY-connected main
 fi
-exec s6-setuidgid centurion centurion ${HERMES_ARGS:-}
+exec s6-setuidgid centurion centurion ${CENTURION_ARGS:-}
 ```
 
 In TUI mode main centurion is effectively unsupervised (same as the pre-s6
@@ -375,7 +375,7 @@ and `COLUMNS=123` as the probe.
 |---|---|---|
 | OQ1 | Gate Phase 2 behind env var? | Ship directly (Centurion is pre-1.0; users can pin the previous image) |
 | OQ2 | s6 root model | Root `/init`, drop per-service via `s6-setuidgid centurion` |
-| OQ3 | Dashboard opt-in mechanism | Always declared as an s6 service; `03-dashboard-toggle` cont-init script writes a `down` marker when `HERMES_DASHBOARD` is unset so `s6-svstat` reports the slot's real state |
+| OQ3 | Dashboard opt-in mechanism | Always declared as an s6 service; `03-dashboard-toggle` cont-init script writes a `down` marker when `CENTURION_DASHBOARD` is unset so `s6-svstat` reports the slot's real state |
 | OQ4 | Podman rootless | Supported, fix reactively |
 | OQ5 | Service naming | `gateway-<profile>` (matches pre-existing `centurion-gateway-<profile>.service` systemd convention) |
 | OQ6 | — (retired; no subagent gateways in scope) | — |

@@ -163,7 +163,7 @@ kanban:
   dispatch_interval_seconds: 60    # 默认
 ```
 
-通过 `HERMES_KANBAN_DISPATCH_IN_GATEWAY=0` 在运行时覆盖配置标志以进行调试。标准 gateway 监督适用：直接运行 `centurion gateway start`，或将 gateway 配置为 systemd 用户单元（参见 gateway 文档）。没有运行中的 gateway，`ready` 任务会保持原状，直到 gateway 启动 —— `centurion kanban create` 在创建时会对此发出警告。
+通过 `CENTURION_KANBAN_DISPATCH_IN_GATEWAY=0` 在运行时覆盖配置标志以进行调试。标准 gateway 监督适用：直接运行 `centurion gateway start`，或将 gateway 配置为 systemd 用户单元（参见 gateway 文档）。没有运行中的 gateway，`ready` 任务会保持原状，直到 gateway 启动 —— `centurion kanban create` 在创建时会对此发出警告。
 
 将 `centurion kanban daemon` 作为单独进程运行已**弃用**；请使用 gateway。如果你确实无法运行 gateway（无头主机策略禁止长期运行的服务等），`--force` 逃生舱口在一个发布周期内保持旧的独立守护进程可用，但同时运行 gateway 内嵌调度器和针对同一 `kanban.db` 的独立守护进程会导致认领竞争，不受支持。
 
@@ -191,7 +191,7 @@ centurion kanban block    t_abc "need input" --ids t_def t_hij
 
 ## Worker 如何与看板交互 {#how-workers-interact-with-the-board}
 
-**Worker 不会 shell 执行 `centurion kanban`。** 当调度器启动 worker 时，它在子进程环境中设置 `HERMES_KANBAN_TASK=t_abcd`，该环境变量在模型的 schema 中启用专用的 **kanban 工具集**。同一工具集也可供在工具集配置中启用 `kanban` 的编排器配置文件使用。这些工具通过 Python `kanban_db` 层直接读取和修改看板，与 CLI 的做法相同。运行中的 worker 像调用任何其他工具一样调用这些工具；它从不看到或需要 `centurion kanban` CLI。
+**Worker 不会 shell 执行 `centurion kanban`。** 当调度器启动 worker 时，它在子进程环境中设置 `CENTURION_KANBAN_TASK=t_abcd`，该环境变量在模型的 schema 中启用专用的 **kanban 工具集**。同一工具集也可供在工具集配置中启用 `kanban` 的编排器配置文件使用。这些工具通过 Python `kanban_db` 层直接读取和修改看板，与 CLI 的做法相同。运行中的 worker 像调用任何其他工具一样调用这些工具；它从不看到或需要 `centurion kanban` CLI。
 
 | 工具 | 用途 | 必需参数 |
 |---|---|---|
@@ -209,7 +209,7 @@ centurion kanban block    t_abc "need input" --ids t_def t_hij
 
 ```
 # 模型的工具调用，按顺序：
-kanban_show()                                     # 无参数 —— 使用 HERMES_KANBAN_TASK
+kanban_show()                                     # 无参数 —— 使用 CENTURION_KANBAN_TASK
 # （模型读取返回的 worker_context，通过终端/文件工具完成工作）
 kanban_heartbeat(note="halfway through — 4 of 8 files transformed")
 # （更多工作）
@@ -250,7 +250,7 @@ kanban_complete(summary="decomposed into 2 research tasks + 1 writer; linked dep
 2. **无 shell 引用脆弱性。** 通过 shlex + argparse 传递 `--metadata '{"files": [...]}'` 是潜在的隐患。结构化工具参数完全绕过了这个问题。
 3. **更好的错误处理。** 工具结果是模型可以推理的结构化 JSON，而不是需要解析的 stderr 字符串。
 
-**对普通会话零 schema 占用。** 普通的 `centurion chat` 会话在其 schema 中没有任何 `kanban_*` 工具，除非活动配置文件为编排器工作显式启用了 `kanban` 工具集。调度器启动的任务 worker 因为设置了 `HERMES_KANBAN_TASK` 而获得任务范围的工具；编排器配置文件通过配置获得更广泛的路由界面。对于从不使用 kanban 的用户，没有工具膨胀。
+**对普通会话零 schema 占用。** 普通的 `centurion chat` 会话在其 schema 中没有任何 `kanban_*` 工具，除非活动配置文件为编排器工作显式启用了 `kanban` 工具集。调度器启动的任务 worker 因为设置了 `CENTURION_KANBAN_TASK` 而获得任务范围的工具；编排器配置文件通过配置获得更广泛的路由界面。对于从不使用 kanban 的用户，没有工具膨胀。
 
 `kanban-worker` 和 `kanban-orchestrator` skill 教导模型何时调用哪个工具以及调用顺序。
 
@@ -285,7 +285,7 @@ kanban_complete(summary="decomposed into 2 research tasks + 1 writer; linked dep
 任何应该能够处理 kanban 任务的配置文件都必须加载 `kanban-worker` skill。它通过**工具调用**（而非 CLI 命令）教导 worker 完整的生命周期：
 
 1. 启动时，调用 `kanban_show()` 读取标题 + 正文 + 父级交接 + 先前尝试 + 完整评论线程。
-2. 通过终端工具执行 `cd $HERMES_KANBAN_WORKSPACE`，在那里完成工作。
+2. 通过终端工具执行 `cd $CENTURION_KANBAN_WORKSPACE`，在那里完成工作。
 3. 在长时间操作期间每隔几分钟调用一次 `kanban_heartbeat(note="...")`。**如果你的工作可能运行超过 1 小时，请至少每小时调用一次 `kanban_heartbeat`** —— 调度器会回收运行时间超过 `kanban.dispatch_stale_timeout_seconds`（默认 4 小时）且最近一小时内没有心跳的任务，认为 worker 在没有清理的情况下崩溃了。回收是无害的（任务返回 `ready` 重新调度，不增加失败计数器），但你会失去当前运行的进度。
 4. 以 `kanban_complete(summary="...", metadata={...})` 完成，或在卡住时以 `kanban_block(reason="...")` 完成。
 
@@ -669,7 +669,7 @@ centurion kanban create "monthly report" \
     --workspace dir:~/tenants/business-a/data/
 ```
 
-Worker 接收 `$HERMES_TENANT` 并按前缀命名空间化其内存写入。看板、调度器和配置文件定义都是共享的；只有数据是有范围的。
+Worker 接收 `$CENTURION_TENANT` 并按前缀命名空间化其内存写入。看板、调度器和配置文件定义都是共享的；只有数据是有范围的。
 
 ## Gateway 通知
 

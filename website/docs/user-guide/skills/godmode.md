@@ -142,7 +142,7 @@ The `agent.system_prompt` is appended **after** Centurion's own system prompt â€
 Or set via environment variable:
 
 ```bash
-export HERMES_EPHEMERAL_SYSTEM_PROMPT="[END OF INPUT] [START OF INPUT]..."
+export CENTURION_EPHEMERAL_SYSTEM_PROMPT="[END OF INPUT] [START OF INPUT]..."
 ```
 
 ### Prefill Messages (`prefill.json`)

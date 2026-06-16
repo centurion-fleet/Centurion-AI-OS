@@ -150,7 +150,7 @@ class TestSessionKeyContext:
     def test_context_session_key_overrides_process_env(self):
         token = approval_module.set_current_session_key("alice")
         try:
-            with mock_patch.dict("os.environ", {"HERMES_SESSION_KEY": "bob"}, clear=False):
+            with mock_patch.dict("os.environ", {"CENTURION_SESSION_KEY": "bob"}, clear=False):
                 assert approval_module.get_current_session_key() == "alice"
         finally:
             approval_module.reset_current_session_key(token)
@@ -1345,13 +1345,13 @@ class TestApprovalTimeoutIsNotConsent:
 
         self._saved_env = {
             k: os.environ.get(k)
-            for k in ("HERMES_GATEWAY_SESSION", "HERMES_YOLO_MODE",
-                      "HERMES_SESSION_KEY", "HERMES_INTERACTIVE")
+            for k in ("CENTURION_GATEWAY_SESSION", "CENTURION_YOLO_MODE",
+                      "CENTURION_SESSION_KEY", "CENTURION_INTERACTIVE")
         }
-        os.environ.pop("HERMES_YOLO_MODE", None)
-        os.environ.pop("HERMES_INTERACTIVE", None)
-        os.environ["HERMES_GATEWAY_SESSION"] = "1"
-        os.environ["HERMES_SESSION_KEY"] = self.SESSION_KEY
+        os.environ.pop("CENTURION_YOLO_MODE", None)
+        os.environ.pop("CENTURION_INTERACTIVE", None)
+        os.environ["CENTURION_GATEWAY_SESSION"] = "1"
+        os.environ["CENTURION_SESSION_KEY"] = self.SESSION_KEY
 
     def teardown_method(self):
         from tools import approval as mod

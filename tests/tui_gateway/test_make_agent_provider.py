@@ -117,7 +117,7 @@ def test_make_agent_honors_tui_launch_env_flags():
                 "CENTURION_TUI_MAX_TURNS": "7",
                 "CENTURION_TUI_CHECKPOINTS": "1",
                 "CENTURION_TUI_PASS_SESSION_ID": "1",
-                "HERMES_IGNORE_RULES": "1",
+                "CENTURION_IGNORE_RULES": "1",
             },
         ),
         patch("tui_gateway.server._load_cfg", return_value=fake_cfg),

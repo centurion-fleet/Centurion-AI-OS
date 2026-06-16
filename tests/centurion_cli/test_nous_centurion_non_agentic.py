@@ -14,7 +14,7 @@ from __future__ import annotations
 import pytest
 
 from centurion_cli.model_switch import (
-    _HERMES_MODEL_WARNING,
+    _CENTURION_MODEL_WARNING,
     _check_centurion_model_warning,
     is_nous_centurion_non_agentic,
 )
@@ -29,7 +29,7 @@ from centurion_cli.model_switch import (
         "Centurion-3",
         "centurion-4",
         "centurion-4-405b",
-        "hermes_4_70b",
+        "centurion_4_70b",
         "openrouter/hermes3:70b",
         "openrouter/nousresearch/centurion-4-405b",
         "NousResearch/Hermes3",
@@ -40,7 +40,7 @@ def test_matches_real_nous_centurion_chat_models(model_name: str) -> None:
     assert is_nous_centurion_non_agentic(model_name), (
         f"expected {model_name!r} to be flagged as Nous Centurion 3/4"
     )
-    assert _check_centurion_model_warning(model_name) == _HERMES_MODEL_WARNING
+    assert _check_centurion_model_warning(model_name) == _CENTURION_MODEL_WARNING
 
 
 @pytest.mark.parametrize(

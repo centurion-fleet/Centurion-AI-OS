@@ -781,7 +781,7 @@ class TestUserMessagePreviewConfig:
 class TestEnvWriteDenylist:
     """``save_env_value`` refuses to persist env-var names that
     influence how subprocesses execute — ``LD_PRELOAD``, ``PYTHONPATH``,
-    ``PATH``, ``EDITOR``, etc. — or any ``HERMES_*`` runtime flag.
+    ``PATH``, ``EDITOR``, etc. — or any ``CENTURION_*`` runtime flag.
 
     The dashboard exposes ``PUT /api/env`` to any authed caller (and
     the session token lives in the SPA's HTML where any future plugin
@@ -822,9 +822,9 @@ class TestEnvWriteDenylist:
             "GIT_SSH_COMMAND",
             "GIT_EXEC_PATH",
             "CENTURION_HOME",
-            "HERMES_PROFILE",
-            "HERMES_CONFIG",
-            "HERMES_ENV",
+            "CENTURION_PROFILE",
+            "CENTURION_CONFIG",
+            "CENTURION_ENV",
         ],
     )
     def test_denylisted_keys_rejected(self, denied_key):
@@ -840,17 +840,17 @@ class TestEnvWriteDenylist:
     @pytest.mark.parametrize(
         "allowed_key",
         [
-            "HERMES_GEMINI_CLIENT_ID",
-            "HERMES_LANGFUSE_PUBLIC_KEY",
-            "HERMES_SPOTIFY_CLIENT_ID",
-            "HERMES_QWEN_BASE_URL",
-            "HERMES_MAX_ITERATIONS",
+            "CENTURION_GEMINI_CLIENT_ID",
+            "CENTURION_LANGFUSE_PUBLIC_KEY",
+            "CENTURION_SPOTIFY_CLIENT_ID",
+            "CENTURION_QWEN_BASE_URL",
+            "CENTURION_MAX_ITERATIONS",
         ],
     )
     def test_centurion_integration_keys_still_writable(self, allowed_key):
-        """``HERMES_*`` overall is NOT blocked — only the four runtime
+        """``CENTURION_*`` overall is NOT blocked — only the four runtime
         location names (HOME/PROFILE/CONFIG/ENV) are. Integration
-        credentials following the ``HERMES_*`` convention must keep
+        credentials following the ``CENTURION_*`` convention must keep
         working or we'd regress every provider setup wizard that
         currently writes one of these (auth.py, Spotify, Langfuse, …)."""
         save_env_value(allowed_key, "test-value-123")
@@ -865,7 +865,7 @@ class TestEnvWriteDenylist:
 
     def test_arbitrary_user_key_still_works(self):
         """Plugin / user-defined env vars (anything outside the
-        denylist and outside ``HERMES_*``) keep working. The denylist
+        denylist and outside ``CENTURION_*``) keep working. The denylist
         is narrow on purpose."""
         save_env_value("MY_PLUGIN_TOKEN", "plugin-secret-123")
         env = load_env()

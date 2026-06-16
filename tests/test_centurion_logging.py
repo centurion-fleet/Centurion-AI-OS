@@ -541,7 +541,7 @@ class TestComponentPrefixes:
         # The gateway component captures both core gateway logs and the
         # centurion_plugins facility (plugin-installed gateway adapters log
         # under that prefix).
-        assert ("gateway", "hermes_plugins") == centurion_logging.COMPONENT_PREFIXES["gateway"]
+        assert ("gateway", "centurion_plugins") == centurion_logging.COMPONENT_PREFIXES["gateway"]
 
     def test_agent_prefix(self):
         prefixes = centurion_logging.COMPONENT_PREFIXES["agent"]

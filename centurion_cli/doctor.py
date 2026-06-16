@@ -24,7 +24,7 @@ _env_path = get_env_path()
 load_centurion_dotenv(centurion_home=_env_path.parent, project_env=PROJECT_ROOT / ".env")
 
 from centurion_cli.colors import Colors, color
-from centurion_cli.models import _HERMES_USER_AGENT
+from centurion_cli.models import _CENTURION_USER_AGENT
 from centurion_cli.vercel_auth import describe_vercel_auth
 from centurion_constants import OPENROUTER_MODELS_URL
 from utils import base_url_host_matches
@@ -120,7 +120,7 @@ def _is_kanban_worker_env_gate(item: dict) -> bool:
     """Return True when Kanban is unavailable only because this is not a worker process."""
     if item.get("name") != "kanban":
         return False
-    if os.environ.get("HERMES_KANBAN_TASK"):
+    if os.environ.get("CENTURION_KANBAN_TASK"):
         return False
 
     tools = item.get("tools") or []
@@ -129,7 +129,7 @@ def _is_kanban_worker_env_gate(item: dict) -> bool:
 
 def _doctor_tool_availability_detail(toolset: str) -> str:
     """Optional explanatory suffix for toolsets whose doctor status needs context."""
-    if toolset == "kanban" and not os.environ.get("HERMES_KANBAN_TASK"):
+    if toolset == "kanban" and not os.environ.get("CENTURION_KANBAN_TASK"):
         return "(runtime-gated; loaded only for dispatcher-spawned workers)"
     return ""
 
@@ -402,7 +402,7 @@ def run_doctor(args):
 
     # Doctor runs from the interactive CLI, so CLI-gated tool availability
     # checks (like cronjob management) should see the same context as `centurion`.
-    os.environ.setdefault("HERMES_INTERACTIVE", "1")
+    os.environ.setdefault("CENTURION_INTERACTIVE", "1")
 
     # Handle `centurion doctor --ack <id>` as a fast path. Persist the ack and
     # return without running the rest of the diagnostics — the user has
@@ -1638,7 +1638,7 @@ def run_doctor(args):
             url = (base.rstrip("/") + "/models") if base else default_url
             headers = {
                 "Authorization": f"Bearer {key}",
-                "User-Agent": _HERMES_USER_AGENT,
+                "User-Agent": _CENTURION_USER_AGENT,
             }
             if base_url_host_matches(base, "api.kimi.com"):
                 headers["User-Agent"] = "claude-code/0.1.0"

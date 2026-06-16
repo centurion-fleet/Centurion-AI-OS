@@ -463,7 +463,7 @@ Profiles 使用 `~/.centurion/profiles/<name>/`，布局相同。
 centurion config set security.redact_secrets true       # 全局启用
 ```
 
-**需要重启。** `security.redact_secrets` 在导入时快照 — 在会话中途切换（例如通过工具调用执行 `export HERMES_REDACT_SECRETS=true`）对正在运行的进程**不会**生效。告知用户在终端运行 `centurion config set security.redact_secrets true`，然后启动新会话。这是有意为之——防止 LLM 在任务中途自行切换该开关。
+**需要重启。** `security.redact_secrets` 在导入时快照 — 在会话中途切换（例如通过工具调用执行 `export CENTURION_REDACT_SECRETS=true`）对正在运行的进程**不会**生效。告知用户在终端运行 `centurion config set security.redact_secrets true`，然后启动新会话。这是有意为之——防止 LLM 在任务中途自行切换该开关。
 
 再次禁用：
 ```bash
@@ -494,7 +494,7 @@ centurion config set approvals.mode off         # 绕过一切（不推荐）
 
 单次调用绕过（不更改配置）：
 - `centurion --yolo …`
-- `export HERMES_YOLO_MODE=1`
+- `export CENTURION_YOLO_MODE=1`
 
 注意：YOLO / `approvals.mode: off` **不会**关闭密钥脱敏。两者相互独立。
 
@@ -664,7 +664,7 @@ agent 创建的 skill 的后台维护。跟踪使用情况，将闲置 skill 标
 
 ### Kanban（多 agent 工作队列）
 
-用于多 profile/多 worker 协作的持久化 SQLite 看板（kanban）。用户通过 `centurion kanban <verb>` 驱动；调度器生成的 worker 看到由 `HERMES_KANBAN_TASK` 控制的专注 `kanban_*` toolset，orchestrator profile 可以选择加入更广泛的 `kanban` toolset。普通会话除非配置，否则没有任何 `kanban_*` schema 占用。
+用于多 profile/多 worker 协作的持久化 SQLite 看板（kanban）。用户通过 `centurion kanban <verb>` 驱动；调度器生成的 worker 看到由 `CENTURION_KANBAN_TASK` 控制的专注 `kanban_*` toolset，orchestrator profile 可以选择加入更广泛的 `kanban` toolset。普通会话除非配置，否则没有任何 `kanban_*` schema 占用。
 
 - **CLI 动词（常用）：** `init`、`create`、`list`（别名 `ls`）、`show`、`assign`、`link`、`unlink`、`comment`、`complete`、`block`、`unblock`、`archive`、`tail`。不常用：`watch`、`stats`、`runs`、`log`、`dispatch`、`daemon`、`gc`。
 - **Worker/orchestrator toolset：** `kanban_show`、`kanban_complete`、`kanban_block`、`kanban_heartbeat`、`kanban_comment`、`kanban_create`、`kanban_link`；在调度器生成的任务之外显式启用 `kanban` toolset 的 profile 还可获得 `kanban_list` 和 `kanban_unblock` 用于看板路由。

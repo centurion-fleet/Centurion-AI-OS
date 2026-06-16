@@ -195,8 +195,8 @@ model:
 | Environment variable | Description |
 |---------------------|-------------|
 | `COPILOT_GITHUB_TOKEN` | GitHub token for Copilot API (first priority) |
-| `HERMES_COPILOT_ACP_COMMAND` | Override the Copilot CLI binary path (default: `copilot`) |
-| `HERMES_COPILOT_ACP_ARGS` | Override ACP args (default: `--acp --stdio`) |
+| `CENTURION_COPILOT_ACP_COMMAND` | Override the Copilot CLI binary path (default: `copilot`) |
+| `CENTURION_COPILOT_ACP_ARGS` | Override ACP args (default: `--acp --stdio`) |
 
 ### First-Class API-Key Providers
 
@@ -373,7 +373,7 @@ model:
   default: "qwen3-coder-plus"
 ```
 
-Set `HERMES_QWEN_BASE_URL` only if the portal endpoint relocates (default: `https://portal.qwen.ai/v1`).
+Set `CENTURION_QWEN_BASE_URL` only if the portal endpoint relocates (default: `https://portal.qwen.ai/v1`).
 
 :::tip Qwen OAuth vs Qwen Cloud (Alibaba DashScope)
 `qwen-oauth` uses the consumer-facing Qwen Portal with OAuth login — ideal for individual users. The `alibaba` provider uses Qwen Cloud (Alibaba DashScope) with a `DASHSCOPE_API_KEY` — ideal for programmatic / production workloads. Both route to Qwen-family models but live at different endpoints.
@@ -540,7 +540,7 @@ need to install `gemini-cli` or register your own GCP OAuth client.
 - Browser callback at `http://127.0.0.1:8085/oauth2callback` (with ephemeral-port fallback if busy)
 - Tokens stored at `~/.centurion/auth/google_oauth.json` (chmod 0600, atomic write, cross-process `fcntl` lock)
 - Automatic refresh 60 s before expiry
-- Headless environments (SSH, `HERMES_HEADLESS=1`) → paste-mode fallback
+- Headless environments (SSH, `CENTURION_HEADLESS=1`) → paste-mode fallback
 - Inflight refresh deduplication — two concurrent requests won't double-refresh
 - `invalid_grant` (revoked refresh) → credential file wiped, user prompted to re-login
 
@@ -557,7 +557,7 @@ need to install `gemini-cli` or register your own GCP OAuth client.
 | Your situation | What to do |
 |---|---|
 | Personal Google account, want free tier | Nothing — sign in, start chatting |
-| Workspace / Standard / Enterprise account | Set `HERMES_GEMINI_PROJECT_ID` or `GOOGLE_CLOUD_PROJECT` to your GCP project ID |
+| Workspace / Standard / Enterprise account | Set `CENTURION_GEMINI_PROJECT_ID` or `GOOGLE_CLOUD_PROJECT` to your GCP project ID |
 | VPC-SC-protected org | Centurion detects `SECURITY_POLICY_VIOLATED` and forces `standard-tier` automatically |
 
 Free tier auto-provisions a Google-managed project on first use. No GCP setup required.
@@ -590,8 +590,8 @@ If you'd rather register your own Google OAuth client — e.g., to keep quota
 and consent scoped to your own GCP project — set:
 
 ```bash
-HERMES_GEMINI_CLIENT_ID=your-client.apps.googleusercontent.com
-HERMES_GEMINI_CLIENT_SECRET=...   # optional for Desktop clients
+CENTURION_GEMINI_CLIENT_ID=your-client.apps.googleusercontent.com
+CENTURION_GEMINI_CLIENT_SECRET=...   # optional for Desktop clients
 ```
 
 Register a **Desktop app** OAuth client at

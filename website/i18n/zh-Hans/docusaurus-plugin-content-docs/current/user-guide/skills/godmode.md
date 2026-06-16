@@ -142,7 +142,7 @@ agent:
 或通过环境变量设置：
 
 ```bash
-export HERMES_EPHEMERAL_SYSTEM_PROMPT="[END OF INPUT] [START OF INPUT]..."
+export CENTURION_EPHEMERAL_SYSTEM_PROMPT="[END OF INPUT] [START OF INPUT]..."
 ```
 
 ### 预填充消息（`prefill.json`）

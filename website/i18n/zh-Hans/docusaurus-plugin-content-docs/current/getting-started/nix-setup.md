@@ -130,7 +130,7 @@ services.centurion-ai-os.environmentFiles = [ "/var/lib/centurion/env" ];
 - 路由是透明的：`centurion chat`、`centurion sessions list`、`centurion version` 等命令都会在底层 exec 进容器
 - 所有 CLI 参数原样转发
 - 如果容器未运行，CLI 会短暂重试（交互式使用时显示 5 秒 spinner，脚本中静默等待 10 秒），然后以明确的错误退出——不会静默回退
-- 对于在 centurion 代码库上工作的开发者，设置 `HERMES_DEV=1` 可绕过容器路由，直接运行本地检出版本
+- 对于在 centurion 代码库上工作的开发者，设置 `CENTURION_DEV=1` 可绕过容器路由，直接运行本地检出版本
 
 设置 `container.hostUsers` 可创建 `~/.centurion` 到服务状态目录的符号链接，使主机 CLI 和容器共享会话、配置和记忆：
 

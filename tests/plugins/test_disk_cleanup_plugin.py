@@ -52,20 +52,20 @@ def _load_plugin_init():
     plugin_dir = repo_root / "plugins" / "disk-cleanup"
     # Use the PluginManager's module naming convention so relative imports work.
     spec = importlib.util.spec_from_file_location(
-        "hermes_plugins.disk_cleanup",
+        "centurion_plugins.disk_cleanup",
         plugin_dir / "__init__.py",
         submodule_search_locations=[str(plugin_dir)],
     )
     # Ensure parent namespace package exists for the relative `. import disk_cleanup`
     import types
-    if "hermes_plugins" not in sys.modules:
-        ns = types.ModuleType("hermes_plugins")
+    if "centurion_plugins" not in sys.modules:
+        ns = types.ModuleType("centurion_plugins")
         ns.__path__ = []
-        sys.modules["hermes_plugins"] = ns
+        sys.modules["centurion_plugins"] = ns
     mod = importlib.util.module_from_spec(spec)
-    mod.__package__ = "hermes_plugins.disk_cleanup"
+    mod.__package__ = "centurion_plugins.disk_cleanup"
     mod.__path__ = [str(plugin_dir)]
-    sys.modules["hermes_plugins.disk_cleanup"] = mod
+    sys.modules["centurion_plugins.disk_cleanup"] = mod
     spec.loader.exec_module(mod)
     return mod
 

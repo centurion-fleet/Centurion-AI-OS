@@ -16,7 +16,7 @@ from centurion_constants import (
 )
 
 
-class TestGetDefaultHermesRoot:
+class TestGetDefaultCenturionRoot:
     """Tests for get_default_centurion_root() — Docker/custom deployment awareness."""
 
     def test_no_centurion_home_returns_native(self, tmp_path, monkeypatch):

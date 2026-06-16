@@ -1,6 +1,6 @@
-"""Harness: dashboard opt-in via HERMES_DASHBOARD.
+"""Harness: dashboard opt-in via CENTURION_DASHBOARD.
 
-Today (tini): dashboard starts once when HERMES_DASHBOARD=1; if it crashes
+Today (tini): dashboard starts once when CENTURION_DASHBOARD=1; if it crashes
 it stays dead. After Phase 2 (s6): dashboard starts once; if it crashes
 it is restarted under supervision. The restart-after-crash test lives in
 Phase 2 Task 2.5; this file only locks the opt-in surface (which must
@@ -36,7 +36,7 @@ def _poll(container: str, probe: str, *, deadline_s: float = 30.0,
 def test_dashboard_not_running_by_default(
     built_image: str, container_name: str,
 ) -> None:
-    """Without HERMES_DASHBOARD, no dashboard process should be running."""
+    """Without CENTURION_DASHBOARD, no dashboard process should be running."""
     subprocess.run(
         ["docker", "run", "-d", "--name", container_name, built_image,
          "sleep", "60"],
@@ -48,20 +48,20 @@ def test_dashboard_not_running_by_default(
     r = docker_exec(container_name, "pgrep", "-f", "centurion dashboard")
     # pgrep exits non-zero when no match found
     assert r.returncode != 0, (
-        "Dashboard should not be running without HERMES_DASHBOARD"
+        "Dashboard should not be running without CENTURION_DASHBOARD"
     )
 
 
 def test_dashboard_slot_reports_down_when_disabled(
     built_image: str, container_name: str,
 ) -> None:
-    """Without HERMES_DASHBOARD, s6-svstat should report the dashboard
+    """Without CENTURION_DASHBOARD, s6-svstat should report the dashboard
     slot as DOWN (not up-with-sleep-infinity, which would
     false-positive `centurion doctor` and any other health check).
 
     Locks the PR #30136 review item I3 fix: cont-init.d/03-dashboard-toggle
     writes a `down` marker file in the live service-dir when
-    HERMES_DASHBOARD is unset, so the slot reflects reality.
+    CENTURION_DASHBOARD is unset, so the slot reflects reality.
     """
     subprocess.run(
         ["docker", "run", "-d", "--name", container_name, built_image,
@@ -76,7 +76,7 @@ def test_dashboard_slot_reports_down_when_disabled(
     )
     assert r.returncode == 0, f"s6-svstat failed: {r.stderr!r} / {r.stdout!r}"
     assert "down" in r.stdout, (
-        f"Dashboard slot should be 'down' without HERMES_DASHBOARD; "
+        f"Dashboard slot should be 'down' without CENTURION_DASHBOARD; "
         f"svstat reports: {r.stdout!r}"
     )
 
@@ -84,10 +84,10 @@ def test_dashboard_slot_reports_down_when_disabled(
 def test_dashboard_slot_reports_up_when_enabled(
     built_image: str, container_name: str,
 ) -> None:
-    """Symmetry: with HERMES_DASHBOARD=1, s6-svstat reports the slot as up."""
+    """Symmetry: with CENTURION_DASHBOARD=1, s6-svstat reports the slot as up."""
     subprocess.run(
         ["docker", "run", "-d", "--name", container_name,
-         "-e", "HERMES_DASHBOARD=1", built_image, "sleep", "120"],
+         "-e", "CENTURION_DASHBOARD=1", built_image, "sleep", "120"],
         check=True, capture_output=True, timeout=30,
     )
     # uvicorn takes a moment to bind; poll svstat.
@@ -109,10 +109,10 @@ def test_dashboard_slot_reports_up_when_enabled(
 def test_dashboard_opt_in_starts(
     built_image: str, container_name: str,
 ) -> None:
-    """With HERMES_DASHBOARD=1, a dashboard process should be visible."""
+    """With CENTURION_DASHBOARD=1, a dashboard process should be visible."""
     subprocess.run(
         ["docker", "run", "-d", "--name", container_name,
-         "-e", "HERMES_DASHBOARD=1", built_image, "sleep", "120"],
+         "-e", "CENTURION_DASHBOARD=1", built_image, "sleep", "120"],
         check=True, capture_output=True, timeout=30,
     )
     # Poll for the dashboard subprocess to appear — the entrypoint
@@ -121,16 +121,16 @@ def test_dashboard_opt_in_starts(
     ok, _ = _poll(
         container_name, "pgrep -f 'centurion dashboard'", deadline_s=30.0,
     )
-    assert ok, "Dashboard should be running with HERMES_DASHBOARD=1"
+    assert ok, "Dashboard should be running with CENTURION_DASHBOARD=1"
 
 
 def test_dashboard_port_override(
     built_image: str, container_name: str,
 ) -> None:
-    """HERMES_DASHBOARD_PORT changes the dashboard's listen port."""
+    """CENTURION_DASHBOARD_PORT changes the dashboard's listen port."""
     subprocess.run(
         ["docker", "run", "-d", "--name", container_name,
-         "-e", "HERMES_DASHBOARD=1", "-e", "HERMES_DASHBOARD_PORT=9120",
+         "-e", "CENTURION_DASHBOARD=1", "-e", "CENTURION_DASHBOARD_PORT=9120",
          built_image, "sleep", "120"],
         check=True, capture_output=True, timeout=30,
     )
@@ -160,7 +160,7 @@ def test_dashboard_restarts_after_crash(
     """
     subprocess.run(
         ["docker", "run", "-d", "--name", container_name,
-         "-e", "HERMES_DASHBOARD=1", built_image, "sleep", "120"],
+         "-e", "CENTURION_DASHBOARD=1", built_image, "sleep", "120"],
         check=True, capture_output=True, timeout=30,
     )
     # Wait for the first dashboard to come up.

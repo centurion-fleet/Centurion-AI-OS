@@ -386,11 +386,11 @@ def compress_context(
 
                 set_current_session_id(agent.session_id)
             except Exception:
-                os.environ["HERMES_SESSION_ID"] = agent.session_id
+                os.environ["CENTURION_SESSION_ID"] = agent.session_id
             agent._session_db_created = False
             agent._session_db.create_session(
                 session_id=agent.session_id,
-                source=agent.platform or os.environ.get("HERMES_SESSION_SOURCE", "cli"),
+                source=agent.platform or os.environ.get("CENTURION_SESSION_SOURCE", "cli"),
                 model=agent.model,
                 model_config=agent._session_init_model_config,
                 parent_session_id=old_session_id,

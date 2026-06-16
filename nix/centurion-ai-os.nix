@@ -60,7 +60,7 @@ let
 
   # Import bundled plugins (memory, context_engine, platforms/*).  Keeping
   # them out of the Python site-packages keeps import semantics identical
-  # to a dev checkout — the loader reads them from HERMES_BUNDLED_PLUGINS.
+  # to a dev checkout — the loader reads them from CENTURION_BUNDLED_PLUGINS.
   bundledPlugins = lib.cleanSourceWith {
     src = ../plugins;
     filter = path: _type: !(lib.hasInfix "/__pycache__/" path);
@@ -160,12 +160,12 @@ stdenv.mkDerivation {
         makeWrapper ${centurionVenv}/bin/${name} $out/bin/${name} \
           --suffix PATH : "${runtimePath}" \
           --set CENTURION_BUNDLED_SKILLS $out/share/centurion-ai-os/skills \
-          --set HERMES_BUNDLED_PLUGINS $out/share/centurion-ai-os/plugins \
-          --set HERMES_WEB_DIST $out/share/centurion-ai-os/web_dist \
+          --set CENTURION_BUNDLED_PLUGINS $out/share/centurion-ai-os/plugins \
+          --set CENTURION_WEB_DIST $out/share/centurion-ai-os/web_dist \
           --set CENTURION_TUI_DIR $out/ui-tui \
           --set CENTURION_PYTHON ${centurionVenv}/bin/python3 \
-          --set HERMES_NODE ${lib.getExe nodejs} \
-          ${lib.optionalString (rev != null) ''--set HERMES_REVISION ${rev} \''}
+          --set CENTURION_NODE ${lib.getExe nodejs} \
+          ${lib.optionalString (rev != null) ''--set CENTURION_REVISION ${rev} \''}
           ${lib.optionalString (extraPythonPackages != [ ]) ''--suffix PYTHONPATH : "${pythonPath}"''}
       '')
       [

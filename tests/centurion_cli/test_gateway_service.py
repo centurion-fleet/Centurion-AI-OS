@@ -451,7 +451,7 @@ class TestGatewayStopCleanup:
 
 class TestLaunchdServiceRecovery:
     def test_get_restart_drain_timeout_prefers_env_then_config_then_default(self, monkeypatch):
-        monkeypatch.delenv("HERMES_RESTART_DRAIN_TIMEOUT", raising=False)
+        monkeypatch.delenv("CENTURION_RESTART_DRAIN_TIMEOUT", raising=False)
         monkeypatch.setattr(gateway_cli, "read_raw_config", lambda: {})
 
         assert (
@@ -466,10 +466,10 @@ class TestLaunchdServiceRecovery:
         )
         assert gateway_cli._get_restart_drain_timeout() == 14.0
 
-        monkeypatch.setenv("HERMES_RESTART_DRAIN_TIMEOUT", "9")
+        monkeypatch.setenv("CENTURION_RESTART_DRAIN_TIMEOUT", "9")
         assert gateway_cli._get_restart_drain_timeout() == 9.0
 
-        monkeypatch.setenv("HERMES_RESTART_DRAIN_TIMEOUT", "invalid")
+        monkeypatch.setenv("CENTURION_RESTART_DRAIN_TIMEOUT", "invalid")
         assert (
             gateway_cli._get_restart_drain_timeout()
             == DEFAULT_GATEWAY_RESTART_DRAIN_TIMEOUT
@@ -1797,7 +1797,7 @@ class TestDockerAwareGateway:
         assert "centurion gateway run" in out
 
 
-class TestLegacyHermesUnitDetection:
+class TestLegacyCenturionUnitDetection:
     """Tests for _find_legacy_centurion_units / has_legacy_centurion_units.
 
     These guard against the scenario that tripped Luis in April 2026: an
@@ -1984,7 +1984,7 @@ class TestLegacyHermesUnitDetection:
         assert results == []
 
 
-class TestRemoveLegacyHermesUnits:
+class TestRemoveLegacyCenturionUnits:
     """Tests for remove_legacy_centurion_units (the migration action)."""
 
     _OUR_UNIT_TEXT = (

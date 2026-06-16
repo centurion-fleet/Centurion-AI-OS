@@ -44,7 +44,7 @@ class TestGetCenturionHomeProfileWarning:
         """active_profile=default → still no warning, returns ~/.centurion."""
         centurion_dir = tmp_path / ".centurion"
         centurion_dir.mkdir()
-        (hermes_dir / "active_profile").write_text("default\n")
+        (centurion_dir / "active_profile").write_text("default\n")
         result = fresh_constants.get_centurion_home()
         assert result == tmp_path / ".centurion"
         assert "CENTURION_HOME fallback" not in capsys.readouterr().err
@@ -55,7 +55,7 @@ class TestGetCenturionHomeProfileWarning:
         """active_profile=coder + CENTURION_HOME unset → warn loudly, still return fallback."""
         centurion_dir = tmp_path / ".centurion"
         centurion_dir.mkdir()
-        (hermes_dir / "active_profile").write_text("coder\n")
+        (centurion_dir / "active_profile").write_text("coder\n")
 
         result = fresh_constants.get_centurion_home()
 
@@ -94,7 +94,7 @@ class TestGetCenturionHomeProfileWarning:
         centurion_dir = tmp_path / ".centurion"
         centurion_dir.mkdir()
         # Write bytes that aren't valid utf-8
-        (hermes_dir / "active_profile").write_bytes(b"\xff\xfe\x00\x00")
+        (centurion_dir / "active_profile").write_bytes(b"\xff\xfe\x00\x00")
 
         result = fresh_constants.get_centurion_home()
 
@@ -108,7 +108,7 @@ class TestGetCenturionHomeProfileWarning:
         """Empty active_profile file → treated as default, no warning."""
         centurion_dir = tmp_path / ".centurion"
         centurion_dir.mkdir()
-        (hermes_dir / "active_profile").write_text("")
+        (centurion_dir / "active_profile").write_text("")
 
         result = fresh_constants.get_centurion_home()
 

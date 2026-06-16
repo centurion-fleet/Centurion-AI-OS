@@ -36,11 +36,11 @@ def resolve_active_host() -> str:
     """Derive the Honcho host key from the active Centurion profile.
 
     Resolution order:
-      1. HERMES_HONCHO_HOST env var (explicit override)
+      1. CENTURION_HONCHO_HOST env var (explicit override)
       2. Active profile name via profiles system -> ``centurion.<profile>``
       3. Fallback: ``"centurion"`` (default profile)
     """
-    explicit = os.environ.get("HERMES_HONCHO_HOST", "").strip()
+    explicit = os.environ.get("CENTURION_HONCHO_HOST", "").strip()
     if explicit:
         return explicit
 

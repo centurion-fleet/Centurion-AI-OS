@@ -81,11 +81,11 @@ model:
 # client rebuilds during credential rotation.  For OpenAI-wire chat
 # completions (streaming and non-streaming) the configured value is also
 # used as the per-request ``timeout=`` kwarg so it wins over the legacy
-# HERMES_API_TIMEOUT env var (which still applies when no config is set).
+# CENTURION_API_TIMEOUT env var (which still applies when no config is set).
 # ``stale_timeout_seconds`` controls the non-streaming stale-call detector and
-# wins over the legacy HERMES_API_CALL_STALE_TIMEOUT env var. Leaving these
-# unset keeps the legacy defaults (HERMES_API_TIMEOUT=1800s,
-# HERMES_API_CALL_STALE_TIMEOUT=300s, native Anthropic 900s).
+# wins over the legacy CENTURION_API_CALL_STALE_TIMEOUT env var. Leaving these
+# unset keeps the legacy defaults (CENTURION_API_TIMEOUT=1800s,
+# CENTURION_API_CALL_STALE_TIMEOUT=300s, native Anthropic 900s).
 #
 # Not currently wired for AWS Bedrock (bedrock_converse + AnthropicBedrock
 # SDK paths) — those use boto3 with its own timeout configuration.
@@ -1078,7 +1078,7 @@ display:
 #
 # First-use consent: each (event, command) pair prompts once on a TTY, then
 # is persisted to ~/.centurion/shell-hooks-allowlist.json.  Non-interactive
-# runs (gateway, cron) need --accept-hooks, HERMES_ACCEPT_HOOKS=1, or the
+# runs (gateway, cron) need --accept-hooks, CENTURION_ACCEPT_HOOKS=1, or the
 # hooks_auto_accept key below.
 #
 # See website/docs/user-guide/features/hooks.md for the full JSON wire

@@ -2413,7 +2413,7 @@ class Migrator:
         # Extract gateway auth token to .env if present
         auth = gateway.get("auth") or {}
         if auth.get("token") and self.migrate_secrets:
-            self._set_env_var("HERMES_GATEWAY_TOKEN", auth["token"], "gateway.auth.token")
+            self._set_env_var("CENTURION_GATEWAY_TOKEN", auth["token"], "gateway.auth.token")
 
     # ── Session config ────────────────────────────────────────
     def migrate_session_config(self, config: Optional[Dict[str, Any]] = None) -> None:
@@ -2611,10 +2611,10 @@ class Migrator:
             discord_centurion = centurion_cfg.get("discord") or {}
             changed = False
             if "requireMention" in discord_cfg:
-                discord_hermes["require_mention"] = discord_cfg["requireMention"]
+                discord_centurion["require_mention"] = discord_cfg["requireMention"]
                 changed = True
             if discord_cfg.get("autoThread") is not None:
-                discord_hermes["auto_thread"] = discord_cfg["autoThread"]
+                discord_centurion["auto_thread"] = discord_cfg["autoThread"]
                 changed = True
             if changed and self.execute:
                 centurion_cfg["discord"] = discord_centurion
@@ -2655,10 +2655,10 @@ class Migrator:
 
         # Map fields that have Centurion equivalents
         if browser.get("cdpUrl"):
-            browser_hermes["cdp_url"] = browser["cdpUrl"]
+            browser_centurion["cdp_url"] = browser["cdpUrl"]
             changed = True
         if browser.get("headless") is not None:
-            browser_hermes["headless"] = browser["headless"]
+            browser_centurion["headless"] = browser["headless"]
             changed = True
 
         if changed:
@@ -2746,7 +2746,7 @@ class Migrator:
                 self.maybe_backup(centurion_cfg_path)
                 dump_yaml_file(centurion_cfg_path, centurion_cfg)
             self.record("approvals-config", "openclaw.json approvals.mode",
-                        "config.yaml approvals.mode", "migrated", f"Mapped '{mode}' -> '{hermes_mode}'")
+                        "config.yaml approvals.mode", "migrated", f"Mapped '{mode}' -> '{centurion_mode}'")
 
         # Archive full approvals config
         if len(approvals) > 1 and self.archive_dir:

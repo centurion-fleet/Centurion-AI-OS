@@ -342,7 +342,7 @@ cron:
   script_timeout_seconds: 300   # 5 分钟
 ```
 
-或设置 `HERMES_CRON_SCRIPT_TIMEOUT` 环境变量。解析顺序为：环境变量 → config.yaml → 默认 120 秒。
+或设置 `CENTURION_CRON_SCRIPT_TIMEOUT` 环境变量。解析顺序为：环境变量 → config.yaml → 默认 120 秒。
 
 ## 无 agent 模式（纯脚本任务）
 

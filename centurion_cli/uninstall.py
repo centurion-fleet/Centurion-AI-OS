@@ -235,7 +235,7 @@ def uninstall_gateway_service():
 # The installer (``scripts/install.ps1``) does four Windows-only things that
 # ``remove_path_from_shell_configs`` / ``remove_wrapper_script`` don't cover:
 #
-#   1. Sets User-scope env vars ``CENTURION_HOME`` and ``HERMES_GIT_BASH_PATH``
+#   1. Sets User-scope env vars ``CENTURION_HOME`` and ``CENTURION_GIT_BASH_PATH``
 #      via ``[Environment]::SetEnvironmentVariable(..., "User")``.  These
 #      don't live in ~/.bashrc — they're in the Windows registry at
 #      HKCU\Environment.
@@ -268,7 +268,7 @@ def _centurion_path_markers(centurion_home: Path) -> list[str]:
     markers = [root + "\\centurion-os", root + "\\git", root + "\\node", root + "\\venv"]
     # Also match if CENTURION_HOME was customised to somewhere else — find-and-nuke
     # any entry whose path component contains "centurion".  We don't want to catch
-    # unrelated entries like "chermes-foo" or "ephermeral", so we look for
+    # unrelated entries like "xc-legacy-foo" or "ephemeral", so we look for
     # backslash-centurion as a word-ish boundary.
     return markers
 
@@ -313,7 +313,7 @@ def remove_path_from_windows_registry(centurion_home: Path) -> list[str]:
 
 
 def remove_centurion_env_vars_windows() -> list[str]:
-    """Delete CENTURION_HOME and HERMES_GIT_BASH_PATH from User-scope env vars."""
+    """Delete CENTURION_HOME and CENTURION_GIT_BASH_PATH from User-scope env vars."""
     try:
         import winreg
     except ImportError:
@@ -323,7 +323,7 @@ def remove_centurion_env_vars_windows() -> list[str]:
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0,
                             winreg.KEY_READ | winreg.KEY_WRITE) as key:
-            for name in ("CENTURION_HOME", "HERMES_GIT_BASH_PATH"):
+            for name in ("CENTURION_HOME", "CENTURION_GIT_BASH_PATH"):
                 try:
                     winreg.QueryValueEx(key, name)
                 except FileNotFoundError:
@@ -578,7 +578,7 @@ def run_uninstall(args):
         else:
             log_info("No Centurion-owned PATH entries in User environment")
 
-        log_info("Removing CENTURION_HOME / HERMES_GIT_BASH_PATH User env vars...")
+        log_info("Removing CENTURION_HOME / CENTURION_GIT_BASH_PATH User env vars...")
         removed_env = remove_centurion_env_vars_windows()
         if removed_env:
             for name in removed_env:

@@ -278,9 +278,9 @@ class TestSpawnEnvIsolation:
         monkeypatch.setattr(subprocess, "Popen", FakePopen)
         monkeypatch.setenv("HOME", "/users/alice")
         monkeypatch.setenv("CENTURION_HOME", "/users/alice/.centurion/profiles/backend-worker")
-        monkeypatch.setenv("HERMES_KANBAN_TASK", "t_smoke")
+        monkeypatch.setenv("CENTURION_KANBAN_TASK", "t_smoke")
         monkeypatch.setenv(
-            "HERMES_KANBAN_DB",
+            "CENTURION_KANBAN_DB",
             "/users/alice/.centurion/kanban/boards/smoke/kanban.db",
         )
 

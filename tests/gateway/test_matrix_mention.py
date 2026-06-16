@@ -95,7 +95,7 @@ class TestIsBotMentioned:
         assert self.adapter._is_bot_mentioned("centurion can you help?")
 
     def test_localpart_case_insensitive(self):
-        assert self.adapter._is_bot_mentioned("HERMES can you help?")
+        assert self.adapter._is_bot_mentioned("CENTURION can you help?")
 
     def test_matrix_pill_in_formatted_body(self):
         html = '<a href="https://matrix.to/#/@centurion:example.org">Centurion</a> help'
@@ -108,8 +108,8 @@ class TestIsBotMentioned:
         assert not self.adapter._is_bot_mentioned("")
 
     def test_partial_localpart_no_match(self):
-        # "hermesbot" should not match word-boundary check for "centurion"
-        assert not self.adapter._is_bot_mentioned("hermesbot is here")
+        # "centurionbot" should not match word-boundary check for "centurion"
+        assert not self.adapter._is_bot_mentioned("centurionbot is here")
 
     # m.mentions.user_ids — MSC3952 / Matrix v1.7 authoritative mentions
     # Ported from openclaw/openclaw#64796

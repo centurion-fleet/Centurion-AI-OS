@@ -130,7 +130,7 @@ When `container.enable = true` and `addToSystemPackages = true`, **every** `cent
 - The routing is transparent: `centurion chat`, `centurion sessions list`, `centurion version`, etc. all exec into the container under the hood
 - All CLI flags are forwarded as-is
 - If the container isn't running, the CLI retries briefly (5s with a spinner for interactive use, 10s silently for scripts) then fails with a clear error — no silent fallback
-- For developers working on the centurion codebase, set `HERMES_DEV=1` to bypass container routing and run the local checkout directly
+- For developers working on the centurion codebase, set `CENTURION_DEV=1` to bypass container routing and run the local checkout directly
 
 Set `container.hostUsers` to create a `~/.centurion` symlink to the service state directory, so the host CLI and the container share sessions, config, and memories:
 

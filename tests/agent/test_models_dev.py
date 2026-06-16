@@ -86,7 +86,7 @@ SAMPLE_REGISTRY = {
 class TestProviderMapping:
     def test_all_mapped_providers_are_strings(self):
         for centurion_id, mdev_id in PROVIDER_TO_MODELS_DEV.items():
-            assert isinstance(hermes_id, str)
+            assert isinstance(centurion_id, str)
             assert isinstance(mdev_id, str)
 
     def test_known_providers_mapped(self):

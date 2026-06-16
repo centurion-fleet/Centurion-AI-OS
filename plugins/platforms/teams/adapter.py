@@ -944,23 +944,23 @@ class TeamsAdapter(BasePlatformAdapter):
             .with_actions([
                 ExecuteAction(
                     title="Allow Once",
-                    verb="hermes_approve",
+                    verb="centurion_approve",
                     data={**btn_data_base, "centurion_action": "approve_once"},
                     style="positive",
                 ),
                 ExecuteAction(
                     title="Allow Session",
-                    verb="hermes_approve",
+                    verb="centurion_approve",
                     data={**btn_data_base, "centurion_action": "approve_session"},
                 ),
                 ExecuteAction(
                     title="Always Allow",
-                    verb="hermes_approve",
+                    verb="centurion_approve",
                     data={**btn_data_base, "centurion_action": "approve_always"},
                 ),
                 ExecuteAction(
                     title="Deny",
-                    verb="hermes_approve",
+                    verb="centurion_approve",
                     data={**btn_data_base, "centurion_action": "deny"},
                     style="destructive",
                 ),

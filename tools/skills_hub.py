@@ -3198,30 +3198,30 @@ def check_for_skill_updates(
 # Centurion centralized index source
 # ---------------------------------------------------------------------------
 
-HERMES_INDEX_URL = "https://centurion-os.nousresearch.com/docs/api/skills-index.json"
-HERMES_INDEX_CACHE_FILE = INDEX_CACHE_DIR / "centurion-index.json"
-HERMES_INDEX_TTL = 6 * 3600  # 6 hours
+CENTURION_INDEX_URL = "https://centurion-os.nousresearch.com/docs/api/skills-index.json"
+CENTURION_INDEX_CACHE_FILE = INDEX_CACHE_DIR / "centurion-index.json"
+CENTURION_INDEX_TTL = 6 * 3600  # 6 hours
 
 
 def _load_centurion_index() -> Optional[dict]:
     """Fetch the centralized skills index, with local cache.
 
     The index is a JSON file hosted on the docs site, rebuilt daily by CI.
-    We cache it locally for HERMES_INDEX_TTL seconds to avoid repeated
+    We cache it locally for CENTURION_INDEX_TTL seconds to avoid repeated
     downloads within a session.
     """
     # Check local cache
-    if HERMES_INDEX_CACHE_FILE.exists():
+    if CENTURION_INDEX_CACHE_FILE.exists():
         try:
-            age = time.time() - HERMES_INDEX_CACHE_FILE.stat().st_mtime
-            if age < HERMES_INDEX_TTL:
-                return json.loads(HERMES_INDEX_CACHE_FILE.read_text())
+            age = time.time() - CENTURION_INDEX_CACHE_FILE.stat().st_mtime
+            if age < CENTURION_INDEX_TTL:
+                return json.loads(CENTURION_INDEX_CACHE_FILE.read_text())
         except (OSError, json.JSONDecodeError):
             pass
 
     # Fetch from docs site
     try:
-        resp = httpx.get(HERMES_INDEX_URL, timeout=15, follow_redirects=True)
+        resp = httpx.get(CENTURION_INDEX_URL, timeout=15, follow_redirects=True)
         if resp.status_code != 200:
             logger.debug("Centurion index fetch returned %d", resp.status_code)
             return _load_stale_index_cache()
@@ -3236,8 +3236,8 @@ def _load_centurion_index() -> Optional[dict]:
 
     # Cache locally
     try:
-        HERMES_INDEX_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        HERMES_INDEX_CACHE_FILE.write_text(json.dumps(data))
+        CENTURION_INDEX_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        CENTURION_INDEX_CACHE_FILE.write_text(json.dumps(data))
     except OSError:
         pass
 
@@ -3246,9 +3246,9 @@ def _load_centurion_index() -> Optional[dict]:
 
 def _load_stale_index_cache() -> Optional[dict]:
     """Fall back to stale cache when the network fetch fails."""
-    if HERMES_INDEX_CACHE_FILE.exists():
+    if CENTURION_INDEX_CACHE_FILE.exists():
         try:
-            return json.loads(HERMES_INDEX_CACHE_FILE.read_text())
+            return json.loads(CENTURION_INDEX_CACHE_FILE.read_text())
         except (OSError, json.JSONDecodeError):
             pass
     return None

@@ -273,7 +273,7 @@ def test_identity_template_resolved_in_container_tag(monkeypatch, tmp_path):
     _save_supermemory_config({"container_tag": "centurion-{identity}"}, str(tmp_path))
     p = SupermemoryMemoryProvider()
     p.initialize("s1", centurion_home=str(tmp_path), platform="cli", agent_identity="coder")
-    assert p._container_tag == "hermes_coder"
+    assert p._container_tag == "centurion_coder"
 
 
 def test_identity_template_default_profile(monkeypatch, tmp_path):
@@ -283,7 +283,7 @@ def test_identity_template_default_profile(monkeypatch, tmp_path):
     _save_supermemory_config({"container_tag": "centurion-{identity}"}, str(tmp_path))
     p = SupermemoryMemoryProvider()
     p.initialize("s1", centurion_home=str(tmp_path), platform="cli")
-    assert p._container_tag == "hermes_default"
+    assert p._container_tag == "centurion_default"
 
 
 def test_container_tag_env_var_override(monkeypatch, tmp_path):

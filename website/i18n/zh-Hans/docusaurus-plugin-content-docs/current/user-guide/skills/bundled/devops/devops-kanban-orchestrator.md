@@ -108,7 +108,7 @@ t1 = kanban_create(
     title="research: Postgres cost vs current",
     assignee="<profile-A>",  # whichever profile handles research on this setup
     body="Compare estimated infrastructure costs, migration costs, and ongoing ops costs over a 3-year window. Sources: AWS/GCP pricing, team time estimates, current Postgres bills from peers.",
-    tenant=os.environ.get("HERMES_TENANT"),
+    tenant=os.environ.get("CENTURION_TENANT"),
 )["task_id"]
 
 t2 = kanban_create(
@@ -194,7 +194,7 @@ kanban_complete(
 
 **如果形状取决于中间发现，不要预先创建整个任务图。** 如果 T3 的结构取决于 T1 和 T2 的发现，让 T3 作为一个"综合发现"任务存在，其第一步是读取父任务的交接内容并规划其余部分。编排器可以派生编排器。
 
-**Tenant 继承。** 如果你的环境中设置了 `HERMES_TENANT`，在每次 `kanban_create` 调用中传入 `tenant=os.environ.get("HERMES_TENANT")`，以确保子任务保持在同一命名空间中。
+**Tenant 继承。** 如果你的环境中设置了 `CENTURION_TENANT`，在每次 `kanban_create` 调用中传入 `tenant=os.environ.get("CENTURION_TENANT")`，以确保子任务保持在同一命名空间中。
 
 ## 恢复卡住的 worker
 

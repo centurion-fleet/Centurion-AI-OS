@@ -138,13 +138,13 @@ Per-run overrides (no mutation to `~/.centurion/config.yaml`):
 
 | Flag | Equivalent env var | Purpose |
 |---|---|---|
-| `-m` / `--model <model>` | `HERMES_INFERENCE_MODEL` | Override the model for this run |
+| `-m` / `--model <model>` | `CENTURION_INFERENCE_MODEL` | Override the model for this run |
 | `--provider <provider>` | _(none)_ | Override the provider for this run |
 
 ```bash
 centurion -z "…" --provider openrouter --model openai/gpt-5.5
 # or:
-HERMES_INFERENCE_MODEL=anthropic/claude-sonnet-4.6 centurion -z "…"
+CENTURION_INFERENCE_MODEL=anthropic/claude-sonnet-4.6 centurion -z "…"
 ```
 
 Same agent, same tools, same skills — just strips every interactive / cosmetic layer. If you need tool output in the transcript too, use `centurion chat -q` instead; `-z` is explicitly for "I only want the final answer".

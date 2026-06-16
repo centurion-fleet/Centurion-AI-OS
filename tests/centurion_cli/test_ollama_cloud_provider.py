@@ -374,9 +374,9 @@ class TestOllamaCloudAgentInit:
 
 class TestOllamaCloudProvidersNew:
     def test_overlay_exists(self):
-        from centurion_cli.providers import HERMES_OVERLAYS
-        assert "ollama-cloud" in HERMES_OVERLAYS
-        overlay = HERMES_OVERLAYS["ollama-cloud"]
+        from centurion_cli.providers import CENTURION_OVERLAYS
+        assert "ollama-cloud" in CENTURION_OVERLAYS
+        overlay = CENTURION_OVERLAYS["ollama-cloud"]
         assert overlay.transport == "openai_chat"
         assert overlay.base_url_env_var == "OLLAMA_BASE_URL"
 

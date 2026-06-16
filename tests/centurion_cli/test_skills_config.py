@@ -132,7 +132,7 @@ class TestIsSkillDisabled:
         assert _is_skill_disabled("any-skill") is False
 
     @patch("centurion_cli.config.load_config")
-    @patch.dict("os.environ", {"HERMES_PLATFORM": "discord"})
+    @patch.dict("os.environ", {"CENTURION_PLATFORM": "discord"})
     def test_env_var_platform(self, mock_load):
         mock_load.return_value = {"skills": {
             "platform_disabled": {"discord": ["discord-skill"]}
@@ -160,15 +160,15 @@ class TestGetDisabledSkillNames:
             "      - tg-only-skill\n"
         )
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-        monkeypatch.delenv("HERMES_PLATFORM", raising=False)
-        monkeypatch.delenv("HERMES_SESSION_PLATFORM", raising=False)
+        monkeypatch.delenv("CENTURION_PLATFORM", raising=False)
+        monkeypatch.delenv("CENTURION_SESSION_PLATFORM", raising=False)
 
         from agent.skill_utils import get_disabled_skill_names
         result = get_disabled_skill_names(platform="telegram")
         assert result == {"tg-only-skill"}
 
     def test_session_platform_env_var(self, tmp_path, monkeypatch):
-        """HERMES_SESSION_PLATFORM should be used when HERMES_PLATFORM is unset."""
+        """CENTURION_SESSION_PLATFORM should be used when CENTURION_PLATFORM is unset."""
         config = tmp_path / "config.yaml"
         config.write_text(
             "skills:\n"
@@ -179,15 +179,15 @@ class TestGetDisabledSkillNames:
             "      - discord-skill\n"
         )
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-        monkeypatch.delenv("HERMES_PLATFORM", raising=False)
-        monkeypatch.setenv("HERMES_SESSION_PLATFORM", "discord")
+        monkeypatch.delenv("CENTURION_PLATFORM", raising=False)
+        monkeypatch.setenv("CENTURION_SESSION_PLATFORM", "discord")
 
         from agent.skill_utils import get_disabled_skill_names
         result = get_disabled_skill_names()
         assert result == {"discord-skill"}
 
     def test_centurion_platform_takes_precedence(self, tmp_path, monkeypatch):
-        """HERMES_PLATFORM should win over HERMES_SESSION_PLATFORM."""
+        """CENTURION_PLATFORM should win over CENTURION_SESSION_PLATFORM."""
         config = tmp_path / "config.yaml"
         config.write_text(
             "skills:\n"
@@ -198,8 +198,8 @@ class TestGetDisabledSkillNames:
             "      - discord-skill\n"
         )
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-        monkeypatch.setenv("HERMES_PLATFORM", "telegram")
-        monkeypatch.setenv("HERMES_SESSION_PLATFORM", "discord")
+        monkeypatch.setenv("CENTURION_PLATFORM", "telegram")
+        monkeypatch.setenv("CENTURION_SESSION_PLATFORM", "discord")
 
         from agent.skill_utils import get_disabled_skill_names
         result = get_disabled_skill_names()
@@ -217,8 +217,8 @@ class TestGetDisabledSkillNames:
             "      - slack-skill\n"
         )
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-        monkeypatch.setenv("HERMES_PLATFORM", "telegram")
-        monkeypatch.setenv("HERMES_SESSION_PLATFORM", "telegram")
+        monkeypatch.setenv("CENTURION_PLATFORM", "telegram")
+        monkeypatch.setenv("CENTURION_SESSION_PLATFORM", "telegram")
 
         from agent.skill_utils import get_disabled_skill_names
         result = get_disabled_skill_names(platform="slack")
@@ -236,8 +236,8 @@ class TestGetDisabledSkillNames:
             "      - tg-skill\n"
         )
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
-        monkeypatch.delenv("HERMES_PLATFORM", raising=False)
-        monkeypatch.delenv("HERMES_SESSION_PLATFORM", raising=False)
+        monkeypatch.delenv("CENTURION_PLATFORM", raising=False)
+        monkeypatch.delenv("CENTURION_SESSION_PLATFORM", raising=False)
 
         from agent.skill_utils import get_disabled_skill_names
         result = get_disabled_skill_names()

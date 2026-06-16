@@ -695,7 +695,7 @@ class TestBuildContextFilesPrompt:
 # =========================================================================
 
 
-class TestFindHermesMd:
+class TestFindCenturionMd:
     def test_finds_in_cwd(self, tmp_path):
         (tmp_path / ".centurion.md").write_text("rules")
         assert _find_centurion_md(tmp_path) == tmp_path / ".centurion.md"

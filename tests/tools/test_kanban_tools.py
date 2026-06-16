@@ -1,7 +1,7 @@
 """Tests for the Kanban tool surface (tools/kanban_tools.py).
 
 Verifies:
-  - Tools are gated on HERMES_KANBAN_TASK: a normal chat session sees
+  - Tools are gated on CENTURION_KANBAN_TASK: a normal chat session sees
     zero kanban tools in its schema; a worker session sees the kanban set.
   - Each handler's happy path.
   - Error paths (missing required args, bad metadata type, etc).
@@ -19,9 +19,9 @@ import pytest
 # ---------------------------------------------------------------------------
 
 def test_kanban_tools_hidden_without_env_var(monkeypatch, tmp_path):
-    """Normal `centurion chat` sessions (no HERMES_KANBAN_TASK) must have
+    """Normal `centurion chat` sessions (no CENTURION_KANBAN_TASK) must have
     zero kanban_* tools in their schema."""
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
@@ -41,7 +41,7 @@ def test_kanban_tools_hidden_without_env_var(monkeypatch, tmp_path):
 
 def test_kanban_tools_visible_with_env_var(monkeypatch, tmp_path):
     """Worker sessions get task lifecycle tools, not board-routing tools."""
-    monkeypatch.setenv("HERMES_KANBAN_TASK", "t_fake")
+    monkeypatch.setenv("CENTURION_KANBAN_TASK", "t_fake")
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
@@ -65,7 +65,7 @@ def test_kanban_worker_env_overrides_profile_toolset_filter(monkeypatch, tmp_pat
     """Dispatcher-spawned workers must get lifecycle tools even when the
     assignee profile restricts enabled toolsets and does not list kanban.
     """
-    monkeypatch.setenv("HERMES_KANBAN_TASK", "t_fake")
+    monkeypatch.setenv("CENTURION_KANBAN_TASK", "t_fake")
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
@@ -91,10 +91,10 @@ def test_worker_with_kanban_toolset_still_hides_board_routing(monkeypatch, tmp_p
     """Task scope wins over profile config for board-routing tools.
 
     Even if a worker process happens to also have ``toolsets: [kanban]``
-    in its config, the HERMES_KANBAN_TASK env var means it's a focused
+    in its config, the CENTURION_KANBAN_TASK env var means it's a focused
     worker and must not see kanban_list / kanban_unblock.
     """
-    monkeypatch.setenv("HERMES_KANBAN_TASK", "t_fake")
+    monkeypatch.setenv("CENTURION_KANBAN_TASK", "t_fake")
     home = tmp_path / ".centurion"
     home.mkdir()
     (home / "config.yaml").write_text("toolsets:\n  - kanban\n")
@@ -119,7 +119,7 @@ def test_worker_with_kanban_toolset_still_hides_board_routing(monkeypatch, tmp_p
 
 def test_kanban_tools_visible_with_toolset_config(monkeypatch, tmp_path):
     """Orchestrator profiles with toolsets: [kanban] see all kanban tools."""
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     home = tmp_path / ".centurion"
     home.mkdir()
     (home / "config.yaml").write_text("toolsets:\n  - kanban\n")
@@ -148,13 +148,13 @@ def test_kanban_tools_visible_with_toolset_config(monkeypatch, tmp_path):
 
 @pytest.fixture
 def worker_env(monkeypatch, tmp_path):
-    """Simulate being a worker: CENTURION_HOME isolated, HERMES_KANBAN_TASK set
+    """Simulate being a worker: CENTURION_HOME isolated, CENTURION_KANBAN_TASK set
     after we've created the task."""
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
-    monkeypatch.setenv("HERMES_PROFILE", "test-worker")
-    monkeypatch.delenv("HERMES_SESSION_ID", raising=False)
+    monkeypatch.setenv("CENTURION_PROFILE", "test-worker")
+    monkeypatch.delenv("CENTURION_SESSION_ID", raising=False)
     from pathlib import Path as _Path
     monkeypatch.setattr(_Path, "home", lambda: tmp_path)
 
@@ -167,7 +167,7 @@ def worker_env(monkeypatch, tmp_path):
         kb.claim_task(conn, tid)
     finally:
         conn.close()
-    monkeypatch.setenv("HERMES_KANBAN_TASK", tid)
+    monkeypatch.setenv("CENTURION_KANBAN_TASK", tid)
     return tid
 
 
@@ -198,7 +198,7 @@ def test_show_explicit_task_id(worker_env):
 
 def test_list_filters_tasks(monkeypatch, worker_env):
     """kanban_list gives orchestrators filtered board discovery."""
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     from centurion_cli import kanban_db as kb
     conn = kb.connect()
     try:
@@ -228,21 +228,21 @@ def test_list_filters_tasks(monkeypatch, worker_env):
 
 
 def test_list_rejects_invalid_status(monkeypatch, worker_env):
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     from tools import kanban_tools as kt
     out = kt._handle_list({"status": "not-a-state"})
     assert "status must be one of" in json.loads(out).get("error", "")
 
 
 def test_list_rejects_bad_limit(monkeypatch, worker_env):
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     from tools import kanban_tools as kt
     assert json.loads(kt._handle_list({"limit": "nope"})).get("error")
     assert json.loads(kt._handle_list({"limit": 0})).get("error")
 
 
 def test_list_parses_include_archived_string_false(monkeypatch, worker_env):
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     from centurion_cli import kanban_db as kb
     conn = kb.connect()
     try:
@@ -263,7 +263,7 @@ def test_list_parses_include_archived_string_false(monkeypatch, worker_env):
 
 
 def test_list_parses_include_archived_string_true(monkeypatch, worker_env):
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     from centurion_cli import kanban_db as kb
     conn = kb.connect()
     try:
@@ -284,7 +284,7 @@ def test_list_parses_include_archived_string_true(monkeypatch, worker_env):
 
 
 def test_list_rejects_bad_include_archived(monkeypatch, worker_env):
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     from tools import kanban_tools as kt
     out = kt._handle_list({"include_archived": "sometimes"})
     assert "include_archived must be" in json.loads(out).get("error", "")
@@ -340,7 +340,7 @@ def test_complete_metadata_round_trips_through_show(worker_env):
 def test_complete_stamps_worker_session_id_from_env(monkeypatch, worker_env):
     from tools import kanban_tools as kt
 
-    monkeypatch.setenv("HERMES_SESSION_ID", "session-trusted")
+    monkeypatch.setenv("CENTURION_SESSION_ID", "session-trusted")
     metadata = {"files": 2, "worker_session_id": "user-spoof"}
 
     out = kt._handle_complete({
@@ -367,8 +367,8 @@ def test_complete_does_not_stamp_worker_session_id_without_scoped_task(
 ):
     from tools import kanban_tools as kt
 
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
-    monkeypatch.setenv("HERMES_SESSION_ID", "session-trusted")
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
+    monkeypatch.setenv("CENTURION_SESSION_ID", "session-trusted")
 
     out = kt._handle_complete({
         "task_id": worker_env,
@@ -700,7 +700,7 @@ def test_comment_happy_path(worker_env):
     try:
         comments = kb.list_comments(conn, worker_env)
         assert len(comments) == 1
-        # Author defaults to HERMES_PROFILE env we set in the fixture
+        # Author defaults to CENTURION_PROFILE env we set in the fixture
         assert comments[0].author == "test-worker"
         assert comments[0].body == "hello thread"
     finally:
@@ -715,7 +715,7 @@ def test_comment_rejects_empty_body(worker_env):
 
 def test_comment_ignores_caller_supplied_author(worker_env):
     """``args["author"]`` is no longer honored — the author is always
-    derived from ``HERMES_PROFILE`` so a worker can't forge a comment
+    derived from ``CENTURION_PROFILE`` so a worker can't forge a comment
     under an authoritative-looking name like ``centurion-system`` and
     poison the next worker's prompt context. Cross-task commenting
     itself remains unrestricted (see #19713); only the author override
@@ -730,7 +730,7 @@ def test_comment_ignores_caller_supplied_author(worker_env):
     conn = kb.connect()
     try:
         comments = kb.list_comments(conn, worker_env)
-        # Author comes from HERMES_PROFILE in the fixture, not the
+        # Author comes from CENTURION_PROFILE in the fixture, not the
         # caller-supplied "centurion-system" override.
         assert comments[0].author == "test-worker"
     finally:
@@ -770,10 +770,10 @@ def test_create_happy_path(worker_env):
 
 def test_create_stamps_session_id_from_env(monkeypatch, worker_env):
     """When the agent loop runs under ACP, the server propagates the
-    originating chat session id via HERMES_SESSION_ID. ``kanban_create``
+    originating chat session id via CENTURION_SESSION_ID. ``kanban_create``
     reads it and stamps the new task so clients can render a per-session
     board (issue: ACP session linkage on kanban tasks)."""
-    monkeypatch.setenv("HERMES_SESSION_ID", "acp-sess-abc")
+    monkeypatch.setenv("CENTURION_SESSION_ID", "acp-sess-abc")
     from tools import kanban_tools as kt
     from centurion_cli import kanban_db as kb
     out = kt._handle_create({
@@ -796,7 +796,7 @@ def test_create_session_id_arg_overrides_env(monkeypatch, worker_env):
     propagation. Edge case but exercised: a tool call could carry a
     different session id (e.g. cross-session linking) and the explicit
     arg should not be silently overwritten."""
-    monkeypatch.setenv("HERMES_SESSION_ID", "from-env")
+    monkeypatch.setenv("CENTURION_SESSION_ID", "from-env")
     from tools import kanban_tools as kt
     from centurion_cli import kanban_db as kb
     out = kt._handle_create({
@@ -819,7 +819,7 @@ def test_create_session_id_absent_when_env_unset(monkeypatch, worker_env):
     """No env var, no arg → session_id stays NULL. Important for backwards
     compatibility: pre-ACP-propagation hosts and CLI-driven creates must
     not accidentally inherit a stale id."""
-    monkeypatch.delenv("HERMES_SESSION_ID", raising=False)
+    monkeypatch.delenv("CENTURION_SESSION_ID", raising=False)
     from tools import kanban_tools as kt
     from centurion_cli import kanban_db as kb
     out = kt._handle_create({
@@ -991,7 +991,7 @@ def test_link_rejects_cycle(worker_env):
 
 
 def test_unblock_happy_path(monkeypatch, worker_env):
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     from centurion_cli import kanban_db as kb
     conn = kb.connect()
     try:
@@ -1014,7 +1014,7 @@ def test_unblock_happy_path(monkeypatch, worker_env):
 
 
 def test_unblock_rejects_non_blocked_task(monkeypatch, worker_env):
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     from tools import kanban_tools as kt
     out = kt._handle_unblock({"task_id": worker_env})
     assert json.loads(out).get("error")
@@ -1084,9 +1084,9 @@ def test_worker_lifecycle_through_tools(worker_env):
 # ---------------------------------------------------------------------------
 
 def test_kanban_guidance_not_in_normal_prompt(monkeypatch, tmp_path):
-    """A normal chat session (no HERMES_KANBAN_TASK) must NOT have
+    """A normal chat session (no CENTURION_KANBAN_TASK) must NOT have
     KANBAN_GUIDANCE in its system prompt."""
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
@@ -1112,9 +1112,9 @@ def test_kanban_guidance_not_in_normal_prompt(monkeypatch, tmp_path):
 
 
 def test_kanban_guidance_in_worker_prompt(monkeypatch, tmp_path):
-    """A worker session (HERMES_KANBAN_TASK set) MUST have the full
+    """A worker session (CENTURION_KANBAN_TASK set) MUST have the full
     lifecycle guidance in its system prompt."""
-    monkeypatch.setenv("HERMES_KANBAN_TASK", "t_fake")
+    monkeypatch.setenv("CENTURION_KANBAN_TASK", "t_fake")
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
@@ -1149,7 +1149,7 @@ def test_kanban_guidance_in_worker_prompt(monkeypatch, tmp_path):
 def test_kanban_guidance_prompt_size_bounded(monkeypatch, tmp_path):
     """Sanity: the guidance block is under 4 KB so it doesn't blow
     up the cached prompt."""
-    monkeypatch.setenv("HERMES_KANBAN_TASK", "t_fake")
+    monkeypatch.setenv("CENTURION_KANBAN_TASK", "t_fake")
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
@@ -1166,7 +1166,7 @@ def test_kanban_guidance_prompt_size_bounded(monkeypatch, tmp_path):
 # Worker task-ownership enforcement (regression tests for #19534)
 # ---------------------------------------------------------------------------
 #
-# A worker process has HERMES_KANBAN_TASK set to its own task id. The
+# A worker process has CENTURION_KANBAN_TASK set to its own task id. The
 # destructive tools (kanban_complete, kanban_block, kanban_heartbeat,
 # kanban_unblock) must refuse to operate
 # on any OTHER task id, even if the caller supplies an explicit `task_id`
@@ -1174,7 +1174,7 @@ def test_kanban_guidance_prompt_size_bounded(monkeypatch, tmp_path):
 # kanban_comment / kanban_create / kanban_link on other tasks, so those
 # are unrestricted.
 #
-# Orchestrator profiles (no HERMES_KANBAN_TASK in env) are intentionally
+# Orchestrator profiles (no CENTURION_KANBAN_TASK in env) are intentionally
 # exempt — their job is routing, and they sometimes close out child
 # tasks on behalf of the child.
 
@@ -1270,7 +1270,7 @@ def test_worker_can_comment_on_foreign_task(worker_env):
     assert d.get("ok") is True, f"cross-task comment must succeed: {d}"
 
     # The comment lands on the foreign task, attributed to the worker's
-    # HERMES_PROFILE — never to a caller-controlled string.
+    # CENTURION_PROFILE — never to a caller-controlled string.
     conn = kb.connect()
     try:
         comments = kb.list_comments(conn, other)
@@ -1340,7 +1340,7 @@ def test_worker_complete_rejects_stale_run_id(worker_env, monkeypatch):
         conn.close()
 
     from tools import kanban_tools as kt
-    monkeypatch.setenv("HERMES_KANBAN_RUN_ID", str(run1.id))
+    monkeypatch.setenv("CENTURION_KANBAN_RUN_ID", str(run1.id))
     out = kt._handle_complete({"summary": "late stale completion"})
     d = json.loads(out)
     assert d.get("ok") is not True
@@ -1353,16 +1353,16 @@ def test_worker_complete_rejects_stale_run_id(worker_env, monkeypatch):
     finally:
         conn.close()
 
-    monkeypatch.setenv("HERMES_KANBAN_RUN_ID", str(run2.id))
+    monkeypatch.setenv("CENTURION_KANBAN_RUN_ID", str(run2.id))
     out = kt._handle_complete({"summary": "current completion"})
     d = json.loads(out)
     assert d.get("ok") is True
 
 
 def test_orchestrator_complete_any_task_allowed(monkeypatch, tmp_path):
-    """Orchestrator profiles (no HERMES_KANBAN_TASK) can still complete
+    """Orchestrator profiles (no CENTURION_KANBAN_TASK) can still complete
     any task via explicit task_id. The check only applies to workers."""
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
@@ -1404,18 +1404,18 @@ def multi_board_env(monkeypatch, tmp_path):
 
     Returns ``("default", "alt")`` slugs. The default board has one
     pre-existing task ``seed_default``; ``alt`` has ``seed_alt``. No
-    HERMES_KANBAN_TASK is pinned (orchestrator context) — workers test
+    CENTURION_KANBAN_TASK is pinned (orchestrator context) — workers test
     the env-task case via the existing ``worker_env`` fixture.
     """
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
-    # Make sure neither HERMES_KANBAN_DB nor CENTURION_KANBAN_BOARD pin a
+    # Make sure neither CENTURION_KANBAN_DB nor CENTURION_KANBAN_BOARD pin a
     # board — the test is specifically about the per-call override.
-    monkeypatch.delenv("HERMES_KANBAN_DB", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_DB", raising=False)
     monkeypatch.delenv("CENTURION_KANBAN_BOARD", raising=False)
-    monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
-    monkeypatch.setenv("HERMES_PROFILE", "test-orchestrator")
+    monkeypatch.delenv("CENTURION_KANBAN_TASK", raising=False)
+    monkeypatch.setenv("CENTURION_PROFILE", "test-orchestrator")
     from pathlib import Path as _Path
     monkeypatch.setattr(_Path, "home", lambda: tmp_path)
 
@@ -1617,13 +1617,13 @@ def test_board_param_routes_unblock_to_alt_board(multi_board_env):
 
 def test_board_param_routes_heartbeat_to_alt_board(monkeypatch, tmp_path):
     """kanban_heartbeat targets the alt board's DB. Worker-scoped, so we
-    use the worker-env style fixture inline (pinning HERMES_KANBAN_TASK
+    use the worker-env style fixture inline (pinning CENTURION_KANBAN_TASK
     to a task that exists in the alt board)."""
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
-    monkeypatch.setenv("HERMES_PROFILE", "alt-worker")
-    monkeypatch.delenv("HERMES_KANBAN_DB", raising=False)
+    monkeypatch.setenv("CENTURION_PROFILE", "alt-worker")
+    monkeypatch.delenv("CENTURION_KANBAN_DB", raising=False)
     monkeypatch.delenv("CENTURION_KANBAN_BOARD", raising=False)
     from pathlib import Path as _Path
     monkeypatch.setattr(_Path, "home", lambda: tmp_path)
@@ -1634,7 +1634,7 @@ def test_board_param_routes_heartbeat_to_alt_board(monkeypatch, tmp_path):
     with kb.connect(board="alt") as conn:
         tid = kb.create_task(conn, title="alt hb", assignee="alt-worker")
         kb.claim_task(conn, tid)
-    monkeypatch.setenv("HERMES_KANBAN_TASK", tid)
+    monkeypatch.setenv("CENTURION_KANBAN_TASK", tid)
 
     from tools import kanban_tools as kt
     out = kt._handle_heartbeat({"note": "alive on alt", "board": "alt"})

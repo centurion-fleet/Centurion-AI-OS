@@ -52,7 +52,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from centurion_cli import __version__ as _HERMES_VERSION
+from centurion_cli import __version__ as _CENTURION_VERSION
 from utils import atomic_replace
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ DEFAULT_TTL_HOURS = 24
 DEFAULT_FETCH_TIMEOUT = 8.0
 SUPPORTED_SCHEMA_VERSION = 1
 
-_HERMES_USER_AGENT = f"centurion-cli/{_HERMES_VERSION}"
+_CENTURION_USER_AGENT = f"centurion-cli/{_CENTURION_VERSION}"
 
 # In-process cache to avoid repeated disk + parse work across multiple
 # calls within the same session. Invalidated by TTL against the disk file's
@@ -120,7 +120,7 @@ def _fetch_manifest(url: str, timeout: float) -> dict[str, Any] | None:
             url,
             headers={
                 "Accept": "application/json",
-                "User-Agent": _HERMES_USER_AGENT,
+                "User-Agent": _CENTURION_USER_AGENT,
             },
         )
         with urllib.request.urlopen(req, timeout=timeout) as resp:

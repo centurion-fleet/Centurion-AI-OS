@@ -1,4 +1,4 @@
-"""Regression test for the ``HermesMCPOAuthProvider.async_auth_flow`` bidirectional
+"""Regression test for the ``CenturionMCPOAuthProvider.async_auth_flow`` bidirectional
 generator bridge.
 
 PR #11383 introduced a subclass method that wrapped the SDK's ``auth_flow`` with::
@@ -48,9 +48,9 @@ async def test_centurion_provider_forwards_asend_values(tmp_path, monkeypatch):
     from pydantic import AnyUrl
 
     from tools.mcp_oauth import CenturionTokenStorage
-    from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
+    from tools.mcp_oauth_manager import _CENTURION_PROVIDER_CLS, reset_manager_for_tests
 
-    assert _HERMES_PROVIDER_CLS is not None, "SDK OAuth types must be available"
+    assert _CENTURION_PROVIDER_CLS is not None, "SDK OAuth types must be available"
 
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     reset_manager_for_tests()
@@ -84,7 +84,7 @@ async def test_centurion_provider_forwards_asend_values(tmp_path, monkeypatch):
         redirect_uris=[AnyUrl("http://127.0.0.1:12345/callback")],
         client_name="Centurion AI OS",
     )
-    provider = _HERMES_PROVIDER_CLS(
+    provider = _CENTURION_PROVIDER_CLS(
         server_name="srv",
         server_url="https://example.com/mcp",
         client_metadata=metadata,
@@ -130,9 +130,9 @@ async def test_centurion_provider_forwards_401_triggers_refresh(tmp_path, monkey
     from pydantic import AnyUrl
 
     from tools.mcp_oauth import CenturionTokenStorage
-    from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
+    from tools.mcp_oauth_manager import _CENTURION_PROVIDER_CLS, reset_manager_for_tests
 
-    assert _HERMES_PROVIDER_CLS is not None
+    assert _CENTURION_PROVIDER_CLS is not None
 
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     reset_manager_for_tests()
@@ -160,7 +160,7 @@ async def test_centurion_provider_forwards_401_triggers_refresh(tmp_path, monkey
         redirect_uris=[AnyUrl("http://127.0.0.1:12345/callback")],
         client_name="Centurion AI OS",
     )
-    provider = _HERMES_PROVIDER_CLS(
+    provider = _CENTURION_PROVIDER_CLS(
         server_name="srv",
         server_url="https://example.com/mcp",
         client_metadata=metadata,

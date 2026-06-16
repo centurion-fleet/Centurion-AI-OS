@@ -63,7 +63,7 @@ def centurion_auth_only_env(tmp_path, monkeypatch):
     return centurion_home
 
 
-def test_normal_path_still_works(hermes_auth_only_env):
+def test_normal_path_still_works(centurion_auth_only_env):
     """openai-codex appears when tokens are already in Centurion auth store."""
     from centurion_cli.model_switch import list_authenticated_providers
 
@@ -75,7 +75,7 @@ def test_normal_path_still_works(hermes_auth_only_env):
     assert "openai-codex" in slugs
 
 
-def test_codex_picker_uses_live_codex_catalog(hermes_auth_only_env, tmp_path, monkeypatch):
+def test_codex_picker_uses_live_codex_catalog(centurion_auth_only_env, tmp_path, monkeypatch):
     """The gateway /model picker should surface Codex CLI-only listed models."""
     from centurion_cli.model_switch import list_authenticated_providers
 

@@ -135,9 +135,9 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             (echo "FAIL: irc plugin manifest missing"; exit 1)
           echo "PASS: irc plugin manifest present"
 
-          grep -q "HERMES_BUNDLED_PLUGINS" ${centurion-ai-os}/bin/centurion || \
-            (echo "FAIL: HERMES_BUNDLED_PLUGINS not in wrapper"; exit 1)
-          echo "PASS: HERMES_BUNDLED_PLUGINS set in wrapper"
+          grep -q "CENTURION_BUNDLED_PLUGINS" ${centurion-ai-os}/bin/centurion || \
+            (echo "FAIL: CENTURION_BUNDLED_PLUGINS not in wrapper"; exit 1)
+          echo "PASS: CENTURION_BUNDLED_PLUGINS set in wrapper"
 
           echo "=== All bundled plugins checks passed ==="
           mkdir -p $out
@@ -165,25 +165,25 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           echo "ok" > $out/result
         '';
 
-        # Verify HERMES_NODE is set in wrapper and points to Node 20+
+        # Verify CENTURION_NODE is set in wrapper and points to Node 20+
         # (string-width uses the /v regex flag which requires Node 20+)
         centurion-node = pkgs.runCommand "centurion-node-version" { } ''
           set -e
-          echo "=== Checking HERMES_NODE in wrapper ==="
-          grep -q "HERMES_NODE" ${centurion-ai-os}/bin/centurion || \
-            (echo "FAIL: HERMES_NODE not set in wrapper"; exit 1)
-          echo "PASS: HERMES_NODE present in wrapper"
+          echo "=== Checking CENTURION_NODE in wrapper ==="
+          grep -q "CENTURION_NODE" ${centurion-ai-os}/bin/centurion || \
+            (echo "FAIL: CENTURION_NODE not set in wrapper"; exit 1)
+          echo "PASS: CENTURION_NODE present in wrapper"
 
-          HERMES_NODE=$(sed -n "s/^export HERMES_NODE='\(.*\)'/\1/p" ${centurion-ai-os}/bin/centurion)
-          test -x "$HERMES_NODE" || (echo "FAIL: HERMES_NODE=$HERMES_NODE not executable"; exit 1)
-          echo "PASS: HERMES_NODE executable at $HERMES_NODE"
+          CENTURION_NODE=$(sed -n "s/^export CENTURION_NODE='\(.*\)'/\1/p" ${centurion-ai-os}/bin/centurion)
+          test -x "$CENTURION_NODE" || (echo "FAIL: CENTURION_NODE=$CENTURION_NODE not executable"; exit 1)
+          echo "PASS: CENTURION_NODE executable at $CENTURION_NODE"
 
-          NODE_MAJOR=$("$HERMES_NODE" --version | sed 's/^v//' | cut -d. -f1)
+          NODE_MAJOR=$("$CENTURION_NODE" --version | sed 's/^v//' | cut -d. -f1)
           test "$NODE_MAJOR" -ge 20 || \
             (echo "FAIL: Node v$NODE_MAJOR < 20, TUI needs /v regex flag support"; exit 1)
           echo "PASS: Node v$NODE_MAJOR >= 20"
 
-          echo "=== All HERMES_NODE checks passed ==="
+          echo "=== All CENTURION_NODE checks passed ==="
           mkdir -p $out
           echo "ok" > $out/result
         '';

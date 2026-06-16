@@ -138,13 +138,13 @@ answer=$(centurion -z "summarize this" < /path/to/file.txt)
 
 | 标志 | 等效环境变量 | 用途 |
 |---|---|---|
-| `-m` / `--model <model>` | `HERMES_INFERENCE_MODEL` | 覆盖本次运行的模型 |
+| `-m` / `--model <model>` | `CENTURION_INFERENCE_MODEL` | 覆盖本次运行的模型 |
 | `--provider <provider>` | _(无)_ | 覆盖本次运行的 provider |
 
 ```bash
 centurion -z "…" --provider openrouter --model openai/gpt-5.5
 # 或：
-HERMES_INFERENCE_MODEL=anthropic/claude-sonnet-4.6 centurion -z "…"
+CENTURION_INFERENCE_MODEL=anthropic/claude-sonnet-4.6 centurion -z "…"
 ```
 
 相同的 agent、相同的工具、相同的 skill——只是剥离了所有交互式/装饰性层。如果你还需要在记录中包含工具输出，请改用 `centurion chat -q`；`-z` 专门用于"我只需要最终答案"的场景。

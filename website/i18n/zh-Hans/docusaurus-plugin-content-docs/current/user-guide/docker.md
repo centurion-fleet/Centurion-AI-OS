@@ -60,7 +60,7 @@ docker run -d \
 
 ## 运行 dashboard
 
-内置 Web dashboard 作为可选的子进程在与 gateway 相同的容器内运行。设置 `HERMES_DASHBOARD=1` 可在容器回环地址（`127.0.0.1`）上默认运行 dashboard：
+内置 Web dashboard 作为可选的子进程在与 gateway 相同的容器内运行。设置 `CENTURION_DASHBOARD=1` 可在容器回环地址（`127.0.0.1`）上默认运行 dashboard：
 
 ```sh
 docker run -d \
@@ -68,7 +68,7 @@ docker run -d \
   --restart unless-stopped \
   -v ~/.centurion:/opt/data \
   -p 8642:8642 \
-  -e HERMES_DASHBOARD=1 \
+  -e CENTURION_DASHBOARD=1 \
   centurion-fleet/centurion-ai-os gateway run
 ```
 
@@ -76,12 +76,12 @@ docker run -d \
 
 | 环境变量 | 描述 | 默认值 |
 |---------------------|-------------|---------|
-| `HERMES_DASHBOARD` | 设为 `1`（或 `true` / `yes`）以在主命令旁启动 dashboard | *（未设置——不启动 dashboard）* |
-| `HERMES_DASHBOARD_HOST` | dashboard HTTP 服务器的绑定地址 | `127.0.0.1` |
-| `HERMES_DASHBOARD_PORT` | dashboard HTTP 服务器的端口 | `9119` |
-| `HERMES_DASHBOARD_TUI` | 设为 `1` 以启用浏览器内 Chat 标签页（通过 PTY/WebSocket 嵌入 `centurion --tui`） | *（未设置）* |
+| `CENTURION_DASHBOARD` | 设为 `1`（或 `true` / `yes`）以在主命令旁启动 dashboard | *（未设置——不启动 dashboard）* |
+| `CENTURION_DASHBOARD_HOST` | dashboard HTTP 服务器的绑定地址 | `127.0.0.1` |
+| `CENTURION_DASHBOARD_PORT` | dashboard HTTP 服务器的端口 | `9119` |
+| `CENTURION_DASHBOARD_TUI` | 设为 `1` 以启用浏览器内 Chat 标签页（通过 PTY/WebSocket 嵌入 `centurion --tui`） | *（未设置）* |
 
-默认情况下，dashboard 保持在回环地址，以避免将未经身份验证的 Web 界面暴露到网络。若要有意发布，请设置 `HERMES_DASHBOARD_HOST=0.0.0.0` 并配置你自己的可信网络边界/反向代理。在这种情况下，你必须通过命令路径中的 host/flags 显式添加 `--insecure` 行为（入口点不再自动启用不安全模式）。
+默认情况下，dashboard 保持在回环地址，以避免将未经身份验证的 Web 界面暴露到网络。若要有意发布，请设置 `CENTURION_DASHBOARD_HOST=0.0.0.0` 并配置你自己的可信网络边界/反向代理。在这种情况下，你必须通过命令路径中的 host/flags 显式添加 `--insecure` 行为（入口点不再自动启用不安全模式）。
 
 :::note
 dashboard 在容器内作为受监管的 s6 服务运行。如果
@@ -218,11 +218,11 @@ services:
     command: gateway run
     ports:
       - "8642:8642"   # gateway API
-      - "9119:9119"   # dashboard（仅在 HERMES_DASHBOARD=1 时生效）
+      - "9119:9119"   # dashboard（仅在 CENTURION_DASHBOARD=1 时生效）
     volumes:
       - ~/.centurion:/opt/data
     environment:
-      - HERMES_DASHBOARD=1
+      - CENTURION_DASHBOARD=1
       # 取消注释以直接转发特定环境变量而非使用 .env 文件：
       # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -287,7 +287,7 @@ docker run -d \
 :::
 
 :::warning 权限模型
-除非你在命令链中保留 `/init`（或等效的旧版 `docker/entrypoint.sh` shim，它会转发到 stage2 hook），否则不要覆盖镜像入口点。s6-overlay 的 `/init` 以 root 运行，以便在首次启动时对卷执行 chown，然后通过 `s6-setuidgid` 为每个受监管的服务**以及**主程序降权至 `centurion` 用户。在官方镜像内以 root 启动 `centurion gateway run` 默认会被拒绝，因为这可能在 `/opt/data` 中留下 root 所有的文件，导致后续 dashboard 或 gateway 启动失败。仅在你有意接受该风险时才设置 `HERMES_ALLOW_ROOT_GATEWAY=1`。
+除非你在命令链中保留 `/init`（或等效的旧版 `docker/entrypoint.sh` shim，它会转发到 stage2 hook），否则不要覆盖镜像入口点。s6-overlay 的 `/init` 以 root 运行，以便在首次启动时对卷执行 chown，然后通过 `s6-setuidgid` 为每个受监管的服务**以及**主程序降权至 `centurion` 用户。在官方镜像内以 root 启动 `centurion gateway run` 默认会被拒绝，因为这可能在 `/opt/data` 中留下 root 所有的文件，导致后续 dashboard 或 gateway 启动失败。仅在你有意接受该风险时才设置 `CENTURION_ALLOW_ROOT_GATEWAY=1`。
 :::
 
 ### Per-profile gateway 监管
@@ -305,7 +305,7 @@ centurion profile delete coder            # 拆除 s6 槽
 **相比 pre-s6 镜像的监管优势：**
 
 - Gateway 崩溃后由 `s6-supervise` 在约 1 秒退避后自动重启。
-- Dashboard 崩溃后自动重启（设置 `HERMES_DASHBOARD=1` 以启动）。
+- Dashboard 崩溃后自动重启（设置 `CENTURION_DASHBOARD=1` 以启动）。
 - `docker restart` 保留运行中的 gateway：cont-init 协调器读取 `$CENTURION_HOME/profiles/<name>/gateway_state.json`，若上次记录状态为 `running` 则恢复该槽。已停止的 gateway 保持停止状态。
 - 各 profile 的 gateway 日志持久化于 `$CENTURION_HOME/logs/gateways/<profile>/current`（由 `s6-log` 轮转），协调器的操作记录在每次启动时追加到 `$CENTURION_HOME/logs/container-boot.log`。
 

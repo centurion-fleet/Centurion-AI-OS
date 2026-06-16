@@ -122,8 +122,8 @@ fi
 # auth.json: bootstrap from env on first boot only. Same semantics as the
 # pre-s6 entrypoint — the [ ! -f ] guard is critical to avoid clobbering
 # rotated refresh tokens on container restart.
-if [ ! -f "$CENTURION_HOME/auth.json" ] && [ -n "${HERMES_AUTH_JSON_BOOTSTRAP:-}" ]; then
-    printf '%s' "$HERMES_AUTH_JSON_BOOTSTRAP" > "$CENTURION_HOME/auth.json"
+if [ ! -f "$CENTURION_HOME/auth.json" ] && [ -n "${CENTURION_AUTH_JSON_BOOTSTRAP:-}" ]; then
+    printf '%s' "$CENTURION_AUTH_JSON_BOOTSTRAP" > "$CENTURION_HOME/auth.json"
     chown centurion:centurion "$CENTURION_HOME/auth.json" 2>/dev/null || true
     chmod 600 "$CENTURION_HOME/auth.json"
 fi

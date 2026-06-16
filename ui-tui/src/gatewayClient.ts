@@ -328,7 +328,7 @@ export class GatewayClient extends EventEmitter {
 
   private startSpawnedGateway(root: string) {
     const python = resolvePython(root)
-    const cwd = process.env.HERMES_CWD || root
+    const cwd = process.env.CENTURION_CWD || root
     const env = { ...process.env }
     const pyPath = env.PYTHONPATH?.trim()
 

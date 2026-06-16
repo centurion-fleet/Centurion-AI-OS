@@ -103,7 +103,7 @@ If you set a custom `num_ctx` in Ollama (e.g., `ollama run --num_ctx 64000`), ma
 :::
 
 :::tip Timeouts with local models
-Centurion auto-detects local endpoints and relaxes streaming timeouts (read timeout raised from 120s to 1800s, stale stream detection disabled). If you still hit timeouts on very large contexts, set `HERMES_STREAM_READ_TIMEOUT=1800` in your `.env`. See the [Local LLM guide](../guides/local-llm-on-mac.md#timeouts) for details.
+Centurion auto-detects local endpoints and relaxes streaming timeouts (read timeout raised from 120s to 1800s, stale stream detection disabled). If you still hit timeouts on very large contexts, set `CENTURION_STREAM_READ_TIMEOUT=1800` in your `.env`. See the [Local LLM guide](../guides/local-llm-on-mac.md#timeouts) for details.
 :::
 
 ### How much does it cost?
@@ -288,7 +288,7 @@ Make sure the key matches the provider. An OpenAI key won't work with OpenRouter
 centurion model
 
 # Set a valid model
-centurion config set HERMES_MODEL anthropic/claude-opus-4.7
+centurion config set CENTURION_MODEL anthropic/claude-opus-4.7
 
 # Or specify per-session
 centurion chat --model openrouter/meta-llama/llama-3.1-70b-instruct

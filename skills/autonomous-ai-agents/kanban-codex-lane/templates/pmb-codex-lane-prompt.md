@@ -44,8 +44,8 @@ Verification you may run:
 - [COMMAND_2]
 
 Verification Centurion will rerun independently:
-- [HERMES_COMMAND_1]
-- [HERMES_COMMAND_2]
+- [CENTURION_COMMAND_1]
+- [CENTURION_COMMAND_2]
 
 Required final report:
 - Summary of changes.

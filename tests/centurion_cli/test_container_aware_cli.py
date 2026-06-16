@@ -27,7 +27,7 @@ def container_env(tmp_path, monkeypatch):
     centurion_home = tmp_path / ".centurion"
     centurion_home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
-    monkeypatch.delenv("HERMES_DEV", raising=False)
+    monkeypatch.delenv("CENTURION_DEV", raising=False)
 
     container_mode = centurion_home / ".container-mode"
     container_mode.write_text(
@@ -65,7 +65,7 @@ def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
     centurion_home = tmp_path / ".centurion"
     centurion_home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(centurion_home))
-    monkeypatch.delenv("HERMES_DEV", raising=False)
+    monkeypatch.delenv("CENTURION_DEV", raising=False)
 
     with patch("centurion_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -74,8 +74,8 @@ def test_get_container_exec_info_none_without_file(tmp_path, monkeypatch):
 
 
 def test_get_container_exec_info_skipped_when_centurion_dev(container_env, monkeypatch):
-    """Returns None when HERMES_DEV=1 is set (dev mode bypass)."""
-    monkeypatch.setenv("HERMES_DEV", "1")
+    """Returns None when CENTURION_DEV=1 is set (dev mode bypass)."""
+    monkeypatch.setenv("CENTURION_DEV", "1")
 
     with patch("centurion_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -84,8 +84,8 @@ def test_get_container_exec_info_skipped_when_centurion_dev(container_env, monke
 
 
 def test_get_container_exec_info_not_skipped_when_centurion_dev_zero(container_env, monkeypatch):
-    """HERMES_DEV=0 does NOT trigger bypass — only '1' does."""
-    monkeypatch.setenv("HERMES_DEV", "0")
+    """CENTURION_DEV=0 does NOT trigger bypass — only '1' does."""
+    monkeypatch.setenv("CENTURION_DEV", "0")
 
     with patch("centurion_constants.is_container", return_value=False):
         info = get_container_exec_info()
@@ -107,7 +107,7 @@ def test_get_container_exec_info_defaults():
         with patch("centurion_constants.is_container", return_value=False), \
              patch.dict(get_container_exec_info.__globals__, {"get_centurion_home": lambda: centurion_home}), \
              patch.dict(os.environ, {}, clear=False):
-            os.environ.pop("HERMES_DEV", None)
+            os.environ.pop("CENTURION_DEV", None)
             info = get_container_exec_info()
 
         assert info is not None

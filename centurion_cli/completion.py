@@ -211,7 +211,7 @@ _centurion_profiles() {{
     _describe 'profile' profiles
 }}
 
-_hermes() {{
+_centurion() {{
     local context state line
     typeset -A opt_args
 

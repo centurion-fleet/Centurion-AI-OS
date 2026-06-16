@@ -143,7 +143,7 @@ RUN cd web && npm run build && \
 # node_modules trees additionally need to be writable by the centurion user
 # so the runtime `npm install` triggered by _tui_need_npm_install() in
 # centurion_cli/main.py succeeds (see #18800). /opt/centurion/web is build-time
-# only (HERMES_WEB_DIST points at centurion_cli/web_dist) and is intentionally
+# only (CENTURION_WEB_DIST points at centurion_cli/web_dist) and is intentionally
 # not chowned here.
 # The .venv MUST remain centurion-writable so lazy_deps.py can install
 # remaining optional platform packages and future pin bumps at first use.
@@ -186,7 +186,7 @@ COPY --chmod=0755 docker/cont-init.d/015-supervise-perms /etc/cont-init.d/015-su
 COPY --chmod=0755 docker/cont-init.d/02-reconcile-profiles /etc/cont-init.d/02-reconcile-profiles
 
 # ---------- Runtime ----------
-ENV HERMES_WEB_DIST=/opt/centurion/centurion_cli/web_dist
+ENV CENTURION_WEB_DIST=/opt/centurion/centurion_cli/web_dist
 ENV CENTURION_HOME=/opt/data
 # Pre-s6 entrypoint.sh did `source .venv/bin/activate` which exported
 # the venv bin onto PATH; Architecture B's main-wrapper.sh does the

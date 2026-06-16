@@ -60,7 +60,7 @@ Opening any port on an internet facing machine is a security risk. You should no
 
 ## Running the dashboard
 
-The built-in web dashboard runs as an optional side-process inside the same container as the gateway. Set `HERMES_DASHBOARD=1` to run the dashboard on container loopback (`127.0.0.1`) by default:
+The built-in web dashboard runs as an optional side-process inside the same container as the gateway. Set `CENTURION_DASHBOARD=1` to run the dashboard on container loopback (`127.0.0.1`) by default:
 
 ```sh
 docker run -d \
@@ -68,7 +68,7 @@ docker run -d \
   --restart unless-stopped \
   -v ~/.centurion:/opt/data \
   -p 8642:8642 \
-  -e HERMES_DASHBOARD=1 \
+  -e CENTURION_DASHBOARD=1 \
   centurion-fleet/centurion-ai-os gateway run
 ```
 
@@ -76,12 +76,12 @@ The entrypoint starts `centurion dashboard` in the background (running as the no
 
 | Environment variable | Description | Default |
 |---------------------|-------------|---------|
-| `HERMES_DASHBOARD` | Set to `1` (or `true` / `yes`) to launch the dashboard alongside the main command | *(unset — dashboard not started)* |
-| `HERMES_DASHBOARD_HOST` | Bind address for the dashboard HTTP server | `127.0.0.1` |
-| `HERMES_DASHBOARD_PORT` | Port for the dashboard HTTP server | `9119` |
-| `HERMES_DASHBOARD_TUI` | Set to `1` to expose the in-browser Chat tab (embedded `centurion --tui` via PTY/WebSocket) | *(unset)* |
+| `CENTURION_DASHBOARD` | Set to `1` (or `true` / `yes`) to launch the dashboard alongside the main command | *(unset — dashboard not started)* |
+| `CENTURION_DASHBOARD_HOST` | Bind address for the dashboard HTTP server | `127.0.0.1` |
+| `CENTURION_DASHBOARD_PORT` | Port for the dashboard HTTP server | `9119` |
+| `CENTURION_DASHBOARD_TUI` | Set to `1` to expose the in-browser Chat tab (embedded `centurion --tui` via PTY/WebSocket) | *(unset)* |
 
-By default, the dashboard stays on loopback to avoid exposing the unauthenticated web surface over the network. To publish it intentionally, set `HERMES_DASHBOARD_HOST=0.0.0.0` and configure your own trusted network boundary/reverse proxy. In that case you must explicitly add `--insecure` behavior by passing host/flags in your command path (the entrypoint no longer auto-enables insecure mode).
+By default, the dashboard stays on loopback to avoid exposing the unauthenticated web surface over the network. To publish it intentionally, set `CENTURION_DASHBOARD_HOST=0.0.0.0` and configure your own trusted network boundary/reverse proxy. In that case you must explicitly add `--insecure` behavior by passing host/flags in your command path (the entrypoint no longer auto-enables insecure mode).
 
 :::note
 The dashboard runs as a supervised s6 service inside the container. If
@@ -220,11 +220,11 @@ services:
     command: gateway run
     ports:
       - "8642:8642"   # gateway API
-      - "9119:9119"   # dashboard (only reached when HERMES_DASHBOARD=1)
+      - "9119:9119"   # dashboard (only reached when CENTURION_DASHBOARD=1)
     volumes:
       - ~/.centurion:/opt/data
     environment:
-      - HERMES_DASHBOARD=1
+      - CENTURION_DASHBOARD=1
       # Uncomment to forward specific env vars instead of using .env file:
       # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -289,7 +289,7 @@ The container ENTRYPOINT is now `/init` (s6-overlay), not `/usr/bin/tini`. All f
 :::
 
 :::warning Privilege model
-Do not override the image entrypoint unless you keep `/init` (or, equivalently, the legacy `docker/entrypoint.sh` shim that forwards to the stage2 hook) in the command chain. s6-overlay's `/init` runs as root so it can chown the volume on first boot, then drops to the `centurion` user via `s6-setuidgid` for every supervised service AND for the main program. Starting `centurion gateway run` as root inside the official image is refused by default because it can leave root-owned files in `/opt/data` and break later dashboard or gateway starts. Set `HERMES_ALLOW_ROOT_GATEWAY=1` only when you intentionally accept that risk.
+Do not override the image entrypoint unless you keep `/init` (or, equivalently, the legacy `docker/entrypoint.sh` shim that forwards to the stage2 hook) in the command chain. s6-overlay's `/init` runs as root so it can chown the volume on first boot, then drops to the `centurion` user via `s6-setuidgid` for every supervised service AND for the main program. Starting `centurion gateway run` as root inside the official image is refused by default because it can leave root-owned files in `/opt/data` and break later dashboard or gateway starts. Set `CENTURION_ALLOW_ROOT_GATEWAY=1` only when you intentionally accept that risk.
 :::
 
 ### Per-profile gateway supervision
@@ -307,7 +307,7 @@ centurion profile delete coder            # tears down the s6 slot
 **Supervision benefits over the pre-s6 image:**
 
 - Gateway crashes are auto-restarted by `s6-supervise` after a ~1s backoff.
-- Dashboard crashes are auto-restarted (set `HERMES_DASHBOARD=1` to start it).
+- Dashboard crashes are auto-restarted (set `CENTURION_DASHBOARD=1` to start it).
 - `docker restart` preserves running gateways: the cont-init reconciler reads `$CENTURION_HOME/profiles/<name>/gateway_state.json` and brings the slot back up if the last recorded state was `running`. Stopped gateways stay stopped.
 - Per-profile gateway logs persist under `$CENTURION_HOME/logs/gateways/<profile>/current` (rotated by `s6-log`), and the reconciler's actions are appended to `$CENTURION_HOME/logs/container-boot.log` per boot.
 

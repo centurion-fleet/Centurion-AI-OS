@@ -53,7 +53,7 @@ def test_connect_rejects_tls_record_in_sqlite_header(tmp_path, monkeypatch):
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
-    monkeypatch.delenv("HERMES_KANBAN_DB", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_DB", raising=False)
     monkeypatch.delenv("CENTURION_KANBAN_HOME", raising=False)
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
@@ -319,7 +319,7 @@ def test_claim_once_wins_second_loses(kanban_home):
 
 
 def test_claim_uses_env_default_ttl(kanban_home, monkeypatch):
-    monkeypatch.setenv("HERMES_KANBAN_CLAIM_TTL_SECONDS", "3600")
+    monkeypatch.setenv("CENTURION_KANBAN_CLAIM_TTL_SECONDS", "3600")
     with kb.connect() as conn:
         t = kb.create_task(conn, title="x", assignee="a")
         kb.claim_task(conn, t, claimer="host:1")
@@ -442,7 +442,7 @@ def test_stale_claim_with_live_pid_uses_env_ttl_override(
 ):
     import centurion_cli.kanban_db as _kb
 
-    monkeypatch.setenv("HERMES_KANBAN_CLAIM_TTL_SECONDS", "3600")
+    monkeypatch.setenv("CENTURION_KANBAN_CLAIM_TTL_SECONDS", "3600")
 
     with kb.connect() as conn:
         t = kb.create_task(conn, title="x", assignee="a")
@@ -627,7 +627,7 @@ def test_heartbeat_extends_claim(kanban_home):
 
 
 def test_heartbeat_uses_env_default_ttl(kanban_home, monkeypatch):
-    monkeypatch.setenv("HERMES_KANBAN_CLAIM_TTL_SECONDS", "3600")
+    monkeypatch.setenv("CENTURION_KANBAN_CLAIM_TTL_SECONDS", "3600")
     with kb.connect() as conn:
         t = kb.create_task(conn, title="x", assignee="a")
         claimer = "host:hb"
@@ -1518,7 +1518,7 @@ def test_cleanup_workspace_refuses_path_outside_scratch_root(kanban_home, tmp_pa
 
 
 def test_cleanup_workspace_honors_workspaces_root_env_override(tmp_path, monkeypatch):
-    """``HERMES_KANBAN_WORKSPACES_ROOT`` extends the managed-scratch set.
+    """``CENTURION_KANBAN_WORKSPACES_ROOT`` extends the managed-scratch set.
 
     Worker subprocesses run with this env var injected by the dispatcher. The
     cleanup containment check must treat paths under it as managed even when
@@ -1530,7 +1530,7 @@ def test_cleanup_workspace_honors_workspaces_root_env_override(tmp_path, monkeyp
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     workspaces_override = tmp_path / "ext-workspaces"
     workspaces_override.mkdir()
-    monkeypatch.setenv("HERMES_KANBAN_WORKSPACES_ROOT", str(workspaces_override))
+    monkeypatch.setenv("CENTURION_KANBAN_WORKSPACES_ROOT", str(workspaces_override))
     kb.init_db()
 
     with kb.connect() as conn:
@@ -1910,7 +1910,7 @@ class TestSharedBoardPaths:
     def test_centurion_kanban_db_pin_beats_kanban_home(
         self, tmp_path, monkeypatch
     ):
-        # HERMES_KANBAN_DB pins the file path directly and beats both
+        # CENTURION_KANBAN_DB pins the file path directly and beats both
         # CENTURION_KANBAN_HOME and the `get_default_centurion_root()` path.
         # This is the env the dispatcher injects into workers.
         default_home = tmp_path / ".centurion"
@@ -1923,7 +1923,7 @@ class TestSharedBoardPaths:
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(default_home))
         monkeypatch.setenv("CENTURION_KANBAN_HOME", str(umbrella))
-        monkeypatch.setenv("HERMES_KANBAN_DB", str(pinned_db))
+        monkeypatch.setenv("CENTURION_KANBAN_DB", str(pinned_db))
 
         assert kb.kanban_db_path() == pinned_db
         # workspaces_root still follows CENTURION_KANBAN_HOME -- the pins
@@ -1933,7 +1933,7 @@ class TestSharedBoardPaths:
     def test_centurion_kanban_workspaces_root_pin_beats_kanban_home(
         self, tmp_path, monkeypatch
     ):
-        # HERMES_KANBAN_WORKSPACES_ROOT pins the workspaces root directly.
+        # CENTURION_KANBAN_WORKSPACES_ROOT pins the workspaces root directly.
         default_home = tmp_path / ".centurion"
         default_home.mkdir()
         umbrella = tmp_path / "umbrella"
@@ -1944,7 +1944,7 @@ class TestSharedBoardPaths:
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(default_home))
         monkeypatch.setenv("CENTURION_KANBAN_HOME", str(umbrella))
-        monkeypatch.setenv("HERMES_KANBAN_WORKSPACES_ROOT", str(pinned_ws))
+        monkeypatch.setenv("CENTURION_KANBAN_WORKSPACES_ROOT", str(pinned_ws))
 
         assert kb.workspaces_root() == pinned_ws
         # kanban_db_path still follows CENTURION_KANBAN_HOME.
@@ -1959,8 +1959,8 @@ class TestSharedBoardPaths:
         default_home.mkdir()
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
         monkeypatch.setenv("CENTURION_HOME", str(default_home))
-        monkeypatch.setenv("HERMES_KANBAN_DB", "   ")
-        monkeypatch.setenv("HERMES_KANBAN_WORKSPACES_ROOT", "")
+        monkeypatch.setenv("CENTURION_KANBAN_DB", "   ")
+        monkeypatch.setenv("CENTURION_KANBAN_WORKSPACES_ROOT", "")
 
         assert kb.kanban_db_path() == default_home / "kanban.db"
         assert kb.workspaces_root() == default_home / "kanban" / "workspaces"
@@ -1968,8 +1968,8 @@ class TestSharedBoardPaths:
     def test_dispatcher_spawn_injects_kanban_db_and_workspaces_root(
         self, tmp_path, monkeypatch
     ):
-        # The dispatcher's `_default_spawn` must inject HERMES_KANBAN_DB
-        # and HERMES_KANBAN_WORKSPACES_ROOT into the worker env so the
+        # The dispatcher's `_default_spawn` must inject CENTURION_KANBAN_DB
+        # and CENTURION_KANBAN_WORKSPACES_ROOT into the worker env so the
         # worker converges on the dispatcher's paths even when the
         # `-p <profile>` flag rewrites CENTURION_HOME.
         default_home = tmp_path / ".centurion"
@@ -2007,12 +2007,12 @@ class TestSharedBoardPaths:
         kb._default_spawn(task, str(tmp_path / "ws"))
 
         env = captured["env"]
-        assert env["HERMES_KANBAN_DB"] == str(default_home / "kanban.db")
-        assert env["HERMES_KANBAN_WORKSPACES_ROOT"] == str(
+        assert env["CENTURION_KANBAN_DB"] == str(default_home / "kanban.db")
+        assert env["CENTURION_KANBAN_WORKSPACES_ROOT"] == str(
             default_home / "kanban" / "workspaces"
         )
-        assert env["HERMES_KANBAN_TASK"] == "t_dispatch_env"
-        assert env["HERMES_KANBAN_BRANCH"] == "wt/t_dispatch_env"
+        assert env["CENTURION_KANBAN_TASK"] == "t_dispatch_env"
+        assert env["CENTURION_KANBAN_BRANCH"] == "wt/t_dispatch_env"
 
 
 # ---------------------------------------------------------------------------
@@ -2356,17 +2356,17 @@ def test_resolve_centurion_argv_centurion_bin_bare_name_uses_path(monkeypatch, t
     import centurion_cli.kanban_db as kb
 
     cwd_centurion = tmp_path / "centurion"
-    cwd_hermes.write_text("wrong\n", encoding="utf-8")
-    cwd_hermes.chmod(cwd_hermes.stat().st_mode | stat.S_IXUSR)
+    cwd_centurion.write_text("wrong\n", encoding="utf-8")
+    cwd_centurion.chmod(cwd_centurion.stat().st_mode | stat.S_IXUSR)
     path_centurion = tmp_path / "bin" / "centurion"
-    path_hermes.parent.mkdir()
-    path_hermes.write_text("right\n", encoding="utf-8")
-    path_hermes.chmod(path_hermes.stat().st_mode | stat.S_IXUSR)
+    path_centurion.parent.mkdir()
+    path_centurion.write_text("right\n", encoding="utf-8")
+    path_centurion.chmod(path_centurion.stat().st_mode | stat.S_IXUSR)
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setenv("PATH", str(path_hermes.parent))
+    monkeypatch.setenv("PATH", str(path_centurion.parent))
     monkeypatch.setenv("CENTURION_BIN", "centurion")
 
-    assert kb._resolve_centurion_argv() == [str(path_hermes)]
+    assert kb._resolve_centurion_argv() == [str(path_centurion)]
 
 
 def test_resolve_centurion_argv_centurion_bin_bare_name_ignores_cwd(monkeypatch, tmp_path):

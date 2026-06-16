@@ -1205,7 +1205,7 @@ display:
 环境变量覆盖（便于快速 A/B 测试）：
 
 ```bash
-HERMES_TELEGRAM_NOTIFICATIONS=all
+CENTURION_TELEGRAM_NOTIFICATIONS=all
 ```
 
 未知值会记录警告并回退到 `important`。

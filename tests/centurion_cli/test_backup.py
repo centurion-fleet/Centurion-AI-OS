@@ -640,7 +640,7 @@ class TestValidation:
             ok, reason = _validate_backup_zip(zf)
         assert not ok
 
-    def test_detect_prefix_hermes(self):
+    def test_detect_prefix_centurion(self):
         """Detects .centurion/ prefix wrapping all entries."""
         import io
         from centurion_cli.backup import _detect_prefix
@@ -810,7 +810,7 @@ class TestBackupEdgeCases:
             # The pre-1980 file should be skipped, not crash the backup
             assert "ancient.txt" not in names
 
-    def test_skips_output_zip_inside_hermes(self, tmp_path, monkeypatch):
+    def test_skips_output_zip_inside_centurion(self, tmp_path, monkeypatch):
         """Backup skips its own output zip if it's inside centurion root."""
         centurion_home = tmp_path / ".centurion"
         centurion_home.mkdir()

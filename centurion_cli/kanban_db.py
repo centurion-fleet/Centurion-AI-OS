@@ -29,7 +29,7 @@ Board resolution order (highest precedence first, all optional):
   ``?board=...`` query param).
 * ``CENTURION_KANBAN_BOARD`` env var (used by the dispatcher to pin workers
   to the board their task lives on — workers cannot see other boards).
-* ``HERMES_KANBAN_DB`` env var (pins the DB file path directly — legacy
+* ``CENTURION_KANBAN_DB`` env var (pins the DB file path directly — legacy
   override still honoured; highest precedence when the file path itself
   is what the caller wants to force).
 * ``<root>/kanban/current`` — a one-line text file holding the slug of
@@ -41,13 +41,13 @@ deployments where ``CENTURION_HOME`` points outside ``~/.centurion`` (e.g.
 ``/opt/centurion``), ``<root>`` is ``CENTURION_HOME``. Legacy env-var
 overrides still work:
 
-* ``HERMES_KANBAN_DB`` — pin the database file path directly.
-* ``HERMES_KANBAN_WORKSPACES_ROOT`` — pin the workspaces root directly.
+* ``CENTURION_KANBAN_DB`` — pin the database file path directly.
+* ``CENTURION_KANBAN_WORKSPACES_ROOT`` — pin the workspaces root directly.
 * ``CENTURION_KANBAN_HOME`` — pin the umbrella root that anchors kanban
   paths. Useful for tests and unusual deployments.
 
-The dispatcher injects ``HERMES_KANBAN_DB``,
-``HERMES_KANBAN_WORKSPACES_ROOT``, and ``CENTURION_KANBAN_BOARD`` into
+The dispatcher injects ``CENTURION_KANBAN_DB``,
+``CENTURION_KANBAN_WORKSPACES_ROOT``, and ``CENTURION_KANBAN_BOARD`` into
 worker subprocess env so workers converge on the exact DB the
 dispatcher used to claim their task — even under unusual symlink or
 Docker layouts.
@@ -106,7 +106,7 @@ _IS_WINDOWS = sys.platform == "win32"
 # next dispatcher tick reclaims it. Workers that outlive this window should
 # call ``heartbeat_claim(task_id)`` periodically. In practice most kanban
 # workloads either finish within 15m, set a longer claim explicitly, or use
-# ``HERMES_KANBAN_CLAIM_TTL_SECONDS`` to raise the default claim window for
+# ``CENTURION_KANBAN_CLAIM_TTL_SECONDS`` to raise the default claim window for
 # long single-call MCP workflows.
 DEFAULT_CLAIM_TTL_SECONDS = 15 * 60
 
@@ -115,14 +115,14 @@ def _resolve_claim_ttl_seconds(ttl_seconds: Optional[int] = None) -> int:
     """Return the effective claim TTL, honoring the kanban env override.
 
     Explicit call-site values win. Otherwise a positive integer from
-    ``HERMES_KANBAN_CLAIM_TTL_SECONDS`` overrides the built-in default.
+    ``CENTURION_KANBAN_CLAIM_TTL_SECONDS`` overrides the built-in default.
     Invalid or non-positive env values fall back silently so existing
     installs keep working.
     """
     if ttl_seconds is not None:
         return max(1, int(ttl_seconds))
 
-    raw = os.environ.get("HERMES_KANBAN_CLAIM_TTL_SECONDS", "").strip()
+    raw = os.environ.get("CENTURION_KANBAN_CLAIM_TTL_SECONDS", "").strip()
     if raw:
         try:
             parsed = int(raw)
@@ -316,7 +316,7 @@ def kanban_db_path(board: Optional[str] = None) -> Path:
 
     Resolution (highest precedence first):
 
-    1. ``HERMES_KANBAN_DB`` env var — pins the path directly. Honoured for
+    1. ``CENTURION_KANBAN_DB`` env var — pins the path directly. Honoured for
        back-compat and for the dispatcher→worker handoff (defense in
        depth: dispatcher injects this into worker env so workers are
        immune to any path-resolution disagreement).
@@ -325,7 +325,7 @@ def kanban_db_path(board: Optional[str] = None) -> Path:
     3. Board ``default`` → ``<root>/kanban.db`` (back-compat path).
        Other boards → ``<root>/kanban/boards/<slug>/kanban.db``.
     """
-    override = os.environ.get("HERMES_KANBAN_DB", "").strip()
+    override = os.environ.get("CENTURION_KANBAN_DB", "").strip()
     if override:
         return Path(override).expanduser()
     slug = _normalize_board_slug(board)
@@ -340,14 +340,14 @@ def workspaces_root(board: Optional[str] = None) -> Path:
     """Return the directory under which ``scratch`` workspaces are created.
 
     Anchored per-board so workspaces don't leak between projects.
-    ``HERMES_KANBAN_WORKSPACES_ROOT`` pins the path directly (highest
+    ``CENTURION_KANBAN_WORKSPACES_ROOT`` pins the path directly (highest
     precedence) — the dispatcher injects this into worker env.
 
     ``default`` keeps the legacy path ``<root>/kanban/workspaces/`` so
     that existing scratch workspaces from before the boards feature are
     preserved. Other boards use ``<root>/kanban/boards/<slug>/workspaces/``.
     """
-    override = os.environ.get("HERMES_KANBAN_WORKSPACES_ROOT", "").strip()
+    override = os.environ.get("CENTURION_KANBAN_WORKSPACES_ROOT", "").strip()
     if override:
         return Path(override).expanduser()
     slug = _normalize_board_slug(board)
@@ -653,7 +653,7 @@ class Task:
     # Name matches the ``--max-retries`` CLI flag on ``kanban create``.
     max_retries: Optional[int] = None
     # Originating chat/agent session id, when the task was created from
-    # within an agent loop that propagated ``HERMES_SESSION_ID``. NULL for
+    # within an agent loop that propagated ``CENTURION_SESSION_ID``. NULL for
     # tasks created from the CLI, the dashboard, or any path that doesn't
     # set the env var. Lets clients render a per-session board without
     # relying on tenant + time-window heuristics.
@@ -860,7 +860,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     -- config and then ``DEFAULT_FAILURE_LIMIT``.
     max_retries          INTEGER,
     -- Originating chat/agent session id when the task was created from
-    -- inside an agent loop that propagated ``HERMES_SESSION_ID``. NULL
+    -- inside an agent loop that propagated ``CENTURION_SESSION_ID``. NULL
     -- for tasks created from the CLI, dashboard, or any path that doesn't
     -- set the env var. Indexed so per-session list queries stay cheap on
     -- larger boards.
@@ -1152,7 +1152,7 @@ def connect(
     * ``db_path`` explicit → used as-is (legacy callers, tests).
     * ``board`` explicit → resolves to that board's DB.
     * Neither → :func:`kanban_db_path` resolves via
-      ``HERMES_KANBAN_DB`` env → ``CENTURION_KANBAN_BOARD`` env →
+      ``CENTURION_KANBAN_DB`` env → ``CENTURION_KANBAN_BOARD`` env →
       ``<root>/kanban/current`` → ``default``.
     """
     if db_path is not None:
@@ -1348,7 +1348,7 @@ def _migrate_add_optional_columns(conn: sqlite3.Connection) -> None:
     if "session_id" not in cols:
         # Originating agent/chat session id, populated when the task is
         # created from within an agent loop that propagated
-        # ``HERMES_SESSION_ID`` (e.g. ACP). NULL on legacy rows and on any
+        # ``CENTURION_SESSION_ID`` (e.g. ACP). NULL on legacy rows and on any
         # creation path that doesn't set the env var (CLI, dashboard).
         _add_column_if_missing(
             conn, "tasks", "session_id", "session_id TEXT"
@@ -3051,7 +3051,7 @@ def _is_managed_scratch_path(p: Path) -> bool:
     broader kanban home, a board root, or sibling subtrees like ``logs/`` or
     ``boards/<slug>/`` itself. Allowed roots:
 
-    * ``HERMES_KANBAN_WORKSPACES_ROOT`` when set (worker-side override
+    * ``CENTURION_KANBAN_WORKSPACES_ROOT`` when set (worker-side override
       injected by the dispatcher).
     * ``<kanban_home>/kanban/workspaces`` — legacy default-board scratch root.
     * ``<kanban_home>/kanban/boards/<slug>/workspaces`` for each board slug
@@ -3074,7 +3074,7 @@ def _is_managed_scratch_path(p: Path) -> bool:
     except OSError:
         return False
     roots: list[Path] = []
-    override = os.environ.get("HERMES_KANBAN_WORKSPACES_ROOT", "").strip()
+    override = os.environ.get("CENTURION_KANBAN_WORKSPACES_ROOT", "").strip()
     if override:
         try:
             roots.append(Path(override).expanduser().resolve(strict=False))
@@ -5666,7 +5666,7 @@ def _default_spawn(
     the PID check is a safety net for crashes, OOM kills, and Ctrl+C.
 
     ``board`` pins the child's kanban context to that board: the child's
-    ``HERMES_KANBAN_DB`` / ``CENTURION_KANBAN_BOARD`` / workspaces_root env
+    ``CENTURION_KANBAN_DB`` / ``CENTURION_KANBAN_BOARD`` / workspaces_root env
     vars all resolve to the same board the dispatcher claimed the task
     from. Workers cannot accidentally see other boards.
     """
@@ -5695,20 +5695,20 @@ def _default_spawn(
         env["CENTURION_HOME"] = resolve_profile_env(profile_arg)
     except FileNotFoundError:
         # Profile dir doesn't exist — defer resolution to the CLI's
-        # _apply_profile_override() via HERMES_PROFILE (set below).
+        # _apply_profile_override() via CENTURION_PROFILE (set below).
         # This only happens in test fixtures where the isolated
         # CENTURION_HOME never had profiles created.
         pass
     if task.tenant:
-        env["HERMES_TENANT"] = task.tenant
-    env["HERMES_KANBAN_TASK"] = task.id
-    env["HERMES_KANBAN_WORKSPACE"] = workspace
+        env["CENTURION_TENANT"] = task.tenant
+    env["CENTURION_KANBAN_TASK"] = task.id
+    env["CENTURION_KANBAN_WORKSPACE"] = workspace
     if task.branch_name:
-        env["HERMES_KANBAN_BRANCH"] = task.branch_name
+        env["CENTURION_KANBAN_BRANCH"] = task.branch_name
     if task.current_run_id is not None:
-        env["HERMES_KANBAN_RUN_ID"] = str(task.current_run_id)
+        env["CENTURION_KANBAN_RUN_ID"] = str(task.current_run_id)
     if task.claim_lock:
-        env["HERMES_KANBAN_CLAIM_LOCK"] = task.claim_lock
+        env["CENTURION_KANBAN_CLAIM_LOCK"] = task.claim_lock
     terminal_timeout = _worker_terminal_timeout_env(
         task.max_runtime_seconds,
         env.get("TERMINAL_TIMEOUT"),
@@ -5727,18 +5727,18 @@ def _default_spawn(
     # dispatcher's. Belt-and-braces with the `get_default_centurion_root()`
     # resolution in `kanban_home()` — symmetric resolution is the norm,
     # but unusual symlink / Docker layouts are caught here too.
-    env["HERMES_KANBAN_DB"] = str(kanban_db_path(board=board))
-    env["HERMES_KANBAN_WORKSPACES_ROOT"] = str(workspaces_root(board=board))
+    env["CENTURION_KANBAN_DB"] = str(kanban_db_path(board=board))
+    env["CENTURION_KANBAN_WORKSPACES_ROOT"] = str(workspaces_root(board=board))
     # Board slug — the final defense-in-depth pin. If the worker ever
     # resolves kanban paths without the DB / workspaces env vars, the
     # board slug still forces it to the right directory.
     resolved_board = _normalize_board_slug(board) or get_current_board()
     env["CENTURION_KANBAN_BOARD"] = resolved_board
-    # HERMES_PROFILE is the author the kanban_comment tool defaults to.
+    # CENTURION_PROFILE is the author the kanban_comment tool defaults to.
     # `centurion -p <assignee>` activates the profile, but the env var is
     # what the tool reads — set it explicitly here so comments are
     # attributed correctly regardless of how the child loads config.
-    env["HERMES_PROFILE"] = profile_arg
+    env["CENTURION_PROFILE"] = profile_arg
 
     cmd = [
         *_resolve_centurion_argv(),
@@ -6071,7 +6071,7 @@ def build_worker_context(conn: sqlite3.Connection, task_id: str) -> str:
         for c in shown_c:
             ts = time.strftime("%Y-%m-%d %H:%M", time.localtime(c.created_at))
             # Render author with explicit "comment from worker" framing so
-            # operator-controlled HERMES_PROFILE values like "centurion-system"
+            # operator-controlled CENTURION_PROFILE values like "centurion-system"
             # or "operator" can't be misread by the next worker as a system
             # directive above the (attacker-influenceable) comment body.
             # Defense-in-depth — the LLM-controlled author-forgery surface

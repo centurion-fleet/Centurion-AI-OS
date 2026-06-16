@@ -197,7 +197,7 @@ _RESERVED_NAMES = frozenset({
 })
 
 # Centurion subcommands that cannot be used as profile names/aliases
-_HERMES_SUBCOMMANDS = frozenset({
+_CENTURION_SUBCOMMANDS = frozenset({
     "chat", "model", "gateway", "setup", "whatsapp", "login", "logout",
     "status", "cron", "doctor", "dump", "config", "pairing", "skills", "tools",
     "mcp", "sessions", "insights", "version", "update", "uninstall",
@@ -324,7 +324,7 @@ def check_alias_collision(name: str) -> Optional[str]:
     canon = normalize_profile_name(name)
     if canon in _RESERVED_NAMES:
         return f"'{canon}' is a reserved name"
-    if canon in _HERMES_SUBCOMMANDS:
+    if canon in _CENTURION_SUBCOMMANDS:
         return f"'{canon}' conflicts with a centurion subcommand"
 
     # Check existing commands in PATH

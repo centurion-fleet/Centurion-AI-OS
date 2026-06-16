@@ -15,7 +15,7 @@ import uuid
 from typing import Optional
 
 from tools.environments.base import BaseEnvironment, _popen_bash
-from tools.environments.local import _HERMES_PROVIDER_ENV_BLOCKLIST
+from tools.environments.local import _CENTURION_PROVIDER_ENV_BLOCKLIST
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ def find_docker() -> Optional[str]:
     """Locate the docker (or podman) CLI binary.
 
     Resolution order:
-    1. ``HERMES_DOCKER_BINARY`` env var — explicit override (e.g. ``/usr/bin/podman``)
+    1. ``CENTURION_DOCKER_BINARY`` env var — explicit override (e.g. ``/usr/bin/podman``)
     2. ``docker`` on PATH via ``shutil.which``
     3. ``podman`` on PATH via ``shutil.which``
     4. Well-known macOS Docker Desktop install locations
@@ -114,10 +114,10 @@ def find_docker() -> Optional[str]:
         return _docker_executable
 
     # 1. Explicit override via env var (e.g. for Podman on immutable distros)
-    override = os.getenv("HERMES_DOCKER_BINARY")
+    override = os.getenv("CENTURION_DOCKER_BINARY")
     if override and os.path.isfile(override) and os.access(override, os.X_OK):
         _docker_executable = override
-        logger.info("Using HERMES_DOCKER_BINARY override: %s", override)
+        logger.info("Using CENTURION_DOCKER_BINARY override: %s", override)
         return override
 
     # 2. docker on PATH
@@ -552,7 +552,7 @@ class DockerEnvironment(BaseEnvironment):
         # Explicit docker_forward_env entries are an intentional opt-in and must
         # win over the generic Centurion secret blocklist. Only implicit passthrough
         # keys are filtered.
-        forward_keys = explicit_forward_keys | (passthrough_keys - _HERMES_PROVIDER_ENV_BLOCKLIST)
+        forward_keys = explicit_forward_keys | (passthrough_keys - _CENTURION_PROVIDER_ENV_BLOCKLIST)
         centurion_env = _load_centurion_env_vars() if forward_keys else {}
         for key in sorted(forward_keys):
             value = os.getenv(key)

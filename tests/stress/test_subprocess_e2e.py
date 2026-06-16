@@ -34,8 +34,8 @@ def make_spawn_fn(home: str):
             "CENTURION_HOME": home,
             "HOME": home,
             "PYTHONPATH": WT,
-            "HERMES_KANBAN_TASK": task.id,
-            "HERMES_KANBAN_WORKSPACE": workspace,
+            "CENTURION_KANBAN_TASK": task.id,
+            "CENTURION_KANBAN_WORKSPACE": workspace,
             "PATH": f"{os.path.dirname(PY)}:{os.environ.get('PATH','')}",
         }
         log_f = open(log_path, "ab")
@@ -212,7 +212,7 @@ exec {PY} -m centurion_cli.main "$@"
     print("=" * 60)
     print("C. Worker log captured to disk")
     print("=" * 60)
-    # Scenario A workers wrote to /tmp/hermes_e2e_*/worker_*.log
+    # Scenario A workers wrote to /tmp/centurion_e2e_*/worker_*.log
     import glob
     logs = glob.glob(os.path.join(home, "worker_*.log"))
     print(f"  {len(logs)} worker log files")

@@ -467,7 +467,7 @@ Secret redaction is **off by default** — tool output (terminal stdout, `read_f
 centurion config set security.redact_secrets true       # enable globally
 ```
 
-**Restart required.** `security.redact_secrets` is snapshotted at import time — toggling it mid-session (e.g. via `export HERMES_REDACT_SECRETS=true` from a tool call) will NOT take effect for the running process. Tell the user to run `centurion config set security.redact_secrets true` in a terminal, then start a new session. This is deliberate — it prevents an LLM from flipping the toggle on itself mid-task.
+**Restart required.** `security.redact_secrets` is snapshotted at import time — toggling it mid-session (e.g. via `export CENTURION_REDACT_SECRETS=true` from a tool call) will NOT take effect for the running process. Tell the user to run `centurion config set security.redact_secrets true` in a terminal, then start a new session. This is deliberate — it prevents an LLM from flipping the toggle on itself mid-task.
 
 Disable again with:
 ```bash
@@ -498,7 +498,7 @@ centurion config set approvals.mode off         # bypass everything (not recomme
 
 Per-invocation bypass without changing config:
 - `centurion --yolo …`
-- `export HERMES_YOLO_MODE=1`
+- `export CENTURION_YOLO_MODE=1`
 
 Note: YOLO / `approvals.mode: off` does NOT turn off secret redaction. They are independent.
 
@@ -697,7 +697,7 @@ User docs: https://github.com/centurion-fleet/Centurion-AI-OS/docs/user-guide/fe
 
 Durable SQLite board for multi-profile / multi-worker collaboration.
 Users drive it via `centurion kanban <verb>`; dispatcher-spawned workers
-see a focused `kanban_*` toolset gated by `HERMES_KANBAN_TASK`, and
+see a focused `kanban_*` toolset gated by `CENTURION_KANBAN_TASK`, and
 orchestrator profiles can opt into the broader `kanban` toolset. Normal
 sessions still have zero `kanban_*` schema footprint unless configured.
 

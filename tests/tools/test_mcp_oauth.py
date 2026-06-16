@@ -31,7 +31,7 @@ from tools.mcp_oauth import (
 # CenturionTokenStorage
 # ---------------------------------------------------------------------------
 
-class TestHermesTokenStorage:
+class TestCenturionTokenStorage:
     def test_roundtrip_tokens(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
         storage = CenturionTokenStorage("test-server")
@@ -611,7 +611,7 @@ def test_build_oauth_auth_preserves_server_url_path():
          patch.object(mcp_oauth, "OAuthClientProvider", _FakeProvider), \
          patch.object(mcp_oauth, "_is_interactive", return_value=True), \
          patch.object(mcp_oauth, "_maybe_preregister_client"), \
-         patch.object(mcp_oauth, "HermesTokenStorage") as mock_storage_cls:
+         patch.object(mcp_oauth, "CenturionTokenStorage") as mock_storage_cls:
         mock_storage_cls.return_value = MagicMock(has_cached_tokens=lambda: True)
         build_oauth_auth(
             server_name="notion",

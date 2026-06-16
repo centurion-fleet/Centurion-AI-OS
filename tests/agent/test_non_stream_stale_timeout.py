@@ -106,7 +106,7 @@ def test_default_base_is_90s(monkeypatch, tmp_path):
     """Default base stale timeout dropped from 300s to 90s (May 2026)."""
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     (tmp_path / ".env").write_text("", encoding="utf-8")
-    monkeypatch.delenv("HERMES_API_CALL_STALE_TIMEOUT", raising=False)
+    monkeypatch.delenv("CENTURION_API_CALL_STALE_TIMEOUT", raising=False)
     _write_config(tmp_path, "")
 
     agent = _make_agent(tmp_path)
@@ -119,7 +119,7 @@ def test_short_codex_request_uses_base_only(monkeypatch, tmp_path):
     """Codex payload below 50k tokens -> default 90s base."""
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     (tmp_path / ".env").write_text("", encoding="utf-8")
-    monkeypatch.delenv("HERMES_API_CALL_STALE_TIMEOUT", raising=False)
+    monkeypatch.delenv("CENTURION_API_CALL_STALE_TIMEOUT", raising=False)
     _write_config(tmp_path, "")
 
     agent = _make_agent(tmp_path)
@@ -131,7 +131,7 @@ def test_long_codex_request_bumps_to_50k_tier(monkeypatch, tmp_path):
     """Codex payload > 50k tokens -> at least 150s."""
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     (tmp_path / ".env").write_text("", encoding="utf-8")
-    monkeypatch.delenv("HERMES_API_CALL_STALE_TIMEOUT", raising=False)
+    monkeypatch.delenv("CENTURION_API_CALL_STALE_TIMEOUT", raising=False)
     _write_config(tmp_path, "")
 
     agent = _make_agent(tmp_path)
@@ -145,7 +145,7 @@ def test_very_long_codex_request_bumps_to_100k_tier(monkeypatch, tmp_path):
     """Codex payload > 100k tokens -> at least 240s."""
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     (tmp_path / ".env").write_text("", encoding="utf-8")
-    monkeypatch.delenv("HERMES_API_CALL_STALE_TIMEOUT", raising=False)
+    monkeypatch.delenv("CENTURION_API_CALL_STALE_TIMEOUT", raising=False)
     _write_config(tmp_path, "")
 
     agent = _make_agent(tmp_path)
@@ -157,7 +157,7 @@ def test_chat_completions_long_messages_bumps_tier(monkeypatch, tmp_path):
     """Chat Completions estimator still works for the legacy messages path."""
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     (tmp_path / ".env").write_text("", encoding="utf-8")
-    monkeypatch.delenv("HERMES_API_CALL_STALE_TIMEOUT", raising=False)
+    monkeypatch.delenv("CENTURION_API_CALL_STALE_TIMEOUT", raising=False)
     _write_config(tmp_path, "")
 
     agent = _make_agent(
@@ -182,7 +182,7 @@ providers:
   openai-codex:
     stale_timeout_seconds: 1800
 """)
-    monkeypatch.delenv("HERMES_API_CALL_STALE_TIMEOUT", raising=False)
+    monkeypatch.delenv("CENTURION_API_CALL_STALE_TIMEOUT", raising=False)
 
     import importlib
     from centurion_cli import timeouts as to_mod

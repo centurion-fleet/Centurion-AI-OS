@@ -58,7 +58,7 @@ Useful overrides:
 ```bash
 OPEN_WEBUI_NAME='My Centurion UI' \
 OPEN_WEBUI_ENABLE_SIGNUP=true \
-HERMES_API_MODEL_NAME='My Centurion AI OS' \
+CENTURION_API_MODEL_NAME='My Centurion AI OS' \
 bash scripts/setup_open_webui.sh
 ```
 

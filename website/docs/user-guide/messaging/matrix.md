@@ -312,7 +312,7 @@ Centurion detects this condition on startup and refuses to enable E2EE, logging:
    Or via the Synapse admin API (note the URL-encoded user ID):
    ```bash
    curl -X DELETE -H "Authorization: Bearer ADMIN_TOKEN" \
-     'https://your-server/_synapse/admin/v2/users/%40hermes%3Ayour-server/devices/DEVICE_ID'
+     'https://your-server/_synapse/admin/v2/users/%40centurion%3Ayour-server/devices/DEVICE_ID'
    ```
    Note: deleting a device via the admin API may also invalidate the associated access token. You may need to generate a new token afterward.
 
@@ -593,7 +593,7 @@ services:
       MATRIX_ACCESS_TOKEN: "syt_..."
       MATRIX_ALLOWED_USERS: "@you:matrix.example.org"
       MATRIX_ENCRYPTION: "true"
-      MATRIX_DEVICE_ID: "HERMES_BOT"
+      MATRIX_DEVICE_ID: "CENTURION_BOT"
 
       # Proxy mode — forward to host agent
       GATEWAY_PROXY_URL: "http://192.168.1.100:8642"

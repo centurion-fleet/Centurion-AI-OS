@@ -77,9 +77,9 @@ from acp_adapter.tools import build_tool_complete, build_tool_start
 logger = logging.getLogger(__name__)
 
 try:
-    from centurion_cli import __version__ as HERMES_VERSION
+    from centurion_cli import __version__ as CENTURION_VERSION
 except Exception:
-    HERMES_VERSION = "0.0.0"
+    CENTURION_VERSION = "0.0.0"
 
 # Thread pool for running AIAgent (synchronous) in parallel.
 _executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="acp-agent")
@@ -839,7 +839,7 @@ class CenturionACPAgent(acp.Agent):
 
         return InitializeResponse(
             protocol_version=acp.PROTOCOL_VERSION,
-            agent_info=Implementation(name="centurion-os", version=HERMES_VERSION),
+            agent_info=Implementation(name="centurion-os", version=CENTURION_VERSION),
             agent_capabilities=AgentCapabilities(
                 load_session=True,
                 prompt_capabilities=PromptCapabilities(image=True),
@@ -1397,12 +1397,12 @@ class CenturionACPAgent(acp.Agent):
         # Approval callback is per-thread (thread-local, GHSA-qg5c-hvr5-hjgr).
         # Set it INSIDE _run_agent so the TLS write happens in the executor
         # thread — setting it here would write to the event-loop thread's TLS,
-        # not the executor's. Also set HERMES_INTERACTIVE so approval.py
+        # not the executor's. Also set CENTURION_INTERACTIVE so approval.py
         # takes the CLI-interactive path (which calls the registered
         # callback via prompt_dangerous_approval) instead of the
         # non-interactive auto-approve branch (GHSA-96vc-wcxf-jjff).
         # ACP's conn.request_permission maps cleanly to the interactive
-        # callback shape — not the gateway-queue HERMES_EXEC_ASK path,
+        # callback shape — not the gateway-queue CENTURION_EXEC_ASK path,
         # which requires a notify_cb registered in _gateway_notify_cbs.
         previous_approval_cb = None
         previous_interactive = None
@@ -1411,7 +1411,7 @@ class CenturionACPAgent(acp.Agent):
 
         def _run_agent() -> dict:
             nonlocal previous_approval_cb, previous_interactive, edit_approval_token, previous_session_id
-            # Bind HERMES_SESSION_KEY for this session so per-session caches
+            # Bind CENTURION_SESSION_KEY for this session so per-session caches
             # (e.g. the interactive sudo password cache in tools.terminal_tool)
             # scope to the ACP session rather than leaking across sessions
             # that land on the same reused executor thread. This call runs
@@ -1443,15 +1443,15 @@ class CenturionACPAgent(acp.Agent):
                     logger.debug("Could not set ACP edit approval requester", exc_info=True)
             # Signal to tools.approval that we have an interactive callback
             # and the non-interactive auto-approve path must not fire.
-            previous_interactive = os.environ.get("HERMES_INTERACTIVE")
-            os.environ["HERMES_INTERACTIVE"] = "1"
+            previous_interactive = os.environ.get("CENTURION_INTERACTIVE")
+            os.environ["CENTURION_INTERACTIVE"] = "1"
             # Propagate the originating ACP session id to tools that want to
             # tag side-effects with it (e.g. ``kanban_create`` stamps it on
             # the new task so clients can render a per-session board). Save
             # and restore around the agent call so a re-used executor thread
             # never leaks one session's id into the next session's tools.
-            previous_session_id = os.environ.get("HERMES_SESSION_ID")
-            os.environ["HERMES_SESSION_ID"] = session_id
+            previous_session_id = os.environ.get("CENTURION_SESSION_ID")
+            os.environ["CENTURION_SESSION_ID"] = session_id
             try:
                 result = agent.run_conversation(
                     user_message=user_content,
@@ -1464,16 +1464,16 @@ class CenturionACPAgent(acp.Agent):
                 logger.exception("Agent error in session %s", session_id)
                 return {"final_response": f"Error: {e}", "messages": state.history}
             finally:
-                # Restore HERMES_INTERACTIVE.
+                # Restore CENTURION_INTERACTIVE.
                 if previous_interactive is None:
-                    os.environ.pop("HERMES_INTERACTIVE", None)
+                    os.environ.pop("CENTURION_INTERACTIVE", None)
                 else:
-                    os.environ["HERMES_INTERACTIVE"] = previous_interactive
-                # Restore HERMES_SESSION_ID symmetrically.
+                    os.environ["CENTURION_INTERACTIVE"] = previous_interactive
+                # Restore CENTURION_SESSION_ID symmetrically.
                 if previous_session_id is None:
-                    os.environ.pop("HERMES_SESSION_ID", None)
+                    os.environ.pop("CENTURION_SESSION_ID", None)
                 else:
-                    os.environ["HERMES_SESSION_ID"] = previous_session_id
+                    os.environ["CENTURION_SESSION_ID"] = previous_session_id
                 if approval_cb:
                     try:
                         from tools import terminal_tool as _terminal_tool
@@ -1496,7 +1496,7 @@ class CenturionACPAgent(acp.Agent):
         try:
             # Wrap the executor call in a fresh copy of the current context so
             # concurrent ACP sessions on the shared ThreadPoolExecutor don't
-            # stomp on each other's ContextVar writes (HERMES_SESSION_KEY in
+            # stomp on each other's ContextVar writes (CENTURION_SESSION_KEY in
             # particular — used by the interactive sudo password cache scope).
             ctx = contextvars.copy_context()
             result = await loop.run_in_executor(_executor, ctx.run, _run_agent)
@@ -1875,7 +1875,7 @@ class CenturionACPAgent(acp.Agent):
         return f"Queued for the next turn. ({depth} queued)"
 
     def _cmd_version(self, args: str, state: SessionState) -> str:
-        return f"Centurion AI OS v{HERMES_VERSION}"
+        return f"Centurion AI OS v{CENTURION_VERSION}"
 
     # ---- Model switching (ACP protocol method) -------------------------------
 
