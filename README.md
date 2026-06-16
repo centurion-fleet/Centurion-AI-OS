@@ -1,8 +1,17 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Centurion AI OS" width="100%">
+
+```
+ ██████╗███████╗███╗   ██╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ ███╗   ██╗
+██╔════╝██╔════╝████╗  ██║╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗████╗  ██║
+██║     █████╗  ██╔██╗ ██║   ██║   ██║   ██║██████╔╝██║██║   ██║██╔██╗ ██║
+██║     ██╔══╝  ██║╚██╗██║   ██║   ██║   ██║██╔══██╗██║██║   ██║██║╚██╗██║
+╚██████╗███████╗██║ ╚████║   ██║   ╚██████╔╝██║  ██║██║╚██████╔╝██║ ╚████║
+ ╚═════╝╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+```
+
 </p>
 
-# Centurion AI OS ☤
+# Centurion AI OS
 
 <p align="center">
   <a href="https://github.com/centurion-fleet/Centurion-AI-OS"><img src="https://img.shields.io/badge/Docs-Centurion%20AI%20OS-FFD700?style=for-the-badge" alt="Documentation"></a>
