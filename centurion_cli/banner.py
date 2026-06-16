@@ -189,7 +189,7 @@ def _version_tuple(v: str) -> tuple[int, ...]:
     return tuple(parts)
 
 
-def _fetch_pypi_latest(package: str = "centurion-os") -> Optional[str]:
+def _fetch_pypi_latest(package: str = "centurionai-os") -> Optional[str]:
     """Fetch the latest version of a package from PyPI. Returns None on failure."""
     try:
         import urllib.request
@@ -339,7 +339,7 @@ def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
 
     Local-only — runs ``git describe --tags --abbrev=0`` against the
     Centurion checkout. Cached per-process. Release URL always points at the
-    canonical NousResearch/centurion-os repo (forks don't get a link).
+    canonical centurion-fleet/Centurion-AI-OS repo (forks don't get a link).
     """
     global _latest_release_cache
     if _latest_release_cache is not None:

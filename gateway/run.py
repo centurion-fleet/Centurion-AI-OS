@@ -65,7 +65,6 @@ _AGENT_CACHE_MAX_SIZE = 128
 _AGENT_CACHE_IDLE_TTL_SECS = 3600.0  # evict agents idle for >1h
 _PLATFORM_CONNECT_TIMEOUT_SECS_DEFAULT = 30.0
 _ADAPTER_DISCONNECT_TIMEOUT_SECS_DEFAULT = 5.0
-_TELEGRAM_COMMAND_MENTION_RE = re.compile(r"(?<![\w:/])/([A-Za-z0-9][A-Za-z0-9_-]*)")
 
 _TELEGRAM_NOISY_STATUS_RE = re.compile(
     r"("  # transient/auxiliary status that should stay in logs, not Telegram chat
@@ -331,26 +330,6 @@ async def _send_or_update_status_coro(adapter, chat_id, status_key, content, met
     return await adapter.send(chat_id, content, metadata=metadata)
 
 
-def _telegramize_command_mentions(text: str, platform: Any) -> str:
-    """Rewrite slash-command mentions to Telegram-valid command names.
-
-    Telegram Bot API command names allow only lowercase letters, digits, and
-    underscores.  Keep other platform renderings unchanged, but normalize
-    Telegram help text so command mentions remain clickable/valid there.
-    """
-    platform_value = getattr(platform, "value", platform)
-    if platform_value != "telegram":
-        return text
-
-    from centurion_cli.commands import _sanitize_telegram_name
-
-    def _replace(match: re.Match[str]) -> str:
-        sanitized = _sanitize_telegram_name(match.group(1))
-        return f"/{sanitized}" if sanitized else match.group(0)
-
-    return _TELEGRAM_COMMAND_MENTION_RE.sub(_replace, text)
-
-
 # Only auto-continue interrupted gateway turns while the interruption is fresh.
 # Stale tool-tail/resume markers can otherwise revive an unrelated old task
 # after a gateway restart when the user's next message starts new work.
@@ -370,40 +349,6 @@ def _telegramize_command_mentions(text: str, platform: Any) -> str:
 # is still classified fresh.  Override via
 # ``config.yaml`` ``agent.gateway_auto_continue_freshness``.
 _AUTO_CONTINUE_FRESHNESS_SECS_DEFAULT = 60 * 60
-
-
-def _coerce_gateway_timestamp(value: Any) -> Optional[float]:
-    """Best-effort conversion of stored gateway timestamps to epoch seconds.
-
-    Missing/unparseable timestamps return None so legacy transcripts keep the
-    historical auto-continue behaviour instead of being silently dropped.
-    Accepts: datetime, epoch seconds (int/float), epoch milliseconds (when
-    the magnitude exceeds year-2286), ISO-8601 strings (with or without a
-    trailing ``Z``), and numeric strings.
-    """
-    if value is None:
-        return None
-    if isinstance(value, datetime):
-        return value.timestamp()
-    if isinstance(value, bool):  # bool is a subclass of int — skip it
-        return None
-    if isinstance(value, (int, float)):
-        # Some platform events use milliseconds; Centurion state rows use seconds.
-        return float(value) / 1000.0 if float(value) > 10_000_000_000 else float(value)
-    if isinstance(value, str):
-        text = value.strip()
-        if not text:
-            return None
-        try:
-            numeric = float(text)
-            return numeric / 1000.0 if numeric > 10_000_000_000 else numeric
-        except ValueError:
-            pass
-        try:
-            return datetime.fromisoformat(text.replace("Z", "+00:00")).timestamp()
-        except ValueError:
-            return None
-    return None
 
 
 def _auto_continue_freshness_window() -> float:
@@ -1018,6 +963,10 @@ from gateway.config import (
     HomeChannel,
     PlatformConfig,
     load_gateway_config,
+)
+from gateway.slash_handlers import (
+    coerce_gateway_timestamp as _coerce_gateway_timestamp,
+    telegramize_command_mentions as _telegramize_command_mentions,
 )
 from gateway.session import (
     SessionStore,
@@ -6242,7 +6191,12 @@ class GatewayRunner:
         elif platform == Platform.SLACK:
             from gateway.platforms.slack import SlackAdapter, check_slack_requirements
             if not check_slack_requirements():
-                logger.warning("Slack: slack-bolt not installed. Run: pip install 'centurion-os[slack]'")
+                from centurion_constants import display_pip_install
+
+                logger.warning(
+                    "Slack: slack-bolt not installed. Run: %s",
+                    display_pip_install("slack"),
+                )
                 return None
             return SlackAdapter(config)
 
@@ -6958,38 +6912,16 @@ class GatewayRunner:
         _raw_stale_timeout = _float_env("CENTURION_AGENT_TIMEOUT", 1800)
         _stale_ts = self._running_agents_ts.get(_quick_key, 0)
         if _quick_key in self._running_agents and _stale_ts:
-            _stale_age = time.time() - _stale_ts
+            from gateway.session_lifecycle import running_agent_age, should_evict_stale_running_agent
+
+            _stale_age = running_agent_age(_stale_ts)
             _stale_agent = self._running_agents.get(_quick_key)
-            # Never evict the pending sentinel — it was just placed moments
-            # ago during the async setup phase before the real agent is
-            # created.  Sentinels have no get_activity_summary(), so the
-            # idle check below would always evaluate to inf >= timeout and
-            # immediately evict them, racing with the setup path.
-            _stale_idle = float("inf")  # assume idle if we can't check
-            _stale_detail = ""
-            if _stale_agent and hasattr(_stale_agent, "get_activity_summary"):
-                try:
-                    _sa = _stale_agent.get_activity_summary()
-                    _stale_idle = _sa.get("seconds_since_activity", float("inf"))
-                    _stale_detail = (
-                        f" | last_activity={_sa.get('last_activity_desc', 'unknown')} "
-                        f"({_stale_idle:.0f}s ago) "
-                        f"| iteration={_sa.get('api_call_count', 0)}/{_sa.get('max_iterations', 0)}"
-                    )
-                except Exception:
-                    pass
-            # Evict if: agent is idle beyond timeout, OR wall-clock age is
-            # extreme (10x timeout or 2h, whichever is larger — catches
-            # cases where the agent object was garbage-collected).
-            _wall_ttl = max(_raw_stale_timeout * 10, 7200) if _raw_stale_timeout > 0 else float("inf")
-            _should_evict = (
-                _stale_agent is not _AGENT_PENDING_SENTINEL
-                and (
-                    (_raw_stale_timeout > 0 and _stale_idle >= _raw_stale_timeout)
-                    or _stale_age > _wall_ttl
-                )
+            _should_evict, _stale_idle, _stale_detail = should_evict_stale_running_agent(
+                stale_age=_stale_age,
+                raw_stale_timeout=_raw_stale_timeout,
+                agent=_stale_agent,
             )
-            if _should_evict:
+            if _stale_agent is not _AGENT_PENDING_SENTINEL and _should_evict:
                 logger.warning(
                     "Evicting stale _running_agents entry for %s "
                     "(age: %.0fs, idle: %.0fs, timeout: %.0fs)%s",
@@ -7007,12 +6939,12 @@ class GatewayRunner:
                 return await self._handle_status_command(event)
 
             # Resolve the command once for all early-intercept checks below.
-            from centurion_cli.commands import (
-                ACTIVE_SESSION_BYPASS_COMMANDS as _DEDICATED_HANDLERS,
-                resolve_command as _resolve_cmd_inner,
-            )
+            from centurion_cli.commands import resolve_command as _resolve_cmd_inner
+            from gateway.dispatch import classify_running_agent_command
+
             _evt_cmd = event.get_command()
             _cmd_def_inner = _resolve_cmd_inner(_evt_cmd) if _evt_cmd else None
+            _running_dispatch = classify_running_agent_command(_cmd_def_inner)
 
             # Slash command access control on the running-agent fast-path.
             # Mirrors the cold-path gate further below so non-admin users
@@ -7194,7 +7126,7 @@ class GatewayRunner:
             # /fast and /reasoning are config-only and take effect next
             # message, so they fall through to the catch-all busy response
             # below — users should wait and set them between turns.
-            if _cmd_def_inner and _cmd_def_inner.name in {"yolo", "verbose"}:
+            if _running_dispatch == "inline" and _cmd_def_inner:
                 if _cmd_def_inner.name == "yolo":
                     return await self._handle_yolo_command(event)
                 if _cmd_def_inner.name == "verbose":
@@ -7204,7 +7136,7 @@ class GatewayRunner:
 
             # Gateway-handled info/control commands with dedicated
             # running-agent handlers.
-            if _cmd_def_inner and _cmd_def_inner.name in _DEDICATED_HANDLERS:
+            if _running_dispatch == "dedicated" and _cmd_def_inner:
                 if _cmd_def_inner.name == "help":
                     return await self._handle_help_command(event)
                 if _cmd_def_inner.name == "commands":
@@ -7223,7 +7155,7 @@ class GatewayRunner:
             # slash commands) would interrupt the agent AND get
             # silently discarded by the slash-command safety net,
             # producing a zero-char response. See #5057, #6252, #10370.
-            if _cmd_def_inner:
+            if _running_dispatch == "catch_all" and _cmd_def_inner:
                 return (
                     f"⏳ Agent is running — `/{_cmd_def_inner.name}` can't run "
                     f"mid-turn. Wait for the current response or `/stop` first."

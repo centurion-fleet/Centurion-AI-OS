@@ -16,7 +16,7 @@ import re
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from centurion_constants import get_centurion_home
+from centurion_constants import PYPI_PACKAGE_NAME, get_centurion_home
 from typing import Optional, Dict, List, Any, Union
 
 logger = logging.getLogger(__name__)
@@ -399,8 +399,8 @@ def compute_next_run(schedule: Dict[str, Any], last_run_at: Optional[str] = None
         if not HAS_CRONITER:
             logger.warning(
                 "Cannot compute next run for cron schedule %r: 'croniter' is "
-                "not installed. croniter is a core dependency as of v0.9.x; "
-                "reinstall centurion-os or run 'pip install croniter' in your "
+                f"not installed. croniter is a core dependency as of v0.9.x; "
+                f"reinstall {PYPI_PACKAGE_NAME} or run 'pip install croniter' in your "
                 "runtime env.",
                 schedule.get("expr"),
             )

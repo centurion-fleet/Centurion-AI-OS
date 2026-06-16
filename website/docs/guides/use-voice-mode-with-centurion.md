@@ -57,19 +57,19 @@ If that is not solid yet, fix text mode first.
 ### CLI microphone + playback
 
 ```bash
-pip install "centurion-ai-os[voice]"
+pip install "centurionai-os[voice]"
 ```
 
 ### Messaging platforms
 
 ```bash
-pip install "centurion-ai-os[messaging]"
+pip install "centurionai-os[messaging]"
 ```
 
 ### Premium ElevenLabs TTS
 
 ```bash
-pip install "centurion-ai-os[tts-premium]"
+pip install "centurionai-os[tts-premium]"
 ```
 
 ### Local NeuTTS (optional)
@@ -81,7 +81,7 @@ python -m pip install -U neutts[all]
 ### Everything
 
 ```bash
-pip install "centurion-ai-os[all]"
+pip install "centurionai-os[all]"
 ```
 
 ## Step 3: install system dependencies
@@ -440,7 +440,7 @@ By default, the bot needs an `@mention` in Discord server text channels unless c
 If you want the shortest path to success:
 
 1. get text Centurion working
-2. install `centurion-ai-os[voice]`
+2. install `centurionai-os[voice]`
 3. use CLI voice mode with local STT + Edge TTS
 4. then enable `/voice on` in Telegram or Discord
 5. only after that, try Discord VC mode

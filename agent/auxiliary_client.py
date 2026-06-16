@@ -309,7 +309,7 @@ _PROVIDERS_WITHOUT_VISION: frozenset = frozenset({
 # `X-Title` is the canonical attribution header OpenRouter's dashboard
 # reads; the previous `X-OpenRouter-Title` label was not recognized there.
 _OR_HEADERS_BASE = {
-    "HTTP-Referer": "https://centurion-os.nousresearch.com",
+    "HTTP-Referer": "https://github.com/centurion-fleet/Centurion-AI-OS",
     "X-Title": "Centurion AI OS",
     "X-OpenRouter-Categories": "productivity,cli-agent",
 }
@@ -389,7 +389,7 @@ def build_nvidia_nim_headers(base_url: str | None) -> dict:
 from centurion_cli import __version__ as _CENTURION_VERSION
 
 _AI_GATEWAY_HEADERS = {
-    "HTTP-Referer": "https://centurion-os.nousresearch.com",
+    "HTTP-Referer": "https://github.com/centurion-fleet/Centurion-AI-OS",
     "X-Title": "Centurion AI OS",
     "User-Agent": f"CenturionAgent/{_CENTURION_VERSION}",
 }

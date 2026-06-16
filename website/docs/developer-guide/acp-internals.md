@@ -31,7 +31,7 @@ centurion acp / centurion-acp / python -m acp_adapter
   -> acp.run_agent(agent, use_unstable_protocol=True)
 ```
 
-The Zed ACP Registry path launches the same adapter through `uvx --from 'centurion-ai-os[acp]==<version>' centurion-acp`, pointed at the `centurion-ai-os` PyPI release.
+The Zed ACP Registry path launches the same adapter through `uvx --from 'centurionai-os[acp]==<version>' centurion-acp`, pointed at the `centurion-ai-os` PyPI release.
 
 Stdout is reserved for ACP JSON-RPC transport. Human-readable logs go to stderr.
 

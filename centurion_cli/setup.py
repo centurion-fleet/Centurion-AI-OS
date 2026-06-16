@@ -25,7 +25,7 @@ from typing import Optional, Dict, Any
 from centurion_cli.nous_subscription import get_nous_subscription_features
 from tools.tool_backend_helpers import managed_nous_tools_enabled
 from utils import base_url_hostname
-from centurion_constants import get_optional_skills_dir
+from centurion_constants import display_pip_install, get_optional_skills_dir
 
 logger = logging.getLogger(__name__)
 
@@ -1661,7 +1661,7 @@ def setup_terminal_backend(config: dict):
     elif selected_backend == "vercel_sandbox":
         print_success("Terminal backend: Vercel Sandbox")
         print_info("Cloud microVM sandboxes with snapshot-backed filesystem persistence.")
-        print_info("Requires the optional SDK: pip install 'centurion-os[vercel]'")
+        print_info(f"Requires the optional SDK: {display_pip_install('vercel')}")
 
         try:
             __import__("vercel")
@@ -1685,7 +1685,7 @@ def setup_terminal_backend(config: dict):
             if result.returncode == 0:
                 print_success("vercel SDK installed")
             else:
-                print_warning("Install failed — run manually: pip install 'centurion-os[vercel]'")
+                print_warning(f"Install failed — run manually: {display_pip_install('vercel')}")
                 if result.stderr:
                     print_info(f"  Error: {result.stderr.strip().splitlines()[-1]}")
 

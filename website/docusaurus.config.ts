@@ -66,6 +66,35 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          {
+            from: '/guides/use-mcp-with-hermes',
+            to: '/guides/use-mcp-with-centurion',
+          },
+          {
+            from: '/guides/use-soul-with-hermes',
+            to: '/guides/use-soul-with-centurion',
+          },
+          {
+            from: '/guides/use-voice-mode-with-hermes',
+            to: '/guides/use-voice-mode-with-centurion',
+          },
+        ],
+        createRedirects(existingPath) {
+          if (existingPath.includes('/guides/use-') && existingPath.includes('-with-centurion')) {
+            const legacy = existingPath.replace('-with-centurion', '-with-hermes');
+            return [legacy];
+          }
+          return undefined;
+        },
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',

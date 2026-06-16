@@ -6,7 +6,7 @@ sounddevice or system audio players.
 
 Dependencies (optional):
     pip install sounddevice numpy
-    or: pip install centurion-os[voice]
+    or: pip install centurionai-os[voice]
 """
 
 import logging

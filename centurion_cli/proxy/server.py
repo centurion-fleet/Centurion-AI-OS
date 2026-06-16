@@ -27,6 +27,7 @@ except ImportError:
     AIOHTTP_AVAILABLE = False
 
 from centurion_cli.proxy.adapters.base import UpstreamAdapter, UpstreamCredential
+from centurion_constants import display_pip_install
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ def create_app(adapter: UpstreamAdapter) -> "web.Application":
     if not AIOHTTP_AVAILABLE:
         raise RuntimeError(
             "aiohttp is required for `centurion proxy`. Install with: "
-            "pip install 'centurion-os[messaging]' or `pip install aiohttp`."
+            f"{display_pip_install('messaging')} or `pip install aiohttp`."
         )
 
     app = web.Application()
@@ -265,7 +266,7 @@ async def run_server(
     if not AIOHTTP_AVAILABLE:
         raise RuntimeError(
             "aiohttp is required for `centurion proxy`. Install with: "
-            "pip install 'centurion-os[messaging]' or `pip install aiohttp`."
+            f"{display_pip_install('messaging')} or `pip install aiohttp`."
         )
 
     app = create_app(adapter)

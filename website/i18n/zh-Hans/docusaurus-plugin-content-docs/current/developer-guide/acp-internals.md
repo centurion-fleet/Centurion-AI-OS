@@ -31,7 +31,7 @@ centurion acp / centurion-acp / python -m acp_adapter
   -> acp.run_agent(agent, use_unstable_protocol=True)
 ```
 
-Zed ACP Registry 路径通过 `uvx --from 'centurion-ai-os[acp]==<version>' centurion-acp` 启动同一适配器，指向 `centurion-ai-os` PyPI 发布包。
+Zed ACP Registry 路径通过 `uvx --from 'centurionai-os[acp]==<version>' centurion-acp` 启动同一适配器，指向 `centurion-ai-os` PyPI 发布包。
 
 stdout 保留用于 ACP JSON-RPC 传输。人类可读的日志输出至 stderr。
 

@@ -62,7 +62,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 DEFAULT_CATALOG_URL = (
-    "https://centurion-os.nousresearch.com/docs/api/model-catalog.json"
+    "https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs/api/model-catalog.json"
 )
 DEFAULT_TTL_HOURS = 24
 DEFAULT_FETCH_TIMEOUT = 8.0

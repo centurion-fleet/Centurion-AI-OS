@@ -329,10 +329,10 @@ def recommended_update_command_for_method(method: str) -> str:
         return "docker pull nousresearch/centurion-os:latest"
     if method == "pip":
         import shutil
-        uv = shutil.which("uv")
-        if uv:
-            return "uv pip install --upgrade centurion-os"
-        return "pip install --upgrade centurion-os"
+
+        from centurion_constants import display_pip_upgrade
+
+        return display_pip_upgrade(use_uv=bool(shutil.which("uv")))
     return "centurion update"
 
 
@@ -1692,7 +1692,7 @@ DEFAULT_CONFIG = {
     # The default URL is served by the docs site GitHub Pages deploy.
     "model_catalog": {
         "enabled": True,
-        "url": "https://centurion-os.nousresearch.com/docs/api/model-catalog.json",
+        "url": "https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs/api/model-catalog.json",
         # Disk cache TTL in hours.  Beyond this, the CLI refetches on the
         # next /model or `centurion model` invocation; network failures
         # silently fall back to the stale cache.

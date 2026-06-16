@@ -1435,7 +1435,7 @@ def _update_acp_registry_versions(semver: str) -> None:
         manifest["version"] = semver
         uvx = manifest.get("distribution", {}).get("uvx", {})
         if "package" in uvx:
-            uvx["package"] = f"centurion-os[acp]=={semver}"
+            uvx["package"] = f"centurionai-os[acp]=={semver}"
         # Preserve trailing newline + 2-space indent the file already uses.
         ACP_REGISTRY_MANIFEST.write_text(
             json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
@@ -1632,7 +1632,7 @@ def get_pr_number(subject: str) -> str | None:
     return None
 
 
-def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/NousResearch/centurion-os",
+def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/centurion-fleet/Centurion-AI-OS",
                        prev_tag=None, first_release=False):
     """Generate markdown changelog from categorized commits."""
     lines = []

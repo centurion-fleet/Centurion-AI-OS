@@ -24,7 +24,7 @@ from centurion_cli.config import load_config
 
 DEFAULT_PORTAL_URL = DEFAULT_CENTURION_PORTAL_URL
 SUBSCRIPTION_URL = f"{DEFAULT_CENTURION_PORTAL_URL}/manage-subscription"
-DOCS_URL = "https://centurion-os.nousresearch.com/docs/user-guide/features/tool-gateway"
+DOCS_URL = "https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs/user-guide/features/tool-gateway"
 
 
 def _nous_portal_base_url() -> str:

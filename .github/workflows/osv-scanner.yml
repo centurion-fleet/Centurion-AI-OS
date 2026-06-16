@@ -16,8 +16,7 @@ name: OSV-Scanner
 #
 # Uses Google's officially-recommended reusable workflow, pinned by SHA.
 # Findings land in the repo's Security tab (Code Scanning > OSV-Scanner).
-# fail-on-vuln is disabled so the job does not block merges on pre-existing
-# vulnerabilities in pinned deps that we may need to patch deliberately.
+# fail-on-vuln blocks merges when CRITICAL CVEs are found in pinned deps.
 
 on:
   pull_request:
@@ -64,4 +63,5 @@ jobs:
         --lockfile=uv.lock
         --lockfile=ui-tui/package-lock.json
         --lockfile=website/package-lock.json
-      fail-on-vuln: false
+      fail-on-vuln: true
+      fail-on-severity: CRITICAL

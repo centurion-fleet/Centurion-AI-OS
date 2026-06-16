@@ -17,7 +17,7 @@ def _get_centurion_version() -> str:
     """Return the centurion-os package version, or 'dev' if unavailable."""
     try:
         from importlib.metadata import version
-        return version("centurion-os")
+        return version("centurionai-os")
     except Exception:
         return "dev"
 

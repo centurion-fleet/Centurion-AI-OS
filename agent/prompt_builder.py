@@ -131,7 +131,7 @@ DEFAULT_AGENT_IDENTITY = (
 CENTURION_AGENT_HELP_GUIDANCE = (
     "If the user asks about configuring, setting up, or using Centurion AI OS "
     "itself, load the `centurion-os` skill with skill_view(name='centurion-os') "
-    "before answering. Docs: https://centurion-os.nousresearch.com/docs"
+    "before answering. Docs: https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs"
 )
 
 MEMORY_GUIDANCE = (

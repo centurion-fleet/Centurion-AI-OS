@@ -840,6 +840,6 @@ def _get_centurion_version() -> str:
     try:
         from importlib.metadata import version
 
-        return version("centurion-os")
+        return version("centurionai-os")
     except Exception:  # pragma: no cover
         return "0.0.0"

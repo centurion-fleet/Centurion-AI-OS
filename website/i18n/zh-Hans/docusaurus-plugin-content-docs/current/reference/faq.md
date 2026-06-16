@@ -437,7 +437,7 @@ cat ~/.centurion/logs/gateway.log | tail -50
 **解决方案：**
 ```bash
 # 安装核心消息网关依赖项
-pip install "centurion-ai-os[messaging]"  # Telegram、Discord、Slack 及共享网关依赖
+pip install "centurionai-os[messaging]"  # Telegram、Discord、Slack 及共享网关依赖
 
 # 检查端口冲突
 lsof -i :8080

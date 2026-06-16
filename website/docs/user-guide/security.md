@@ -630,7 +630,7 @@ The check itself is stdlib-only and runs from one `importlib.metadata.version()`
 
 ### Lazy install of optional dependencies
 
-Many features (Mistral TTS, ElevenLabs, Honcho memory, Bedrock, Slack, Matrix, …) depend on Python packages that not every user needs. Centurion installs these **lazily** on first use rather than eagerly under `centurion-ai-os[all]`. The implementation lives in `tools/lazy_deps.py`.
+Many features (Mistral TTS, ElevenLabs, Honcho memory, Bedrock, Slack, Matrix, …) depend on Python packages that not every user needs. Centurion installs these **lazily** on first use rather than eagerly under `centurionai-os[all]`. The implementation lives in `tools/lazy_deps.py`.
 
 The trade-off this fixes:
 
@@ -650,7 +650,7 @@ Security guarantees enforced by `tools/lazy_deps.py`:
 | Venv-scoped only | Installs target `sys.executable` in the active venv — never the system Python |
 | PyPI by name only | Specs accept `"package>=1.0,<2"` syntax. No `--index-url`, `git+https://`, or file: paths — a malicious `config.yaml` cannot redirect the install |
 | Allowlist | Only specs that appear in the in-tree `LAZY_DEPS` map can be installed via this path. A typo in a feature name does NOT get install-anything semantics |
-| Opt-out | Set `security.allow_lazy_installs: false` to disable runtime installs entirely. Useful for restricted networks or strict security postures |
+| Opt-out | Set `security.allow_lazy_installs: false` to disable runtime installs entirely. Useful for restricted networks, strict security postures, Docker/Nix deployments, and production gateways |
 | No silent retries | Failures surface as `FeatureUnavailable` — no caching of bad state, no retry storms |
 
 To disable runtime installs:

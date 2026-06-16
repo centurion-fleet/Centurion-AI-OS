@@ -111,6 +111,22 @@ seed_one ".env" ".env.example"
 seed_one "config.yaml" "cli-config.yaml.example"
 seed_one "SOUL.md" "docker/SOUL.md"
 
+# Harden container deployments: disable runtime pip installs unless the user
+# explicitly opted back in via config.yaml edits on the mounted volume.
+if [ -f "$CENTURION_HOME/config.yaml" ]; then
+    s6-setuidgid centurion "$INSTALL_DIR/.venv/bin/python" - <<PY || true
+import yaml
+from pathlib import Path
+
+path = Path("${CENTURION_HOME}") / "config.yaml"
+data = yaml.safe_load(path.read_text()) or {}
+security = data.setdefault("security", {})
+if security.get("allow_lazy_installs", True) is not False:
+    security["allow_lazy_installs"] = False
+    path.write_text(yaml.dump(data, default_flow_style=False, sort_keys=False))
+PY
+fi
+
 # .env holds API keys and secrets — restrict to owner-only access. Applied
 # unconditionally (not only on first-seed) so a host-mounted .env that was
 # created with a permissive umask gets tightened on every container start.

@@ -40,19 +40,19 @@ A paid [Centurion Portal](/user-guide/features/tool-gateway) subscription suppli
 
 ```bash
 # CLI voice mode (microphone + audio playback)
-pip install "centurion-ai-os[voice]"
+pip install "centurionai-os[voice]"
 
 # Discord + Telegram messaging (includes discord.py[voice] for VC support)
-pip install "centurion-ai-os[messaging]"
+pip install "centurionai-os[messaging]"
 
 # Premium TTS (ElevenLabs)
-pip install "centurion-ai-os[tts-premium]"
+pip install "centurionai-os[tts-premium]"
 
 # Local TTS (NeuTTS, optional)
 python -m pip install -U neutts[all]
 
 # Everything at once
-pip install "centurion-ai-os[all]"
+pip install "centurionai-os[all]"
 ```
 
 | Extra | Packages | Required For |

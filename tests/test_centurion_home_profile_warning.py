@@ -1,6 +1,6 @@
 """Tests for get_centurion_home() profile-mode fallback warning.
 
-Regression test for https://github.com/NousResearch/centurion-os/issues/18594.
+Regression test for https://github.com/centurion-fleet/Centurion-AI-OS/issues/18594.
 
 When CENTURION_HOME is unset but an active_profile file indicates a non-default
 profile is active, get_centurion_home() should:

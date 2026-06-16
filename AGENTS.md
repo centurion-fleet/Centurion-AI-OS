@@ -310,13 +310,16 @@ The registry handles schema collection, dispatch, availability checking, and err
 
 ## Dependency Pinning Policy
 
-All dependencies must have upper bounds to limit supply-chain attack surface.
-This policy was established after the litellm compromise (PR #2796, #2810) and
-reinforced after the Mini Shai-Hulud worm campaign (May 2026).
+Core and optional dependencies in `pyproject.toml` use **exact `==` pins**
+(post–supply-chain hardening). `tools/lazy_deps.py` must stay in sync with
+matching optional-extra pins — CI runs `scripts/check_lazy_deps_pins.py`.
+
+Legacy guidance for new packages still applies where ranges are used:
 
 | Source type | Treatment | Example |
 |---|---|---|
-| PyPI package | `>=floor,<next_major` | `"httpx>=0.28.1,<1"` |
+| PyPI package (ranged) | `>=floor,<next_major` | `"httpx>=0.28.1,<1"` |
+| PyPI package (core tree) | `==exact` | `"aiohttp==3.13.4"` |
 | Git URL | Commit SHA | `git+https://...@<40-char-sha>` |
 | GitHub Actions | Commit SHA + comment | `uses: actions/checkout@<sha>  # v4` |
 | CI-only pip | `==exact` | `pyyaml==6.0.2` |
@@ -1011,11 +1014,11 @@ def profile_env(tmp_path, monkeypatch):
 
 ## Testing
 
-**ALWAYS use `scripts/run_tests.sh`** — do not call `pytest` directly. The script enforces
-hermetic environment parity with CI (unset credential vars, TZ=UTC, LANG=C.UTF-8,
-`-n auto` xdist workers, in-tree subprocess-isolation plugin). Direct `pytest`
-on a 16+ core developer machine with API keys set diverges from CI in ways
-that have caused multiple "works locally, fails in CI" incidents (and the reverse).
+**ALWAYS use `scripts/run_tests.sh`** — do not call `pytest` directly. The script
+delegates to `scripts/run_tests_parallel.py` and enforces hermetic environment
+parity with CI (unset credential vars, TZ=UTC, LANG=C.UTF-8, per-file subprocess
+isolation). Direct `pytest` on a developer machine with API keys set diverges from
+CI in ways that have caused multiple "works locally, fails in CI" incidents.
 
 ```bash
 scripts/run_tests.sh                                  # full suite, CI-parity
@@ -1025,26 +1028,16 @@ scripts/run_tests.sh -v --tb=long                     # pass-through pytest flag
 scripts/run_tests.sh --no-isolate tests/foo/          # disable subprocess isolation (faster, for debugging)
 ```
 
-### Subprocess-per-test isolation
+### Subprocess-per-file isolation
 
-Every test runs in a freshly-spawned Python subprocess via the in-tree plugin
-at `tests/_isolate_plugin.py`. This means module-level dicts/sets and
-ContextVars from one test cannot leak into the next — the historic
-`_reset_module_state` autouse fixture is gone.
+`scripts/run_tests_parallel.py` runs each test **file** in a fresh Python
+subprocess so module-level dicts/sets and ContextVars cannot leak between files.
 
 Implementation notes:
 
-- The plugin uses `multiprocessing.get_context("spawn")`, which works on
-  Linux, macOS, and Windows alike (POSIX `fork` is not used).
-- Per-test overhead is ~0.5–1.0s (Python startup + pytest collection). xdist
-  parallelism amortizes this across cores; on a 20-core box the full suite
-  finishes in roughly the same wall time as before, but flake-free.
-- `isolate_timeout` (configured in `pyproject.toml`) caps each test at 30s.
-  Hangs are killed and surfaced as a failure report.
-- Pass `--no-isolate` to disable isolation — useful when debugging a single
-  test interactively, or when you specifically want to verify state leakage.
-- The plugin disables itself in child processes (sentinel envvar
-  `CENTURION_ISOLATE_CHILD=1`), so there's no fork-bomb risk.
+- Uses `multiprocessing.get_context("spawn")` for cross-platform safety.
+- CI shards the suite via `--slice N/M` in `.github/workflows/tests.yml`.
+- Pass `--no-isolate` to `run_tests_parallel.py` for faster local debugging.
 
 ### Why the wrapper (and why the old "just call pytest" doesn't work)
 

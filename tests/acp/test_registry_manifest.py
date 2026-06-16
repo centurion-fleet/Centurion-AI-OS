@@ -28,12 +28,12 @@ def test_agent_json_matches_official_registry_required_fields():
     data = _manifest()
 
     assert FORBIDDEN_MANIFEST_KEYS.isdisjoint(data)
-    assert data["id"] == "centurion-os"
+    assert data["id"] == "centurion-ai-os"
     assert re.fullmatch(r"[a-z][a-z0-9-]*", data["id"])
     assert data["name"] == "Centurion AI OS"
     assert data["description"]
-    assert data["repository"] == "https://github.com/NousResearch/centurion-os"
-    assert data["website"].startswith("https://centurion-os.nousresearch.com/")
+    assert data["repository"] == "https://github.com/centurion-fleet/Centurion-AI-OS"
+    assert data["website"].startswith("https://github.com/centurion-fleet/Centurion-AI-OS")
     assert data["authors"] == ["Centurion Fleet"]
     assert data["license"] == "MIT"
     assert set(data["distribution"]) <= ALLOWED_DISTRIBUTIONS
@@ -47,7 +47,7 @@ def test_agent_json_uses_uvx_distribution_without_local_command_fields():
     # Schema allows {package, args, env}; we use {package, args}.
     assert set(uvx) <= {"package", "args", "env"}
     assert "package" in uvx
-    assert uvx["package"] == f"centurion-os[acp]=={data['version']}"
+    assert uvx["package"] == f"centurionai-os[acp]=={data['version']}"
     assert uvx["args"] == ["centurion-acp"]
     # Old command-shape fields must not leak back in.
     assert "type" not in data["distribution"]
@@ -62,7 +62,7 @@ def test_agent_json_pins_uvx_package_to_pyproject_version():
     """The registry CI rejects ``@latest`` and floating pins; the manifest must
     always reference the exact PyPI version listed in pyproject.toml."""
     assert _manifest()["distribution"]["uvx"]["package"] == (
-        f"centurion-os[acp]=={_pyproject_version()}"
+        f"centurionai-os[acp]=={_pyproject_version()}"
     )
 
 

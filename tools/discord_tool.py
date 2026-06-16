@@ -79,7 +79,7 @@ def _discord_request(
         headers={
             "Authorization": f"Bot {token}",
             "Content-Type": "application/json",
-            "User-Agent": "Centurion-AI-OS (https://github.com/NousResearch/centurion-os)",
+            "User-Agent": "Centurion-AI-OS (https://github.com/centurion-fleet/Centurion-AI-OS)",
         },
     )
 

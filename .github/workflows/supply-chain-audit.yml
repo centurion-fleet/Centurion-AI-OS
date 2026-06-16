@@ -157,6 +157,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check lazy_deps pins match pyproject optional extras
+        run: python3 scripts/check_lazy_deps_pins.py
+
       - name: Check for unbounded PyPI deps
         id: bounds
         run: |

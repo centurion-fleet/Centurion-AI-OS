@@ -200,7 +200,7 @@ def build_parser(parent_subparsers: argparse._SubParsersAction) -> argparse.Argu
             "Durable SQLite-backed task board shared across Centurion profiles. "
             "Tasks are claimed atomically, can depend on other tasks, and "
             "are executed by a named profile in an isolated workspace. "
-            "See https://centurion-os.nousresearch.com/docs/user-guide/features/kanban "
+            "See https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs/user-guide/features/kanban "
             "or docs/centurion-kanban-v1-spec.pdf for the full design."
         ),
     )

@@ -257,7 +257,9 @@
 
       settings = mkOption {
         type = deepConfigType;
-        default = { };
+        default = {
+          security.allow_lazy_installs = false;
+        };
         description = ''
           Declarative Centurion config (attrset). Deep-merged across module
           definitions and rendered as config.yaml.

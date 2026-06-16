@@ -9,7 +9,7 @@
   "license": "MIT",
   "distribution": {
     "uvx": {
-      "package": "centurion-ai-os[acp]==0.14.0",
+      "package": "centurionai-os[acp]==0.14.0",
       "args": ["centurion-acp"]
     }
   }

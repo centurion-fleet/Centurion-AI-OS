@@ -44,7 +44,7 @@ This guide walks you through the full setup process — from creating your DingT
 Install the required Python packages:
 
 ```bash
-pip install "centurion-ai-os[dingtalk]"
+pip install "centurionai-os[dingtalk]"
 ```
 
 Or individually:

@@ -31,7 +31,7 @@ import logging
 import os
 import time
 import asyncio
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, fields
 from typing import Optional, Callable
 
 from .peers import FleetPeers, get_fleet_queue_dir, FleetPeer
@@ -266,7 +266,10 @@ class FleetTransport:
                         continue
 
                 # Attempt delivery
-                envelope = FleetMessageEnvelope(**data)
+                envelope_keys = {f.name for f in fields(FleetMessageEnvelope)}
+                envelope = FleetMessageEnvelope(
+                    **{k: v for k, v in data.items() if k in envelope_keys}
+                )
                 peer = self.peers.get(envelope.recipient_id)
 
                 if peer and peer.address:

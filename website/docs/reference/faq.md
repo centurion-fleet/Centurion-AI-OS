@@ -437,7 +437,7 @@ Configure in `~/.centurion/config.yaml` under your gateway's settings. See the [
 **Solution:**
 ```bash
 # Install core messaging gateway dependencies
-pip install "centurion-ai-os[messaging]"  # Telegram, Discord, Slack, and shared gateway deps
+pip install "centurionai-os[messaging]"  # Telegram, Discord, Slack, and shared gateway deps
 
 # Check for port conflicts
 lsof -i :8080

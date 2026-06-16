@@ -248,7 +248,7 @@ terminal:
 **Required install:** Install the optional SDK extra:
 
 ```bash
-pip install 'centurion-ai-os[vercel]'
+pip install 'centurionai-os[vercel]'
 ```
 
 **Required authentication:** Configure access-token auth with all three of `VERCEL_TOKEN`, `VERCEL_PROJECT_ID`, and `VERCEL_TEAM_ID`. This is the supported setup for deployments and normal long-running Centurion processes on Render, Railway, Docker, and similar hosts.

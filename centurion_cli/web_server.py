@@ -91,6 +91,7 @@ _SESSION_HEADER_NAME = "X-Centurion-Session-Token"
 # In-browser Chat tab (/chat, /api/pty, …).  Off unless ``centurion dashboard --tui``
 # or CENTURION_DASHBOARD_TUI=1.  Set from :func:`start_server`.
 _DASHBOARD_EMBEDDED_CHAT_ENABLED = False
+_DASHBOARD_INSECURE_BINDING = False
 
 # Simple rate limiter for the reveal endpoint
 _reveal_timestamps: List[float] = []
@@ -3754,9 +3755,11 @@ def mount_spa(application: FastAPI):
         """
         html = _index_path.read_text()
         chat_js = "true" if _DASHBOARD_EMBEDDED_CHAT_ENABLED else "false"
+        insecure_js = "true" if _DASHBOARD_INSECURE_BINDING else "false"
         token_script = (
             f'<script>window.__CENTURION_SESSION_TOKEN__="{_SESSION_TOKEN}";'
             f"window.__CENTURION_DASHBOARD_EMBEDDED_CHAT__={chat_js};"
+            f"window.__CENTURION_DASHBOARD_INSECURE__={insecure_js};"
             f'window.__CENTURION_BASE_PATH__="{prefix}";</script>'
         )
         if prefix:
@@ -4716,8 +4719,9 @@ def start_server(
     """Start the web UI server."""
     import uvicorn
 
-    global _DASHBOARD_EMBEDDED_CHAT_ENABLED
+    global _DASHBOARD_EMBEDDED_CHAT_ENABLED, _DASHBOARD_INSECURE_BINDING
     _DASHBOARD_EMBEDDED_CHAT_ENABLED = embedded_chat
+    _DASHBOARD_INSECURE_BINDING = host not in _LOCALHOST
 
     _LOCALHOST = ("127.0.0.1", "localhost", "::1")
     if host not in _LOCALHOST and not allow_public:

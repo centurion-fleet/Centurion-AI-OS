@@ -1164,14 +1164,14 @@ centurion claw migrate --source /home/user/old-openclaw
 centurion dashboard [options]
 ```
 
-Launch the web dashboard — a browser-based UI for managing configuration, API keys, and monitoring sessions. Requires `pip install centurion-ai-os[web]` (FastAPI + Uvicorn). The embedded browser Chat tab requires `--tui` plus the `pty` extra. See [Web Dashboard](/user-guide/features/web-dashboard) for full documentation.
+Launch the web dashboard — a browser-based UI for managing configuration, API keys, and monitoring sessions. Requires `pip install centurionai-os[web]` (FastAPI + Uvicorn). The embedded browser Chat tab requires `--tui` plus the `pty` extra. See [Web Dashboard](/user-guide/features/web-dashboard) for full documentation.
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--port` | `9119` | Port to run the web server on |
 | `--host` | `127.0.0.1` | Bind address |
 | `--no-open` | — | Don't auto-open the browser |
-| `--tui` | off | Enable the in-browser Chat tab by running `centurion --tui` behind a PTY/WebSocket bridge. Requires `pip install 'centurion-ai-os[web,pty]'` and a POSIX PTY environment such as Linux, macOS, or WSL2. |
+| `--tui` | off | Enable the in-browser Chat tab by running `centurion --tui` behind a PTY/WebSocket bridge. Requires `pip install 'centurionai-os[web,pty]'` and a POSIX PTY environment such as Linux, macOS, or WSL2. |
 | `--insecure` | off | Allow binding to non-localhost hosts. Exposes dashboard credentials on the network; use only behind trusted network controls. |
 | `--stop` | — | Stop running `centurion dashboard` processes and exit. |
 | `--status` | — | List running `centurion dashboard` processes and exit. |

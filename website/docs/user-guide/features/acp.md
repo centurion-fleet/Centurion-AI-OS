@@ -48,7 +48,7 @@ This installs the `agent-client-protocol` dependency and enables:
 For Zed registry installs, Zed launches Centurion through the official ACP Registry entry. That entry uses a `uvx` distribution that runs:
 
 ```bash
-uvx --from 'centurion-ai-os[acp]==<version>' centurion-acp
+uvx --from 'centurionai-os[acp]==<version>' centurion-acp
 ```
 
 Make sure `uv` is available on `PATH` before using the registry install path.
@@ -136,7 +136,7 @@ Zed v0.221.x and newer installs external agents through the official ACP Registr
 Prerequisites:
 
 - Configure Centurion provider credentials first with `centurion model`, or set them in `~/.centurion/.env` / `~/.centurion/config.yaml`.
-- Install `uv` so the registry launcher can run `uvx --from 'centurion-ai-os[acp]==<version>' centurion-acp`.
+- Install `uv` so the registry launcher can run `uvx --from 'centurionai-os[acp]==<version>' centurion-acp`.
 
 For local development before the registry entry is available, use a custom agent server in Zed settings:
 
@@ -174,7 +174,7 @@ The upstream registry PR copies those files into the top-level `centurion-ai-os/
 The registry entry uses a `uvx` distribution that points directly at the `centurion-ai-os` PyPI release:
 
 ```text
-uvx --from 'centurion-ai-os[acp]==<version>' centurion-acp
+uvx --from 'centurionai-os[acp]==<version>' centurion-acp
 ```
 
 The registry CI verifies that the pinned version exists on PyPI, so the manifest's `version` and uvx `package` pin must always match `pyproject.toml`. `scripts/release.py` keeps them in lockstep automatically.

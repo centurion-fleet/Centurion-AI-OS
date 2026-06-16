@@ -248,7 +248,7 @@ terminal:
 **必需安装：** 安装可选 SDK 扩展：
 
 ```bash
-pip install 'centurion-ai-os[vercel]'
+pip install 'centurionai-os[vercel]'
 ```
 
 **必需认证：** 使用 `VERCEL_TOKEN`、`VERCEL_PROJECT_ID` 和 `VERCEL_TEAM_ID` 三者全部配置访问令牌认证。这是在 Render、Railway、Docker 及类似宿主上部署和正常长期运行 Centurion 进程的受支持设置。

@@ -4,8 +4,8 @@ Verifies that Centurion-managed provider, tool, and gateway env vars are
 stripped from subprocess environments so external CLIs are not silently
 misrouted or handed Centurion secrets.
 
-See: https://github.com/NousResearch/centurion-os/issues/1002
-See: https://github.com/NousResearch/centurion-os/issues/1264
+See: https://github.com/centurion-fleet/Centurion-AI-OS/issues/1002
+See: https://github.com/centurion-fleet/Centurion-AI-OS/issues/1264
 """
 
 import os

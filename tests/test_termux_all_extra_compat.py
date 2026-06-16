@@ -11,9 +11,9 @@ INSTALL_SH = REPO_ROOT / "scripts" / "install.sh"
 def test_pyproject_defines_termux_all_without_known_blockers() -> None:
     text = PYPROJECT.read_text()
     assert "termux-all = [" in text
-    assert '"centurion-os[termux]"' in text
-    assert '"centurion-os[matrix]"' not in text.split("termux-all = [", 1)[1].split("]", 1)[0]
-    assert '"centurion-os[voice]"' not in text.split("termux-all = [", 1)[1].split("]", 1)[0]
+    assert '"centurionai-os[termux]"' in text
+    assert '"centurionai-os[matrix]"' not in text.split("termux-all = [", 1)[1].split("]", 1)[0]
+    assert '"centurionai-os[voice]"' not in text.split("termux-all = [", 1)[1].split("]", 1)[0]
 
 
 def test_install_script_prefers_termux_all_then_fallbacks() -> None:

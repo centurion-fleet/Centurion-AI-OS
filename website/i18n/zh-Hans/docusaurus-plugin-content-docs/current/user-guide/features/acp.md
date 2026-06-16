@@ -48,7 +48,7 @@ pip install -e '.[acp]'
 对于 Zed registry 安装，Zed 通过官方 ACP Registry 条目启动 Centurion。该条目使用 `uvx` 发行版运行：
 
 ```bash
-uvx --from 'centurion-ai-os[acp]==<version>' centurion-acp
+uvx --from 'centurionai-os[acp]==<version>' centurion-acp
 ```
 
 使用 registry 安装路径前，请确保 `uv` 已在 `PATH` 中可用。
@@ -134,7 +134,7 @@ Zed v0.221.x 及更新版本通过官方 ACP Registry 安装外部 agent。
 前提条件：
 
 - 先通过 `centurion model` 配置 Centurion provider 凭据，或在 `~/.centurion/.env` / `~/.centurion/config.yaml` 中设置。
-- 安装 `uv`，以便 registry 启动器可以运行 `uvx --from 'centurion-ai-os[acp]==<version>' centurion-acp`。
+- 安装 `uv`，以便 registry 启动器可以运行 `uvx --from 'centurionai-os[acp]==<version>' centurion-acp`。
 
 在 registry 条目可用之前进行本地开发时，在 Zed 设置中使用自定义 agent 服务器：
 
@@ -172,7 +172,7 @@ acp_registry/icon.svg
 Registry 条目使用直接指向 `centurion-ai-os` PyPI 发行版的 `uvx` 发行版：
 
 ```text
-uvx --from 'centurion-ai-os[acp]==<version>' centurion-acp
+uvx --from 'centurionai-os[acp]==<version>' centurion-acp
 ```
 
 Registry CI 会验证固定版本是否存在于 PyPI，因此清单的 `version` 和 uvx `package` 固定版本必须始终与 `pyproject.toml` 匹配。`scripts/release.py` 会自动保持它们同步。

@@ -74,7 +74,7 @@ import type { Translations } from "@/i18n/types";
 import { PluginPage, PluginSlot, usePlugins } from "@/plugins";
 import type { PluginManifest } from "@/plugins";
 import { useTheme } from "@/themes";
-import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";
+import { isDashboardEmbeddedChatEnabled, isDashboardInsecureBinding } from "@/lib/dashboard-flags";
 import { api } from "@/lib/api";
 
 function RootRedirect() {
@@ -316,6 +316,7 @@ export default function App() {
   const normalizedPath = pathname.replace(/\/$/, "") || "/";
   const isChatRoute = normalizedPath === "/chat";
   const embeddedChat = isDashboardEmbeddedChatEnabled();
+  const insecureBinding = isDashboardInsecureBinding();
 
   // `dashboard.show_token_analytics` gates the Analytics nav item.  The
   // page itself remains reachable by URL (it renders an explanation when
@@ -423,6 +424,14 @@ export default function App() {
       className="flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden bg-black text-text-primary antialiased"
     >
       <SelectionSwitcher />
+      {insecureBinding ? (
+        <div
+          role="status"
+          className="shrink-0 border-b border-amber-500/40 bg-amber-950/80 px-4 py-2 text-center text-sm text-amber-100"
+        >
+          Insecure binding: this dashboard is exposed on a non-loopback interface without robust authentication. Use only on trusted networks.
+        </div>
+      ) : null}
       <Backdrop />
       <PluginSlot name="backdrop" />
 

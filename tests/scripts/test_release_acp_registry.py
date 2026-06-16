@@ -44,7 +44,7 @@ def _write_manifest(root: Path, version: str) -> None:
                 "description": "test",
                 "distribution": {
                     "uvx": {
-                        "package": f"centurion-os[acp]=={version}",
+                        "package": f"centurionai-os[acp]=={version}",
                         "args": ["centurion-acp"],
                     }
                 },
@@ -66,7 +66,7 @@ def test_update_acp_registry_versions_bumps_manifest_and_pin(monkeypatch, tmp_pa
         (tmp_path / "acp_registry" / "agent.json").read_text(encoding="utf-8")
     )
     assert manifest["version"] == "0.14.0"
-    assert manifest["distribution"]["uvx"]["package"] == "centurion-os[acp]==0.14.0"
+    assert manifest["distribution"]["uvx"]["package"] == "centurionai-os[acp]==0.14.0"
     # args stay untouched so we don't accidentally rewrite them.
     assert manifest["distribution"]["uvx"]["args"] == ["centurion-acp"]
 
@@ -110,4 +110,4 @@ def test_update_version_files_bumps_manifest_alongside_pyproject(
         (tmp_path / "acp_registry" / "agent.json").read_text(encoding="utf-8")
     )
     assert manifest["version"] == "0.14.0"
-    assert manifest["distribution"]["uvx"]["package"] == "centurion-os[acp]==0.14.0"
+    assert manifest["distribution"]["uvx"]["package"] == "centurionai-os[acp]==0.14.0"

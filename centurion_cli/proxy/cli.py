@@ -14,6 +14,7 @@ from centurion_cli.proxy.server import (
     DEFAULT_PORT,
     run_server,
 )
+from centurion_constants import display_pip_install
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 def _print_aiohttp_missing() -> None:
     print(
         "centurion proxy requires aiohttp. Install one of:\n"
-        "  pip install 'centurion-os[messaging]'\n"
+        f"  {display_pip_install('messaging')}\n"
         "  pip install aiohttp",
         file=sys.stderr,
     )

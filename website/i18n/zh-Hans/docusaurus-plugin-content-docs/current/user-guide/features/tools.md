@@ -126,7 +126,7 @@ centurion config set terminal.backend modal
 ### Vercel Sandbox
 
 ```bash
-pip install 'centurion-ai-os[vercel]'
+pip install 'centurionai-os[vercel]'
 centurion config set terminal.backend vercel_sandbox
 centurion config set terminal.vercel_runtime node24
 ```

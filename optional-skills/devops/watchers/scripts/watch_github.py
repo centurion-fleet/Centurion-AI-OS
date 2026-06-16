@@ -6,7 +6,7 @@ Usage (via cron with --no-agent):
     centurion cron create centurion-issues \\
       --schedule "*/5 * * * *" --no-agent \\
       --script "$CENTURION_HOME/skills/devops/watchers/scripts/watch_github.py" \\
-      --script-args "--name centurion-issues --repo NousResearch/centurion-os --scope issues"
+      --script-args "--name centurion-issues --repo centurion-fleet/Centurion-AI-OS --scope issues"
 
 Set GITHUB_TOKEN (or GH_TOKEN) in ~/.centurion/.env to avoid the 60 req/hr
 anonymous rate limit.

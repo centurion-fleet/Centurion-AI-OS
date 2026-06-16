@@ -44,7 +44,7 @@ group_sessions_per_user: false
 安装所需的 Python 包：
 
 ```bash
-pip install "centurion-ai-os[dingtalk]"
+pip install "centurionai-os[dingtalk]"
 ```
 
 或单独安装：

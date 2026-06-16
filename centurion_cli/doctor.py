@@ -13,7 +13,7 @@ from pathlib import Path
 
 from centurion_cli.config import get_project_root, get_centurion_home, get_env_path
 from centurion_cli.env_loader import load_centurion_dotenv
-from centurion_constants import display_centurion_home
+from centurion_constants import display_centurion_home, display_pip_install
 
 PROJECT_ROOT = get_project_root()
 CENTURION_HOME = get_centurion_home()
@@ -1293,8 +1293,8 @@ def run_doctor(args):
         else:
             _fail_and_issue(
                 "vercel SDK not installed",
-                "(pip install 'centurion-os[vercel]')",
-                "Install the Vercel optional dependency: pip install 'centurion-os[vercel]'",
+                f"({display_pip_install('vercel')})",
+                f"Install the Vercel optional dependency: {display_pip_install('vercel')}",
                 issues,
             )
 

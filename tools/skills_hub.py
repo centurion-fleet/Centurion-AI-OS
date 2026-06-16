@@ -3198,7 +3198,7 @@ def check_for_skill_updates(
 # Centurion centralized index source
 # ---------------------------------------------------------------------------
 
-CENTURION_INDEX_URL = "https://centurion-os.nousresearch.com/docs/api/skills-index.json"
+CENTURION_INDEX_URL = "https://github.com/centurion-fleet/Centurion-AI-OS/tree/main/website/docs/api/skills-index.json"
 CENTURION_INDEX_CACHE_FILE = INDEX_CACHE_DIR / "centurion-index.json"
 CENTURION_INDEX_TTL = 6 * 3600  # 6 hours
 

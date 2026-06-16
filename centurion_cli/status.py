@@ -19,7 +19,7 @@ from centurion_cli.models import provider_label
 from centurion_cli.nous_subscription import get_nous_subscription_features
 from centurion_cli.runtime_provider import resolve_requested_provider
 from centurion_cli.vercel_auth import describe_vercel_auth
-from centurion_constants import OPENROUTER_MODELS_URL
+from centurion_constants import OPENROUTER_MODELS_URL, display_pip_install
 from tools.tool_backend_helpers import managed_nous_tools_enabled
 
 def check_mark(ok: bool) -> str:
@@ -389,7 +389,7 @@ def show_status(args):
             persist_enabled = persist.lower() in {"1", "true", "yes", "on"}
         auth_status = describe_vercel_auth()
         sdk_ok = importlib.util.find_spec("vercel") is not None
-        sdk_label = "installed" if sdk_ok else "missing (install: pip install 'centurion-os[vercel]')"
+        sdk_label = "installed" if sdk_ok else f"missing (install: {display_pip_install('vercel')})"
         print(f"  Runtime:      {runtime}")
         print(f"  SDK:          {check_mark(sdk_ok)} {sdk_label}")
         print(f"  Auth:         {check_mark(auth_status.ok)} {auth_status.label}")

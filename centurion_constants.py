@@ -54,7 +54,7 @@ def get_centurion_home() -> Path:
     callers that import this at load time.  Subprocess spawners are
     expected to propagate ``CENTURION_HOME`` explicitly (see the systemd
     template in ``centurion_cli/gateway.py`` and the kanban dispatcher in
-    ``centurion_cli/kanban_db.py``).  See https://github.com/NousResearch/centurion-os/issues/18594.
+    ``centurion_cli/kanban_db.py``).  See https://github.com/centurion-fleet/Centurion-AI-OS/issues/18594.
     """
     override = get_centurion_home_override()
     if override:
@@ -244,7 +244,7 @@ def secure_parent_dir(path: Path) -> None:
     prevent catastrophic host bricking when ``CENTURION_HOME`` or other path
     env vars resolve to an unexpected location.
 
-    See https://github.com/NousResearch/centurion-os/issues/25821.
+    See https://github.com/centurion-fleet/Centurion-AI-OS/issues/25821.
     """
     parent = path.parent.resolve()
     # Refuse root and its direct children (/usr, /home, /var, /tmp, …).
@@ -386,6 +386,27 @@ def get_skills_dir() -> Path:
 def get_env_path() -> Path:
     """Return the path to the ``.env`` file under CENTURION_HOME."""
     return get_centurion_home() / ".env"
+
+
+# ─── PyPI distribution name ───────────────────────────────────────────────────
+
+PYPI_PACKAGE_NAME = "centurionai-os"
+
+
+def display_pip_install(extra: str | None = None, *, version: str | None = None) -> str:
+    """Return a copy-pasteable ``pip install`` command for this distribution."""
+    spec = PYPI_PACKAGE_NAME
+    if extra:
+        spec = f"{spec}[{extra}]"
+    if version:
+        spec = f"{spec}=={version}"
+    return f"pip install '{spec}'"
+
+
+def display_pip_upgrade(*, use_uv: bool = False) -> str:
+    """Return a copy-pasteable ``pip install --upgrade`` command."""
+    cmd = f"pip install --upgrade '{PYPI_PACKAGE_NAME}'"
+    return f"uv {cmd}" if use_uv else cmd
 
 
 # ─── Network Preferences ─────────────────────────────────────────────────────
