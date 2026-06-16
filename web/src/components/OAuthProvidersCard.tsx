@@ -7,9 +7,9 @@ import {
   Terminal,
 } from "lucide-react";
 import { api, type OAuthProvider } from "@/lib/api";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { CopyButton } from "@nous-research/ui/ui/components/command-block";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Button } from "@centurion-fleet/ui/ui/components/button";
+import { CopyButton } from "@centurion-fleet/ui/ui/components/command-block";
+import { Spinner } from "@centurion-fleet/ui/ui/components/spinner";
 import {
   Card,
   CardContent,
@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@nous-research/ui/ui/components/badge";
+import { Badge } from "@centurion-fleet/ui/ui/components/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { OAuthLoginModal } from "@/components/OAuthLoginModal";
 import { useI18n } from "@/i18n";

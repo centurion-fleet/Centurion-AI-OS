@@ -20,7 +20,7 @@ import pytest
 # ---------------------------------------------------------------------------
 
 class TestGetSubprocessHome:
-    """Unit tests for hermes_constants.get_subprocess_home()."""
+    """Unit tests for centurion_constants.get_subprocess_home()."""
 
     def test_returns_none_when_centurion_home_unset(self, monkeypatch):
         monkeypatch.delenv("CENTURION_HOME", raising=False)

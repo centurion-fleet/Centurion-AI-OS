@@ -10,7 +10,7 @@ on:
       - 'Dockerfile'
       - 'docker/**'
       - '.github/workflows/docker-publish.yml'
-      - '.github/actions/hermes-smoke-test/**'
+      - '.github/actions/centurion-smoke-test/**'
   pull_request:
     branches: [main]
     paths:
@@ -20,7 +20,7 @@ on:
       - 'Dockerfile'
       - 'docker/**'
       - '.github/workflows/docker-publish.yml'
-      - '.github/actions/hermes-smoke-test/**'
+      - '.github/actions/centurion-smoke-test/**'
   release:
     types: [published]
 
@@ -76,7 +76,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=docker-amd64
 
       - name: Smoke test image
-        uses: ./.github/actions/hermes-smoke-test
+        uses: ./.github/actions/centurion-smoke-test
         with:
           image: ${{ env.IMAGE_NAME }}:test
 
@@ -114,7 +114,7 @@ jobs:
           # ``dev`` extra pulls in pytest, pytest-asyncio, pytest-timeout —
           # everything tests/docker/ needs.  We deliberately avoid ``all``
           # here because the docker tests only drive the container via
-          # subprocess and don't import hermes_agent's optional deps.
+          # subprocess and don't import centurion_agent's optional deps.
           uv pip install -e ".[dev]"
 
       - name: Run docker integration tests
@@ -214,7 +214,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=docker-arm64
 
       - name: Smoke test image
-        uses: ./.github/actions/hermes-smoke-test
+        uses: ./.github/actions/centurion-smoke-test
         with:
           image: ${{ env.IMAGE_NAME }}:test
 

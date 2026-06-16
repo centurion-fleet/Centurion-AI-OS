@@ -258,8 +258,8 @@ class TestExchangeAuthCode:
         assert not setup_module.PENDING_AUTH_PATH.exists()
 
 
-class TestHermesConstantsFallback:
-    """Tests for _centurion_home.py fallback when hermes_constants is unavailable."""
+class TestCenturionConstantsFallback:
+    """Tests for _centurion_home.py fallback when centurion_constants is unavailable."""
 
     HELPER_PATH = (
         Path(__file__).resolve().parents[2]
@@ -267,8 +267,8 @@ class TestHermesConstantsFallback:
     )
 
     def _load_helper(self, monkeypatch):
-        """Load _centurion_home.py with hermes_constants blocked."""
-        monkeypatch.setitem(sys.modules, "hermes_constants", None)
+        """Load _centurion_home.py with centurion_constants blocked."""
+        monkeypatch.setitem(sys.modules, "centurion_constants", None)
         spec = importlib.util.spec_from_file_location("_centurion_home_test", self.HELPER_PATH)
         module = importlib.util.module_from_spec(spec)
         assert spec.loader is not None
@@ -276,13 +276,13 @@ class TestHermesConstantsFallback:
         return module
 
     def test_fallback_uses_centurion_home_env_var(self, monkeypatch, tmp_path):
-        """When hermes_constants is missing, CENTURION_HOME comes from env var."""
-        monkeypatch.setenv("CENTURION_HOME", str(tmp_path / "custom-hermes"))
+        """When centurion_constants is missing, CENTURION_HOME comes from env var."""
+        monkeypatch.setenv("CENTURION_HOME", str(tmp_path / "custom-centurion"))
         module = self._load_helper(monkeypatch)
-        assert module.get_centurion_home() == tmp_path / "custom-hermes"
+        assert module.get_centurion_home() == tmp_path / "custom-centurion"
 
-    def test_fallback_defaults_to_dot_hermes(self, monkeypatch):
-        """When hermes_constants is missing and CENTURION_HOME unset, default to ~/.centurion."""
+    def test_fallback_defaults_to_dot_centurion(self, monkeypatch):
+        """When centurion_constants is missing and CENTURION_HOME unset, default to ~/.centurion."""
         monkeypatch.delenv("CENTURION_HOME", raising=False)
         module = self._load_helper(monkeypatch)
         assert module.get_centurion_home() == Path.home() / ".centurion"
@@ -301,18 +301,18 @@ class TestHermesConstantsFallback:
 
     def test_fallback_display_centurion_home_profile_path(self, monkeypatch):
         """Fallback display_centurion_home() handles profile paths under ~/."""
-        monkeypatch.setenv("CENTURION_HOME", str(Path.home() / ".hermes/profiles/coder"))
+        monkeypatch.setenv("CENTURION_HOME", str(Path.home() / ".centurion/profiles/coder"))
         module = self._load_helper(monkeypatch)
         assert module.display_centurion_home() == "~/.centurion/profiles/coder"
 
     def test_fallback_display_centurion_home_custom_path(self, monkeypatch):
         """Fallback display_centurion_home() returns full path for non-home locations."""
-        monkeypatch.setenv("CENTURION_HOME", "/opt/hermes-custom")
+        monkeypatch.setenv("CENTURION_HOME", "/opt/centurion-custom")
         module = self._load_helper(monkeypatch)
-        assert module.display_centurion_home() == "/opt/hermes-custom"
+        assert module.display_centurion_home() == "/opt/centurion-custom"
 
     def test_delegates_to_centurion_constants_when_available(self):
-        """When hermes_constants IS importable, _centurion_home delegates to it."""
+        """When centurion_constants IS importable, _centurion_home delegates to it."""
         spec = importlib.util.spec_from_file_location(
             "_centurion_home_happy", self.HELPER_PATH
         )
@@ -320,5 +320,5 @@ class TestHermesConstantsFallback:
         assert spec.loader is not None
         spec.loader.exec_module(module)
         import centurion_constants
-        assert module.get_centurion_home is hermes_constants.get_centurion_home
-        assert module.display_centurion_home is hermes_constants.display_centurion_home
+        assert module.get_centurion_home is centurion_constants.get_centurion_home
+        assert module.display_centurion_home is centurion_constants.display_centurion_home

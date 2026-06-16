@@ -76,7 +76,7 @@ class TestIsWriteDenied:
         ],
     )
     def test_centurion_control_files_oauth_and_mcp_tokens_denied(self, path):
-        """Hermes control files, PKCE creds, mcp-tokens, and pairing entries must be write-denied."""
+        """Centurion control files, PKCE creds, mcp-tokens, and pairing entries must be write-denied."""
         from centurion_constants import get_centurion_home
         centurion_home = get_centurion_home()
         full_path = str(centurion_home / path)
@@ -92,7 +92,7 @@ class TestIsWriteDenied:
         ],
     )
     def test_centurion_control_files_and_oauth_traversal_denied(self, path):
-        """Path traversal attempts to protected Hermes files must be blocked."""
+        """Path traversal attempts to protected Centurion files must be blocked."""
         from centurion_constants import get_centurion_home
         centurion_home = get_centurion_home()
         full_path = str(centurion_home / path)

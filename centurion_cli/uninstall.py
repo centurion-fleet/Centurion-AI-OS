@@ -1,5 +1,5 @@
 """
-Hermes Agent Uninstaller.
+Centurion AI OS Uninstaller.
 
 Provides options for:
 - Full uninstall: Remove everything including configs and data
@@ -50,7 +50,7 @@ def find_shell_configs() -> list:
 
 
 def remove_path_from_shell_configs():
-    """Remove Hermes PATH entries from shell configuration files."""
+    """Remove Centurion PATH entries from shell configuration files."""
     configs = find_shell_configs()
     removed_from = []
     
@@ -59,13 +59,13 @@ def remove_path_from_shell_configs():
             content = config_path.read_text()
             original_content = content
             
-            # Remove lines containing centurion-os or hermes PATH entries
+            # Remove lines containing centurion-os or centurion PATH entries
             new_lines = []
             skip_next = False
             
             for line in content.split('\n'):
-                # Skip the "# Hermes Agent" comment and following line
-                if '# Hermes Agent' in line or '# centurion-os' in line:
+                # Skip the "# Centurion AI OS" comment and following line
+                if '# Centurion AI OS' in line or '# centurion-os' in line:
                     skip_next = True
                     continue
                 if skip_next and ('centurion' in line.lower() and 'PATH' in line):
@@ -73,7 +73,7 @@ def remove_path_from_shell_configs():
                     continue
                 skip_next = False
                 
-                # Remove any PATH line containing hermes
+                # Remove any PATH line containing centurion
                 if 'centurion' in line.lower() and ('PATH=' in line or 'path=' in line.lower()):
                     continue
                     
@@ -96,10 +96,10 @@ def remove_path_from_shell_configs():
 
 
 def remove_wrapper_script():
-    """Remove the hermes wrapper script if it exists."""
+    """Remove the centurion wrapper script if it exists."""
     wrapper_paths = [
         Path.home() / ".local" / "bin" / "centurion",
-        Path("/usr/local/bin/hermes"),
+        Path("/usr/local/bin/centurion"),
     ]
     
     removed = []
@@ -125,7 +125,7 @@ def uninstall_gateway_service():
     - Linux: user + system systemd services (with proper DBUS env setup)
     - macOS: launchd plists
     - Windows: Scheduled Task + Startup-folder fallback, via ``gateway_windows``
-    - All platforms: standalone ``hermes gateway run`` processes
+    - All platforms: standalone ``centurion gateway run`` processes
     - Termux/Android: skips systemd (no systemd on Android), still kills standalone processes
     """
     import platform
@@ -240,15 +240,15 @@ def uninstall_gateway_service():
 #      don't live in ~/.bashrc — they're in the Windows registry at
 #      HKCU\Environment.
 #   2. Prepends to User-scope ``PATH`` (same registry location) entries
-#      like ``%LOCALAPPDATA%\hermes\git\cmd``, ``%LOCALAPPDATA%\hermes\git\bin``,
-#      ``%LOCALAPPDATA%\hermes\git\usr\bin``, ``%LOCALAPPDATA%\hermes\node``.
+#      like ``%LOCALAPPDATA%\centurion\git\cmd``, ``%LOCALAPPDATA%\centurion\git\bin``,
+#      ``%LOCALAPPDATA%\centurion\git\usr\bin``, ``%LOCALAPPDATA%\centurion\node``.
 #      Again not in any rc file — only accessible via the registry or the
 #      .NET [Environment] API.
-#   3. Downloads PortableGit to ``%LOCALAPPDATA%\hermes\git\`` and Node to
-#      ``%LOCALAPPDATA%\hermes\node\`` as user-scoped, isolated copies.
+#   3. Downloads PortableGit to ``%LOCALAPPDATA%\centurion\git\`` and Node to
+#      ``%LOCALAPPDATA%\centurion\node\`` as user-scoped, isolated copies.
 #      These are ~200MB combined and serve no purpose after uninstall.
 #   4. On the ``centurion dashboard`` + gateway paths, drops files into
-#      ``%LOCALAPPDATA%\hermes\gateway-service\`` and sometimes
+#      ``%LOCALAPPDATA%\centurion\gateway-service\`` and sometimes
 #      ``%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\`` — the
 #      latter is handled by ``gateway_windows.uninstall()`` already.
 #
@@ -261,7 +261,7 @@ def uninstall_gateway_service():
 
 
 def _centurion_path_markers(centurion_home: Path) -> list[str]:
-    """Path-entry substrings that identify Hermes-owned User-PATH entries."""
+    """Path-entry substrings that identify Centurion-owned User-PATH entries."""
     root = str(centurion_home).rstrip("\\/")
     # Match on prefix so sub-entries (git\cmd, git\bin, git\usr\bin, node, etc.)
     # all get swept.  Also match the bare centurion-os install dir.
@@ -269,12 +269,12 @@ def _centurion_path_markers(centurion_home: Path) -> list[str]:
     # Also match if CENTURION_HOME was customised to somewhere else — find-and-nuke
     # any entry whose path component contains "centurion".  We don't want to catch
     # unrelated entries like "chermes-foo" or "ephermeral", so we look for
-    # backslash-hermes as a word-ish boundary.
+    # backslash-centurion as a word-ish boundary.
     return markers
 
 
 def remove_path_from_windows_registry(centurion_home: Path) -> list[str]:
-    """Strip Hermes-owned entries from User-scope PATH in the registry.
+    """Strip Centurion-owned entries from User-scope PATH in the registry.
 
     Returns the list of removed path entries.  Operates on HKCU\\Environment,
     same key the installer wrote to via ``[Environment]::SetEnvironmentVariable``.
@@ -340,7 +340,7 @@ def remove_centurion_env_vars_windows() -> list[str]:
 
 def remove_portable_tooling_windows(centurion_home: Path) -> list[Path]:
     """Delete PortableGit and Node installs the Windows installer created under
-    ``%LOCALAPPDATA%\\hermes\\``.  Only called on full uninstall; they're
+    ``%LOCALAPPDATA%\\centurion\\``.  Only called on full uninstall; they're
     isolated from any system Git / Node so they cannot break other tools."""
     removed: list[Path] = []
     for sub in ("git", "node", "gateway-service"):
@@ -387,7 +387,7 @@ def _uninstall_profile(profile) -> None:
     """Fully uninstall a single named profile: stop its gateway service,
     remove its alias wrapper, and wipe its CENTURION_HOME directory.
 
-    We shell out to ``hermes -p <name> gateway stop|uninstall`` because
+    We shell out to ``centurion -p <name> gateway stop|uninstall`` because
     service names, unit paths, and plist paths are all derived from the
     current CENTURION_HOME and can't be easily switched in-process.
     """
@@ -400,11 +400,11 @@ def _uninstall_profile(profile) -> None:
     # 1. Stop and remove this profile's gateway service.
     #    Use `python -m centurion_cli.main` so we don't depend on a `centurion`
     #    wrapper that may be half-removed mid-uninstall.
-    hermes_invocation = [_sys.executable, "-m", "centurion_cli.main", "--profile", name]
+    centurion_invocation = [_sys.executable, "-m", "centurion_cli.main", "--profile", name]
     for subcmd in ("stop", "uninstall"):
         try:
             subprocess.run(
-                hermes_invocation + ["gateway", subcmd],
+                centurion_invocation + ["gateway", subcmd],
                 capture_output=True,
                 text=True,
                 timeout=60,
@@ -452,7 +452,7 @@ def run_uninstall(args):
 
     print()
     print(color("┌─────────────────────────────────────────────────────────┐", Colors.MAGENTA, Colors.BOLD))
-    print(color("│            ⚕ Hermes Agent Uninstaller                  │", Colors.MAGENTA, Colors.BOLD))
+    print(color("│            ⚕ Centurion AI OS Uninstaller                  │", Colors.MAGENTA, Colors.BOLD))
     print(color("└─────────────────────────────────────────────────────────┘", Colors.MAGENTA, Colors.BOLD))
     print()
     
@@ -522,7 +522,7 @@ def run_uninstall(args):
     # Final confirmation
     print()
     if full_uninstall:
-        print(color("⚠️  WARNING: This will permanently delete ALL Hermes data!", Colors.RED, Colors.BOLD))
+        print(color("⚠️  WARNING: This will permanently delete ALL Centurion data!", Colors.RED, Colors.BOLD))
         print(color("   Including: configs, API keys, sessions, scheduled jobs, logs", Colors.RED))
         if remove_profiles:
             print(color(
@@ -531,7 +531,7 @@ def run_uninstall(args):
                 Colors.RED
             ))
     else:
-        print("This will remove the Hermes code but keep your configuration and data.")
+        print("This will remove the Centurion code but keep your configuration and data.")
     
     print()
     try:
@@ -570,13 +570,13 @@ def run_uninstall(args):
         log_info("Removing PATH entries from Windows User environment...")
         # Expand %LOCALAPPDATA% etc. in centurion_home so the marker matching is
         # against fully resolved paths — installer writes literal strings
-        # like C:\Users\<u>\AppData\Local\hermes\git\cmd, not %LOCALAPPDATA%.
+        # like C:\Users\<u>\AppData\Local\centurion\git\cmd, not %LOCALAPPDATA%.
         removed_path_entries = remove_path_from_windows_registry(Path(os.path.expandvars(str(centurion_home))))
         if removed_path_entries:
             for entry in removed_path_entries:
                 log_success(f"Removed from User PATH: {entry}")
         else:
-            log_info("No Hermes-owned PATH entries in User environment")
+            log_info("No Centurion-owned PATH entries in User environment")
 
         log_info("Removing CENTURION_HOME / HERMES_GIT_BASH_PATH User env vars...")
         removed_env = remove_centurion_env_vars_windows()
@@ -584,10 +584,10 @@ def run_uninstall(args):
             for name in removed_env:
                 log_success(f"Removed User env var: {name}")
         else:
-            log_info("No Hermes-set User env vars to remove")
+            log_info("No Centurion-set User env vars to remove")
     
     # 3. Remove wrapper script
-    log_info("Removing hermes command...")
+    log_info("Removing centurion command...")
     removed_wrappers = remove_wrapper_script()
     if removed_wrappers:
         for wrapper in removed_wrappers:
@@ -676,5 +676,5 @@ def run_uninstall(args):
         print(color("Reload your shell to complete the process:", Colors.YELLOW))
         print("  source ~/.bashrc  # or ~/.zshrc")
     print()
-    print("Thank you for using Hermes Agent! ⚕")
+    print("Thank you for using Centurion AI OS! ⚕")
     print()

@@ -1,4 +1,4 @@
-"""``hermes logs`` — view and filter Hermes log files.
+"""``centurion logs`` — view and filter Centurion log files.
 
 Supports tailing, following, session filtering, level filtering,
 component filtering, and relative time ranges.  All log files live
@@ -6,15 +6,15 @@ under ``~/.centurion/logs/``.
 
 Usage examples::
 
-    hermes logs                    # last 50 lines of agent.log
-    hermes logs -f                 # follow agent.log in real time
-    hermes logs errors             # last 50 lines of errors.log
-    hermes logs gateway -n 100    # last 100 lines of gateway.log
-    hermes logs --level WARNING    # only WARNING+ lines
-    hermes logs --session abc123   # filter by session ID substring
-    hermes logs --component tools  # only tool-related lines
-    hermes logs --since 1h         # lines from the last hour
-    hermes logs --since 30m -f     # follow, starting 30 min ago
+    centurion logs                    # last 50 lines of agent.log
+    centurion logs -f                 # follow agent.log in real time
+    centurion logs errors             # last 50 lines of errors.log
+    centurion logs gateway -n 100    # last 100 lines of gateway.log
+    centurion logs --level WARNING    # only WARNING+ lines
+    centurion logs --session abc123   # filter by session ID substring
+    centurion logs --component tools  # only tool-related lines
+    centurion logs --since 1h         # lines from the last hour
+    centurion logs --since 30m -f     # follow, starting 30 min ago
 """
 
 import re
@@ -172,7 +172,7 @@ def tail_log(
     log_path = get_centurion_home() / "logs" / filename
     if not log_path.exists():
         print(f"Log file not found: {log_path}")
-        print(f"(Logs are created when Hermes runs — try 'centurion chat' first)")
+        print(f"(Logs are created when Centurion runs — try 'centurion chat' first)")
         sys.exit(1)
 
     # Parse --since into a datetime cutoff

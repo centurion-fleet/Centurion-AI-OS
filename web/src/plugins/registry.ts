@@ -19,15 +19,15 @@ import React, {
 } from "react";
 import { api, fetchJSON } from "@/lib/api";
 import { cn, timeAgo, isoTimeAgo } from "@/lib/utils";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
-import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
+import { Badge } from "@centurion-fleet/ui/ui/components/badge";
+import { Button } from "@centurion-fleet/ui/ui/components/button";
+import { Checkbox } from "@centurion-fleet/ui/ui/components/checkbox";
+import { Select, SelectOption } from "@centurion-fleet/ui/ui/components/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@nous-research/ui/ui/components/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@centurion-fleet/ui/ui/components/tabs";
 import { useI18n } from "@/i18n";
 import { registerSlot, PluginSlot } from "./slots";
 
@@ -117,7 +117,7 @@ export function exposePluginSDK() {
       createContext,
     },
 
-    // Hermes API client
+    // Centurion API client
     api,
     // Raw fetchJSON for plugin-specific endpoints
     fetchJSON,

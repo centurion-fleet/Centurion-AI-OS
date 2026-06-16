@@ -1660,7 +1660,7 @@ class TestDefaultInteractionDispatch:
         centurion_home = tmp_path / "centurion_home"
         centurion_home.mkdir()
         monkeypatch.setattr(
-            "hermes_constants.get_centurion_home",
+            "centurion_constants.get_centurion_home",
             lambda: centurion_home,
         )
 
@@ -1681,7 +1681,7 @@ class TestDefaultInteractionDispatch:
         centurion_home = tmp_path / "centurion_home"
         centurion_home.mkdir()
         monkeypatch.setattr(
-            "hermes_constants.get_centurion_home",
+            "centurion_constants.get_centurion_home",
             lambda: centurion_home,
         )
         from gateway.platforms.qqbot.keyboards import parse_interaction_event

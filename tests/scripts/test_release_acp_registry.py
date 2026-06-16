@@ -39,7 +39,7 @@ def _write_manifest(root: Path, version: str) -> None:
         json.dumps(
             {
                 "id": "centurion-os",
-                "name": "Hermes Agent",
+                "name": "Centurion AI OS",
                 "version": version,
                 "description": "test",
                 "distribution": {

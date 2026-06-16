@@ -213,13 +213,13 @@ class TestToolsetConsistency:
                 assert inc in TOOLSETS, f"{name} includes unknown toolset '{inc}'"
 
     def test_centurion_platforms_share_core_tools(self):
-        """All hermes-* platform toolsets share the same core tools.
+        """All centurion-* platform toolsets share the same core tools.
 
         Platform-specific additions (e.g. ``discord`` / ``discord_admin``
-        on hermes-discord, gated on DISCORD_BOT_TOKEN) are allowed on top —
+        on centurion-discord, gated on DISCORD_BOT_TOKEN) are allowed on top —
         the invariant is that the core set is identical across platforms.
         """
-        platforms = ["hermes-cli", "hermes-telegram", "hermes-discord", "hermes-whatsapp", "hermes-slack", "hermes-signal", "hermes-homeassistant"]
+        platforms = ["centurion-cli", "centurion-telegram", "centurion-discord", "centurion-whatsapp", "centurion-slack", "centurion-signal", "centurion-homeassistant"]
         tool_sets = [set(TOOLSETS[p]["tools"]) for p in platforms]
         # All platforms must contain the shared core; platform-specific
         # extras are OK (subset check, not equality).
@@ -250,7 +250,7 @@ class TestPluginToolsets:
 
 class TestDefaultPlatformWebSearchCoverage:
     def test_centurion_whatsapp_toolset_includes_web_search(self):
-        assert "web_search" in resolve_toolset("hermes-whatsapp")
+        assert "web_search" in resolve_toolset("centurion-whatsapp")
 
     def test_centurion_api_server_toolset_includes_web_search(self):
-        assert "web_search" in resolve_toolset("hermes-api-server")
+        assert "web_search" in resolve_toolset("centurion-api-server")

@@ -1,7 +1,7 @@
 """Tests for centurion_bootstrap — Windows UTF-8 stdio shim.
 
-The bootstrap module is imported at the top of every Hermes entry point
-(hermes, centurion-os, centurion-acp, gateway, batch_runner, cli.py).  It
+The bootstrap module is imported at the top of every Centurion entry point
+(centurion, centurion-os, centurion-acp, gateway, batch_runner, cli.py).  It
 fixes Python's Windows UTF-8 defaults so print("café") doesn't crash and
 subprocess children inherit UTF-8 mode.
 
@@ -12,7 +12,7 @@ Key invariants covered by these tests:
   3. Idempotent: safe to call multiple times
   4. Respects user opt-out: if the user explicitly sets PYTHONUTF8=0 or
      PYTHONIOENCODING=something-else, we leave those alone
-  5. Load order: every Hermes entry point imports centurion_bootstrap as its
+  5. Load order: every Centurion entry point imports centurion_bootstrap as its
      first non-docstring import (before anything that might do file I/O
      or print to stdout)
 """
@@ -65,7 +65,7 @@ class TestWindowsBehavior:
         reason="Windows-specific behavior",
     )
     def test_stdout_reconfigured_to_utf8_on_windows(self):
-        # The live process's stdout should now be UTF-8 (the Hermes CLI
+        # The live process's stdout should now be UTF-8 (the Centurion CLI
         # runs on Windows with a pytest console that's cp1252 by default).
         # If reconfigure succeeded, sys.stdout.encoding is 'utf-8'.
         _fresh_import()
@@ -233,15 +233,15 @@ class TestStdioReconfigureErrorHandling:
 
 
 class TestEntryPointsImportBootstrap:
-    """Every Hermes entry point must import centurion_bootstrap as its
+    """Every Centurion entry point must import centurion_bootstrap as its
     first non-docstring import.  We check this by scanning source files
     rather than invoking the entry points (which would require a full
     agent context)."""
 
-    # Entry points that invoke Hermes as a process.  Each one must
+    # Entry points that invoke Centurion as a process.  Each one must
     # import centurion_bootstrap before doing any file I/O or stdout writes.
     ENTRY_POINTS = [
-        "centurion_cli/main.py",   # hermes CLI (console_script)
+        "centurion_cli/main.py",   # centurion CLI (console_script)
         "run_agent.py",          # centurion-os (console_script)
         "acp_adapter/entry.py",  # centurion-acp (console_script)
         "gateway/run.py",        # gateway
@@ -262,7 +262,7 @@ class TestEntryPointsImportBootstrap:
         points may guard the import against ``ModuleNotFoundError`` so a
         half-finished ``centurion update`` (git-reset landed new code but
         ``uv pip install -e .`` didn't finish re-registering
-        ``centurion_bootstrap`` as a top-level module) leaves hermes
+        ``centurion_bootstrap`` as a top-level module) leaves centurion
         recoverable instead of crashing on every invocation.  When the
         first top-level node is such a guarded-import block, we peek
         inside it to verify bootstrap is the imported module.
@@ -289,7 +289,7 @@ class TestEntryPointsImportBootstrap:
                 break
             # Accept a guarded-import Try block where the body is a lone
             # Import node — this is the recovery-friendly form that lets
-            # hermes start even when centurion_bootstrap hasn't been
+            # centurion start even when centurion_bootstrap hasn't been
             # re-registered in the venv yet.
             if isinstance(node, ast.Try) and len(node.body) == 1 and isinstance(
                 node.body[0], (ast.Import, ast.ImportFrom)

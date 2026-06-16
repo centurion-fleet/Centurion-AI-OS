@@ -1,5 +1,5 @@
 """
-Tests for mcp_serve — Hermes MCP server.
+Tests for mcp_serve — Centurion MCP server.
 
 Three layers of tests:
 1. Unit tests — helpers, content extraction, attachment parsing
@@ -31,7 +31,7 @@ def _isolate_centurion_home(tmp_path, monkeypatch):
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path))
     try:
         import centurion_constants
-        monkeypatch.setattr(hermes_constants, "get_centurion_home", lambda: tmp_path)
+        monkeypatch.setattr(centurion_constants, "get_centurion_home", lambda: tmp_path)
     except (ImportError, AttributeError):
         pass
     return tmp_path
@@ -123,7 +123,7 @@ def populated_sessions_dir(sessions_dir, sample_sessions):
 
 
 def _create_test_db(db_path, session_id, messages):
-    """Create a minimal SQLite DB mimicking hermes_state schema."""
+    """Create a minimal SQLite DB mimicking centurion_state schema."""
     conn = sqlite3.connect(str(db_path))
     conn.execute("""
         CREATE TABLE IF NOT EXISTS sessions (

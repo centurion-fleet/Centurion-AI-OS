@@ -50,7 +50,7 @@ class TestHandleUpdateCommand:
     async def test_managed_install_returns_package_manager_guidance(self, monkeypatch):
         runner = _make_runner()
         event = _make_event()
-        monkeypatch.setenv("HERMES_MANAGED", "homebrew")
+        monkeypatch.setenv("CENTURION_MANAGED", "homebrew")
 
         result = await runner._handle_update_command(event)
 
@@ -100,7 +100,7 @@ class TestHandleUpdateCommand:
 
     @pytest.mark.asyncio
     async def test_no_centurion_binary(self, tmp_path):
-        """Returns error when hermes is not on PATH and centurion_cli is not importable."""
+        """Returns error when centurion is not on PATH and centurion_cli is not importable."""
         runner = _make_runner()
         event = _make_event()
 
@@ -123,7 +123,7 @@ class TestHandleUpdateCommand:
 
     @pytest.mark.asyncio
     async def test_fallback_to_sys_executable(self, tmp_path):
-        """Falls back to sys.executable -m centurion_cli.main when hermes not on PATH."""
+        """Falls back to sys.executable -m centurion_cli.main when centurion not on PATH."""
         runner = _make_runner()
         event = _make_event()
 
@@ -146,7 +146,7 @@ class TestHandleUpdateCommand:
              patch("subprocess.Popen", mock_popen):
             result = await runner._handle_update_command(event)
 
-        assert "Starting Hermes update" in result
+        assert "Starting Centurion update" in result
         call_args = mock_popen.call_args[0][0]
         # The update_cmd uses sys.executable -m centurion_cli.main
         joined = " ".join(call_args) if isinstance(call_args, list) else call_args
@@ -157,10 +157,10 @@ class TestHandleUpdateCommand:
         """_resolve_centurion_bin returns argv parts from shutil.which when available."""
         from gateway.run import _resolve_centurion_bin
 
-        with patch("shutil.which", return_value="/custom/path/hermes"):
+        with patch("shutil.which", return_value="/custom/path/centurion"):
             result = _resolve_centurion_bin()
 
-        assert result == ["/custom/path/hermes"]
+        assert result == ["/custom/path/centurion"]
 
     @pytest.mark.asyncio
     async def test_resolve_centurion_bin_fallback(self):
@@ -203,7 +203,7 @@ class TestHandleUpdateCommand:
 
         with patch("gateway.run._centurion_home", centurion_home), \
              patch("gateway.run.__file__", fake_file), \
-             patch("shutil.which", side_effect=lambda x: "/usr/bin/hermes" if x == "centurion" else "/usr/bin/setsid"), \
+             patch("shutil.which", side_effect=lambda x: "/usr/bin/centurion" if x == "centurion" else "/usr/bin/setsid"), \
              patch("subprocess.Popen"):
             result = await runner._handle_update_command(event)
 
@@ -236,7 +236,7 @@ class TestHandleUpdateCommand:
 
         with patch("gateway.run._centurion_home", centurion_home), \
              patch("gateway.run.__file__", fake_file), \
-             patch("shutil.which", side_effect=lambda x: "/usr/bin/hermes" if x == "centurion" else "/usr/bin/setsid"), \
+             patch("shutil.which", side_effect=lambda x: "/usr/bin/centurion" if x == "centurion" else "/usr/bin/setsid"), \
              patch("subprocess.Popen"):
             await runner._handle_update_command(event)
 
@@ -270,7 +270,7 @@ class TestHandleUpdateCommand:
         assert call_args[0] == "/usr/bin/setsid"
         assert call_args[1] == "bash"
         assert ".update_exit_code" in call_args[-1]
-        assert "Starting Hermes update" in result
+        assert "Starting Centurion update" in result
 
     @pytest.mark.asyncio
     async def test_fallback_when_no_setsid(self, tmp_path):
@@ -291,7 +291,7 @@ class TestHandleUpdateCommand:
 
         def which_no_setsid(x):
             if x == "centurion":
-                return "/usr/bin/hermes"
+                return "/usr/bin/centurion"
             if x == "setsid":
                 return None
             return None
@@ -310,7 +310,7 @@ class TestHandleUpdateCommand:
         # start_new_session=True should be in kwargs
         call_kwargs = mock_popen.call_args[1]
         assert call_kwargs.get("start_new_session") is True
-        assert "Starting Hermes update" in result
+        assert "Starting Centurion update" in result
 
     @pytest.mark.asyncio
     async def test_popen_failure_cleans_up(self, tmp_path):

@@ -69,9 +69,9 @@ class TestEnvFileReadBlocking:
             assert error is None, f"{path} should be allowed"
 
     def test_allowed_centurion_env(self):
-        """Hermes' own .env inside CENTURION_HOME is NOT blocked by this rule
+        """Centurion' own .env inside CENTURION_HOME is NOT blocked by this rule
         (it's handled by other mechanisms). Only project-local .env is blocked."""
-        # Note: hermes internal .env is in ~/.centurion/.env which is NOT a project-local
+        # Note: centurion internal .env is in ~/.centurion/.env which is NOT a project-local
         # path, but the basename check applies to ANY .env. This is intentional —
         # even ~/.centurion/.env should not be readable via read_file.
         error = get_read_block_error(os.path.expanduser("~/.centurion/.env"))
@@ -89,7 +89,7 @@ class TestEnvFileReadBlocking:
 
 
 class TestCacheFileReadBlocking:
-    """Internal Hermes cache files must remain blocked."""
+    """Internal Centurion cache files must remain blocked."""
 
     def test_hub_index_cache_blocked(self, tmp_path):
         """Hub index-cache reads are blocked."""
@@ -101,7 +101,7 @@ class TestCacheFileReadBlocking:
         with patch("agent.file_safety._centurion_home_path", return_value=centurion_home):
             error = get_read_block_error(str(cache))
             assert error is not None
-            assert "internal Hermes cache" in error
+            assert "internal Centurion cache" in error
 
     def test_hub_directory_blocked(self, tmp_path):
         """Hub directory reads are blocked."""
@@ -147,4 +147,4 @@ class TestCombinedGuards:
         with patch("agent.file_safety._centurion_home_path", return_value=centurion_home):
             error = get_read_block_error(str(cache))
             assert error is not None
-            assert "internal Hermes cache" in error
+            assert "internal Centurion cache" in error

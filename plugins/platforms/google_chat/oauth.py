@@ -77,7 +77,7 @@ logger = logging.getLogger("gateway.platforms.google_chat_user_oauth")
 try:
     from centurion_constants import display_centurion_home, get_centurion_home
 except (ModuleNotFoundError, ImportError):
-    # Fallback for environments where hermes_constants isn't importable
+    # Fallback for environments where centurion_constants isn't importable
     # (mirrors the same fallback used by the google-workspace skill's
     # _centurion_home.py shim).
     def get_centurion_home() -> Path:
@@ -628,7 +628,7 @@ def revoke(email: Optional[str] = None) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Google Chat user-OAuth setup for Hermes (native attachment delivery)"
+        description="Google Chat user-OAuth setup for Centurion (native attachment delivery)"
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--check", action="store_true",

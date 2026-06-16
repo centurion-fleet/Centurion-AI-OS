@@ -23,8 +23,8 @@
  * terminal pane keeps working unimpaired.
  */
 
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Badge } from "@nous-research/ui/ui/components/badge";
+import { Button } from "@centurion-fleet/ui/ui/components/button";
+import { Badge } from "@centurion-fleet/ui/ui/components/badge";
 import { Card } from "@/components/ui/card";
 
 import { ModelPickerDialog } from "@/components/ModelPickerDialog";
@@ -145,7 +145,7 @@ export function ChatSidebar({ channel, className }: ChatSidebarProps) {
 
   // Event subscriber WebSocket — receives the rebroadcast of every
   // dispatcher emit from the PTY child's gateway.  See /api/pub +
-  // /api/events in hermes_cli/web_server.py for the broadcast hop.
+  // /api/events in centurion_cli/web_server.py for the broadcast hop.
   //
   // Failures (auth/loopback rejection, server too old to expose the
   // endpoint, transient drops) surface in the same banner as the

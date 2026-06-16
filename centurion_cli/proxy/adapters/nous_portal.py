@@ -1,4 +1,4 @@
-"""Nous Portal upstream adapter.
+"""Centurion Portal upstream adapter.
 
 Reads the user's Nous OAuth state from ``~/.centurion/auth.json`` through the
 shared runtime resolver, refreshes the access token and resolves the
@@ -49,7 +49,7 @@ _ALLOWED_PATHS: FrozenSet[str] = frozenset(
 
 
 class NousPortalAdapter(UpstreamAdapter):
-    """Proxy upstream for the Nous Portal inference API."""
+    """Proxy upstream for the Centurion Portal inference API."""
 
     def __init__(self) -> None:
         # Serialize proxy requests in this process; cross-process token refresh
@@ -62,7 +62,7 @@ class NousPortalAdapter(UpstreamAdapter):
 
     @property
     def display_name(self) -> str:
-        return "Nous Portal"
+        return "Centurion Portal"
 
     @property
     def allowed_paths(self) -> FrozenSet[str]:
@@ -104,7 +104,7 @@ class NousPortalAdapter(UpstreamAdapter):
             state = self._read_state()
             if state is None:
                 raise RuntimeError(
-                    "Not logged into Nous Portal. Run `hermes login nous` first."
+                    "Not logged into Centurion Portal. Run `centurion login nous` first."
                 )
 
             try:
@@ -124,18 +124,18 @@ class NousPortalAdapter(UpstreamAdapter):
                         quarantine_reason="proxy_refresh_failure",
                     )
                 raise RuntimeError(
-                    f"Failed to refresh Nous Portal credentials: {exc}"
+                    f"Failed to refresh Centurion Portal credentials: {exc}"
                 ) from exc
             except Exception as exc:
                 raise RuntimeError(
-                    f"Failed to refresh Nous Portal credentials: {exc}"
+                    f"Failed to refresh Centurion Portal credentials: {exc}"
                 ) from exc
 
             agent_key = refreshed.get("api_key")
             if not agent_key:
                 raise RuntimeError(
-                    "Nous Portal refresh did not return a usable agent_key. "
-                    "Try `hermes login nous` to re-authenticate."
+                    "Centurion Portal refresh did not return a usable agent_key. "
+                    "Try `centurion login nous` to re-authenticate."
                 )
 
             base_url = (

@@ -32,7 +32,7 @@ def _load_plugin_router():
     assert plugin_file.exists(), f"plugin file missing: {plugin_file}"
 
     spec = importlib.util.spec_from_file_location(
-        "hermes_dashboard_plugin_kanban_test", plugin_file,
+        "centurion_dashboard_plugin_kanban_test", plugin_file,
     )
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
@@ -158,7 +158,7 @@ def test_board_query_param_default_overrides_current_board_pointer(client):
     pointer targets a non-default board.
 
     Regression: selecting the Default board in the dashboard must not fall
-    through to whichever board ``hermes kanban boards switch`` last pinned.
+    through to whichever board ``centurion kanban boards switch`` last pinned.
     """
     default_task = client.post(
         "/api/plugins/kanban/tasks",
@@ -715,9 +715,9 @@ def test_board_auto_initializes_missing_db(tmp_path, monkeypatch):
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
-    monkeypatch.delenv("HERMES_KANBAN_BOARD", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_BOARD", raising=False)
     monkeypatch.delenv("HERMES_KANBAN_DB", raising=False)
-    monkeypatch.delenv("HERMES_KANBAN_HOME", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_HOME", raising=False)
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     # Deliberately DO NOT call kb.init_db().
 
@@ -1348,7 +1348,7 @@ def test_create_task_includes_warning_when_no_dispatcher(client, monkeypatch):
     # Force the dispatcher probe to report "not running".
     monkeypatch.setattr(
         "centurion_cli.kanban._check_dispatcher_presence",
-        lambda: (False, "No gateway is running — start `hermes gateway start`."),
+        lambda: (False, "No gateway is running — start `centurion gateway start`."),
     )
     r = client.post(
         "/api/plugins/kanban/tasks",
@@ -2160,7 +2160,7 @@ def test_dashboard_bulk_actions_include_reclaim_first():
     dist = (repo_root / "plugins" / "kanban" / "dashboard" / "dist" / "index.js").read_text()
 
     assert "reclaim_first: reclaimFirst" in dist
-    assert "hermes-kanban-bulk-reclaim-first" in dist
+    assert "centurion-kanban-bulk-reclaim-first" in dist
     assert '"→ todo"' in dist
     assert '"Block"' in dist
     assert '"Unblock"' in dist
@@ -2192,6 +2192,6 @@ def test_dashboard_failed_card_highlight_class_exists():
     js = (repo_root / "plugins" / "kanban" / "dashboard" / "dist" / "index.js").read_text()
     css = (repo_root / "plugins" / "kanban" / "dashboard" / "dist" / "style.css").read_text()
 
-    assert "hermes-kanban-card--failed" in js
-    assert "hermes-kanban-card--failed" in css
+    assert "centurion-kanban-card--failed" in js
+    assert "centurion-kanban-card--failed" in css
     assert "failedIds" in js

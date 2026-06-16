@@ -142,7 +142,7 @@ class TestFirecrawlClientConfig:
         real_home = tmp_path / "real-home"
         (real_home / ".centurion").mkdir(parents=True)
 
-        centurion_home = tmp_path / "hermes-home"
+        centurion_home = tmp_path / "centurion-home"
         centurion_home.mkdir()
         (centurion_home / "auth.json").write_text(json.dumps({
             "providers": {

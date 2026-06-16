@@ -19,7 +19,7 @@ mode parameter):
      previews, timestamps).
 
 All three modes operate on the SQLite session DB via the FTS5 index and
-the get_anchored_view / get_messages_around primitives in hermes_state.
+the get_anchored_view / get_messages_around primitives in centurion_state.
 No LLM calls anywhere — every shape returns actual messages from the DB.
 
 History: PR #20238 (JabberELF) seeded a fast/summary dual-mode split; the

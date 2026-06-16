@@ -311,6 +311,6 @@ class TestSysPathOrdering:
         assert callable(_centurion_now)
 
     def test_centurion_constants_importable(self):
-        """hermes_constants should be importable from cron context."""
+        """centurion_constants should be importable from cron context."""
         from centurion_constants import get_centurion_home
         assert callable(get_centurion_home)

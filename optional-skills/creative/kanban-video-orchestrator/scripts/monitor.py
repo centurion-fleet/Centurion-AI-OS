@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Monitor a running video-production kanban. Polls `hermes kanban list` and
+Monitor a running video-production kanban. Polls `centurion kanban list` and
 `events` for a tenant and surfaces issues (stuck tasks, missing heartbeats,
 repeated retries, dependency deadlocks).
 
@@ -26,13 +26,13 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 
-def hermes_available() -> bool:
+def centurion_available() -> bool:
     return shutil.which("centurion") is not None
 
 
 def kanban_list(tenant: str) -> list[dict]:
     """Returns parsed task rows. Falls back to plain stdout parsing if JSON
-    output isn't supported by the installed hermes CLI."""
+    output isn't supported by the installed centurion CLI."""
     try:
         out = subprocess.run(
             ["centurion", "kanban", "list", "--tenant", tenant, "--json"],
@@ -42,7 +42,7 @@ def kanban_list(tenant: str) -> list[dict]:
             return json.loads(out.stdout)
     except (FileNotFoundError, json.JSONDecodeError):
         pass
-    # Fallback: textual parse of `hermes kanban list`
+    # Fallback: textual parse of `centurion kanban list`
     out = subprocess.run(
         ["centurion", "kanban", "list", "--tenant", tenant],
         capture_output=True, text=True, check=False,
@@ -171,7 +171,7 @@ def main():
                     help="Print one snapshot and exit (no polling loop)")
     args = ap.parse_args()
 
-    if not hermes_available():
+    if not centurion_available():
         print("ERROR: 'centurion' CLI not found in PATH", file=sys.stderr)
         sys.exit(1)
 

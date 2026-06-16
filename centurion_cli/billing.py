@@ -1,7 +1,7 @@
 """Centurion subscription billing gate.
 
 Until ``portal.personal-centurion.com`` is live, billing stays disabled and
-Nous/Hermes Portal OAuth is blocked. Users configure bring-your-own-key
+Nous/Centurion Portal OAuth is blocked. Users configure bring-your-own-key
 providers via ``centurion setup`` / ``centurion model`` instead.
 """
 

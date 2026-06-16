@@ -1,4 +1,4 @@
-"""Tests for the OpenClaw→Hermes migration hardening features.
+"""Tests for the OpenClaw→Centurion migration hardening features.
 
 Covers the changes in the "claw migrate hardening" PR:
   - secret redaction (engine-level, applied to report JSON)
@@ -22,7 +22,7 @@ SCRIPT_PATH = (
     / "migration"
     / "openclaw-migration"
     / "scripts"
-    / "openclaw_to_hermes.py"
+    / "openclaw_to_centurion.py"
 )
 
 

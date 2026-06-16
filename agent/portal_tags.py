@@ -1,15 +1,15 @@
-"""Centralized Nous Portal request tags.
+"""Centralized Centurion Portal request tags.
 
-Every Hermes request that hits the Nous Portal — main agent loop, auxiliary
+Every Centurion request that hits the Centurion Portal — main agent loop, auxiliary
 client (compression / titles / vision / web_extract / session_search / etc.),
 and any future code path — must carry the same product-attribution tags so
-Nous can attribute usage to Hermes Agent and bucket it by client release.
+Nous can attribute usage to Centurion AI OS and bucket it by client release.
 
 Tag shape (sent in OpenAI-compatible ``extra_body['tags']``):
 
     [
         "product=centurion-os",
-        "client=hermes-client-v<__version__>",
+        "client=centurion-client-v<__version__>",
     ]
 
 The version is sourced live from ``centurion_cli.__version__`` so it auto-aligns
@@ -35,7 +35,7 @@ from typing import List
 
 
 def _centurion_version() -> str:
-    """Return the current Hermes release version, e.g. ``"0.13.0"``.
+    """Return the current Centurion release version, e.g. ``"0.13.0"``.
 
     Falls back to ``"unknown"`` if ``centurion_cli`` cannot be imported (should
     never happen in a real install — guarded for defensive testing).
@@ -48,15 +48,15 @@ def _centurion_version() -> str:
 
 
 def centurion_client_tag() -> str:
-    """Return the ``client=...`` tag for Nous Portal requests.
+    """Return the ``client=...`` tag for Centurion Portal requests.
 
-    Format: ``client=hermes-client-v<MAJOR>.<MINOR>.<PATCH>``.
+    Format: ``client=centurion-client-v<MAJOR>.<MINOR>.<PATCH>``.
     """
-    return f"client=hermes-client-v{_centurion_version()}"
+    return f"client=centurion-client-v{_centurion_version()}"
 
 
 def nous_portal_tags() -> List[str]:
-    """Return the canonical list of Nous Portal product tags.
+    """Return the canonical list of Centurion Portal product tags.
 
     Always returns a fresh list so callers can mutate it freely
     (e.g. ``merged_extra.setdefault("tags", []).extend(nous_portal_tags())``).

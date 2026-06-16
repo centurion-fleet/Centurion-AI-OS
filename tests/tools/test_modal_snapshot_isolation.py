@@ -62,7 +62,7 @@ def _install_modal_test_modules(
     centurion_cli = types.ModuleType("centurion_cli")
     centurion_cli.__path__ = []  # type: ignore[attr-defined]
     sys.modules["centurion_cli"] = centurion_cli
-    centurion_home = tmp_path / "hermes-home"
+    centurion_home = tmp_path / "centurion-home"
     os.environ["CENTURION_HOME"] = str(centurion_home)
     sys.modules["centurion_cli.config"] = types.SimpleNamespace(
         get_centurion_home=lambda: centurion_home,

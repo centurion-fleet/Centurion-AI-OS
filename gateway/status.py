@@ -28,7 +28,7 @@ if sys.platform == "win32":
 else:
     import fcntl
 
-_GATEWAY_KIND = "hermes-gateway"
+_GATEWAY_KIND = "centurion-gateway"
 _RUNTIME_STATUS_FILE = "gateway_state.json"
 _LOCKS_DIRNAME = "gateway-locks"
 _IS_WINDOWS = sys.platform == "win32"
@@ -165,7 +165,7 @@ def _read_process_cmdline(pid: int) -> Optional[str]:
 
 
 def _looks_like_gateway_process(pid: int) -> bool:
-    """Return True when the live PID still looks like the Hermes gateway."""
+    """Return True when the live PID still looks like the Centurion gateway."""
     cmdline = _read_process_cmdline(pid)
     if not cmdline:
         return False
@@ -173,8 +173,8 @@ def _looks_like_gateway_process(pid: int) -> bool:
     patterns = (
         "centurion_cli.main gateway",
         "centurion_cli/main.py gateway",
-        "hermes gateway",
-        "hermes-gateway",
+        "centurion gateway",
+        "centurion-gateway",
         "gateway/run.py",
     )
     return any(pattern in cmdline for pattern in patterns)
@@ -194,7 +194,7 @@ def _record_looks_like_gateway(record: dict[str, Any]) -> bool:
     patterns = (
         "centurion_cli.main gateway",
         "centurion_cli/main.py gateway",
-        "hermes gateway",
+        "centurion gateway",
         "gateway/run.py",
     )
     return any(pattern in cmdline for pattern in patterns)
@@ -747,7 +747,7 @@ def release_all_scoped_locks(
 # unexpected kills — but that also means a --replace takeover target
 # exits 1, which tricks systemd into reviving it 30 seconds later,
 # starting a flap loop against the replacer when both services are
-# enabled in the user's systemd (e.g. ``hermes.service`` + ``hermes-
+# enabled in the user's systemd (e.g. ``centurion.service`` + ``centurion-
 # gateway.service``).
 #
 # The takeover marker breaks the loop: the replacer writes a short-lived

@@ -98,7 +98,7 @@ def _xai_user_agent() -> str:
     try:
         from tools.xai_http import centurion_xai_user_agent
 
-        return hermes_xai_user_agent()
+        return centurion_xai_user_agent()
     except Exception:
         return "centurion-os/video_gen"
 
@@ -294,7 +294,7 @@ class XAIVideoGenProvider(VideoGenProvider):
         if not api_key:
             return error_response(
                 error=(
-                    "No xAI credentials found. Sign in via `hermes auth add xai-oauth` "
+                    "No xAI credentials found. Sign in via `centurion auth add xai-oauth` "
                     "(SuperGrok / Premium+) or set XAI_API_KEY from "
                     "https://console.x.ai/."
                 ),

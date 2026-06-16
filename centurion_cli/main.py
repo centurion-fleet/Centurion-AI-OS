@@ -33,7 +33,7 @@ Usage:
     centurion honcho tokens --dialectic N     # Set dialectic result char cap
     centurion honcho identity                 # Show AI peer identity representation
     centurion honcho identity <file>          # Seed AI peer identity from a file (SOUL.md etc.)
-    centurion honcho migrate                  # Step-by-step migration guide: OpenClaw native → Hermes + Honcho
+    centurion honcho migrate                  # Step-by-step migration guide: OpenClaw native → Centurion + Honcho
     centurion version             Show version
     centurion update              Update to latest version
     centurion uninstall           Uninstall Centurion AI OS
@@ -496,7 +496,7 @@ def _has_any_provider_configured() -> bool:
     from centurion_cli.config import get_env_path, get_centurion_home, load_config
     from centurion_cli.auth import get_auth_status
 
-    # Determine whether Hermes itself has been explicitly configured (model
+    # Determine whether Centurion itself has been explicitly configured (model
     # in config that isn't the hardcoded default). Used below to gate external
     # tool credentials (Claude Code, Codex CLI) that shouldn't silently skip
     # the setup wizard on a fresh install.
@@ -558,7 +558,7 @@ def _has_any_provider_configured() -> bool:
     except Exception:
         pass
 
-    # Check for Nous Portal OAuth credentials
+    # Check for Centurion Portal OAuth credentials
     auth_file = get_centurion_home() / "auth.json"
     if auth_file.exists():
         try:
@@ -585,8 +585,8 @@ def _has_any_provider_configured() -> bool:
             return True
 
     # Check for Claude Code OAuth credentials (~/.claude/.credentials.json)
-    # Only count these if Hermes has been explicitly configured — Claude Code
-    # being installed doesn't mean the user wants Hermes to use their tokens.
+    # Only count these if Centurion has been explicitly configured — Claude Code
+    # being installed doesn't mean the user wants Centurion to use their tokens.
     if _has_centurion_config:
         try:
             from agent.anthropic_adapter import (
@@ -1219,9 +1219,9 @@ def _tui_need_rebuild(root: Path) -> bool:
     The TUI bundle is self-contained. Rebuilding it on every launch adds a
     visible cold-start tax on slow Termux CPUs, while a simple mtime freshness
     check still rebuilds immediately after source updates, dependency updates,
-    or local edits. Set ``HERMES_TUI_FORCE_BUILD=1`` to force the old behaviour.
+    or local edits. Set ``CENTURION_TUI_FORCE_BUILD=1`` to force the old behaviour.
     """
-    force = (os.environ.get("HERMES_TUI_FORCE_BUILD") or "").strip().lower()
+    force = (os.environ.get("CENTURION_TUI_FORCE_BUILD") or "").strip().lower()
     if force in {"1", "true", "yes", "on"}:
         return True
 
@@ -1306,7 +1306,7 @@ def _find_bundled_tui(centurion_cli_dir: Path | None = None) -> Path | None:
 
 
 def _make_tui_argv(tui_dir: Path, tui_dev: bool) -> tuple[list[str], Path]:
-    """TUI: --dev → tsx src; else node dist (HERMES_TUI_DIR prebuilt or esbuild)."""
+    """TUI: --dev → tsx src; else node dist (CENTURION_TUI_DIR prebuilt or esbuild)."""
     _ensure_tui_node()
 
     def _node_bin(bin: str) -> str:
@@ -1328,12 +1328,12 @@ def _make_tui_argv(tui_dir: Path, tui_dev: bool) -> tuple[list[str], Path]:
         return path
 
     # Footgun: --dev against a prebuilt bundle that has no source/node_modules.
-    ext_dir = os.environ.get("HERMES_TUI_DIR")
+    ext_dir = os.environ.get("CENTURION_TUI_DIR")
     if tui_dev and ext_dir:
         print(
-            f"Error: --dev is incompatible with HERMES_TUI_DIR={ext_dir}\n"
+            f"Error: --dev is incompatible with CENTURION_TUI_DIR={ext_dir}\n"
             f"The prebuilt TUI has no source code to hot-reload.\n"
-            f"Unset HERMES_TUI_DIR (e.g. `unset HERMES_TUI_DIR`) to use --dev from a checkout.",
+            f"Unset CENTURION_TUI_DIR (e.g. `unset CENTURION_TUI_DIR`) to use --dev from a checkout.",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -1481,11 +1481,11 @@ def _launch_tui(
         prefix="centurion-tui-active-session-", suffix=".json"
     )
     os.close(active_session_fd)
-    env["HERMES_TUI_ACTIVE_SESSION_FILE"] = active_session_file
-    env["HERMES_PYTHON_SRC_ROOT"] = os.environ.get(
-        "HERMES_PYTHON_SRC_ROOT", str(PROJECT_ROOT)
+    env["CENTURION_TUI_ACTIVE_SESSION_FILE"] = active_session_file
+    env["CENTURION_PYTHON_SRC_ROOT"] = os.environ.get(
+        "CENTURION_PYTHON_SRC_ROOT", str(PROJECT_ROOT)
     )
-    env.setdefault("HERMES_PYTHON", sys.executable)
+    env.setdefault("CENTURION_PYTHON", sys.executable)
     env.setdefault("HERMES_CWD", os.getcwd())
     env.setdefault("NODE_ENV", "development" if tui_dev else "production")
 
@@ -1515,11 +1515,11 @@ def _launch_tui(
         env["HERMES_MODEL"] = model
         env["HERMES_INFERENCE_MODEL"] = model
     if provider:
-        env["HERMES_TUI_PROVIDER"] = provider
+        env["CENTURION_TUI_PROVIDER"] = provider
         env["HERMES_INFERENCE_PROVIDER"] = provider
     tui_toolsets = _normalize_tui_toolsets(toolsets)
     if tui_toolsets:
-        env["HERMES_TUI_TOOLSETS"] = ",".join(tui_toolsets)
+        env["CENTURION_TUI_TOOLSETS"] = ",".join(tui_toolsets)
     if skills:
         if isinstance(skills, (list, tuple)):
             flattened = []
@@ -1528,25 +1528,25 @@ def _launch_tui(
                     part.strip() for part in str(item).split(",") if part.strip()
                 )
             if flattened:
-                env["HERMES_TUI_SKILLS"] = ",".join(flattened)
+                env["CENTURION_TUI_SKILLS"] = ",".join(flattened)
         else:
             value = str(skills).strip()
             if value:
-                env["HERMES_TUI_SKILLS"] = value
+                env["CENTURION_TUI_SKILLS"] = value
     if query:
-        env["HERMES_TUI_QUERY"] = query
+        env["CENTURION_TUI_QUERY"] = query
     if image:
-        env["HERMES_TUI_IMAGE"] = image
+        env["CENTURION_TUI_IMAGE"] = image
     if checkpoints:
-        env["HERMES_TUI_CHECKPOINTS"] = "1"
+        env["CENTURION_TUI_CHECKPOINTS"] = "1"
     if pass_session_id:
-        env["HERMES_TUI_PASS_SESSION_ID"] = "1"
+        env["CENTURION_TUI_PASS_SESSION_ID"] = "1"
     if max_turns is not None:
-        env["HERMES_TUI_MAX_TURNS"] = str(max_turns)
+        env["CENTURION_TUI_MAX_TURNS"] = str(max_turns)
     if verbose:
-        env["HERMES_TUI_TOOL_PROGRESS"] = "verbose"
+        env["CENTURION_TUI_TOOL_PROGRESS"] = "verbose"
     elif quiet:
-        env["HERMES_TUI_TOOL_PROGRESS"] = "off"
+        env["CENTURION_TUI_TOOL_PROGRESS"] = "off"
     if accept_hooks:
         env["HERMES_ACCEPT_HOOKS"] = "1"
     # Guarantee an 8GB V8 heap for the TUI. Default node cap is ~1.5–4GB
@@ -1560,16 +1560,16 @@ def _launch_tui(
     if not any(t.startswith("--max-old-space-size=") for t in _tokens):
         _tokens.append("--max-old-space-size=8192")
     env["NODE_OPTIONS"] = " ".join(_tokens)
-    # HERMES_TUI_RESUME is an internal hand-off from the Python wrapper to the
+    # CENTURION_TUI_RESUME is an internal hand-off from the Python wrapper to the
     # Ink app.  Because we start from os.environ.copy(), an exported/stale value
     # in the user's shell would otherwise make a plain `centurion --tui` try to
     # resume a non-existent session and leave the UI at "error: session not
     # found" with no live session.  Only forward a resume id that argparse
     # resolved for this invocation; direct `node ui-tui/dist/entry.js` users can
-    # still set HERMES_TUI_RESUME themselves.
-    env.pop("HERMES_TUI_RESUME", None)
+    # still set CENTURION_TUI_RESUME themselves.
+    env.pop("CENTURION_TUI_RESUME", None)
     if resume_session_id:
-        env["HERMES_TUI_RESUME"] = resume_session_id
+        env["CENTURION_TUI_RESUME"] = resume_session_id
 
     argv, cwd = _make_tui_argv(tui_dir, tui_dev)
     code: Optional[int] = None
@@ -1608,7 +1608,7 @@ def _launch_tui(
 
 
 def _pin_kanban_board_env() -> None:
-    """Pin the active kanban board into ``HERMES_KANBAN_BOARD`` for the chat session.
+    """Pin the active kanban board into ``CENTURION_KANBAN_BOARD`` for the chat session.
 
     Without this, in-process tools (``kanban_*``) and shelled-out CLI calls
     (``centurion kanban …``) resolve the board on different paths: the env-pin if
@@ -1618,19 +1618,19 @@ def _pin_kanban_board_env() -> None:
     calls hit board B (#20074). Pinning at chat boot mirrors what the
     dispatcher already does for spawned workers.
     """
-    if os.environ.get("HERMES_KANBAN_BOARD"):
+    if os.environ.get("CENTURION_KANBAN_BOARD"):
         return
     try:
         from centurion_cli.kanban_db import get_current_board
 
-        os.environ["HERMES_KANBAN_BOARD"] = get_current_board()
+        os.environ["CENTURION_KANBAN_BOARD"] = get_current_board()
     except Exception:
         pass
 
 
 def cmd_chat(args):
     """Run interactive chat CLI."""
-    use_tui = getattr(args, "tui", False) or os.environ.get("HERMES_TUI") == "1"
+    use_tui = getattr(args, "tui", False) or os.environ.get("CENTURION_TUI") == "1"
 
     # Resolve --continue into --resume with the latest session or by name
     continue_val = getattr(args, "continue_last", None)
@@ -1844,7 +1844,7 @@ def cmd_whatsapp(args):
     current_mode = get_env_value("WHATSAPP_MODE") or ""
     if not current_mode:
         print()
-        print("How will you use WhatsApp with Hermes?")
+        print("How will you use WhatsApp with Centurion?")
         print()
         print("  1. Separate bot number (recommended)")
         print("     People message the bot's number directly — cleanest experience.")
@@ -2635,7 +2635,7 @@ def _aux_config_menu() -> None:
         print("  Side tasks (vision, compression, web extraction, etc.) default")
         print('  to your main chat model.  "auto" means "use my main model" —')
         print("  Centurion only falls back to a lightweight backend (OpenRouter,")
-        print("  Nous Portal) if the main model is unavailable.  Override a")
+        print("  Centurion Portal) if the main model is unavailable.  Override a")
         print("  task below if you want it pinned to a specific provider/model.")
         print()
 
@@ -3016,7 +3016,7 @@ def _model_flow_ai_gateway(config, current_model=""):
 
 
 def _model_flow_nous(config, current_model="", args=None):
-    """Nous Portal provider: ensure logged in, then pick model."""
+    """Centurion Portal provider: ensure logged in, then pick model."""
     from centurion_cli.billing import billing_unavailable_message, is_billing_enabled
 
     if not is_billing_enabled(config):
@@ -3046,7 +3046,7 @@ def _model_flow_nous(config, current_model="", args=None):
 
     state = get_provider_auth_state("nous")
     if not state or not state.get("access_token"):
-        print("Not logged into Nous Portal. Starting login...")
+        print("Not logged into Centurion Portal. Starting login...")
         print()
         try:
             mock_args = argparse.Namespace(
@@ -3089,7 +3089,7 @@ def _model_flow_nous(config, current_model="", args=None):
 
     model_ids = get_curated_nous_model_ids()
     if not model_ids:
-        print("No curated models available for Nous Portal.")
+        print("No curated models available for Centurion Portal.")
         return
 
     # Verify credentials are still valid (catches expired sessions early)
@@ -3100,7 +3100,7 @@ def _model_flow_nous(config, current_model="", args=None):
         msg = format_auth_error(exc) if isinstance(exc, AuthError) else str(exc)
         if relogin:
             print(f"Session expired: {msg}")
-            print("Re-authenticating with Nous Portal...\n")
+            print("Re-authenticating with Centurion Portal...\n")
             try:
                 mock_args = argparse.Namespace(
                     portal_url=None,
@@ -3158,7 +3158,7 @@ def _model_flow_nous(config, current_model="", args=None):
         )
 
     if not model_ids and not unavailable_models:
-        print("No models available for Nous Portal after filtering.")
+        print("No models available for Centurion Portal after filtering.")
         return
 
     if free_tier and not model_ids:
@@ -3205,7 +3205,7 @@ def _model_flow_nous(config, current_model="", args=None):
             save_env_value("OPENAI_BASE_URL", "")
             save_env_value("OPENAI_API_KEY", "")
         save_config(config)
-        print(f"Default model set to: {selected} (via Nous Portal)")
+        print(f"Default model set to: {selected} (via Centurion Portal)")
         # Offer Tool Gateway enablement for paid subscribers
         prompt_enable_tool_gateway(config)
     else:
@@ -3802,7 +3802,7 @@ def _prompt_custom_api_mode_selection(base_url: str, current_api_mode: str = "")
         (
             "",
             "Auto-detect",
-            "Use Hermes URL heuristics; best for standard OpenAI-compatible endpoints.",
+            "Use Centurion URL heuristics; best for standard OpenAI-compatible endpoints.",
         ),
         (
             "chat_completions",
@@ -4915,7 +4915,7 @@ def _model_flow_copilot_acp(config, current_model=""):
     )
     effective_base = status.get("base_url") or pconfig.inference_base_url
 
-    print("  GitHub Copilot ACP delegates Hermes turns to `copilot --acp`.")
+    print("  GitHub Copilot ACP delegates Centurion turns to `copilot --acp`.")
     print("  Centurion currently starts its own ACP subprocess for each request.")
     print("  Centurion uses your selected model as a hint for the Copilot ACP session.")
     print(f"  Command: {resolved_command}")
@@ -5644,7 +5644,7 @@ def _model_flow_api_key_provider(config, provider_id, current_model=""):
                     "(<= 250 requests/day for gemini-2.5-flash)."
                 )
                 print(
-                    "   Hermes typically makes 3-10 API calls per user turn "
+                    "   Centurion typically makes 3-10 API calls per user turn "
                     "(tool iterations + auxiliary tasks),"
                 )
                 print(
@@ -5654,7 +5654,7 @@ def _model_flow_api_key_provider(config, provider_id, current_model=""):
                 print("   an agent session.")
                 print()
                 print(
-                    "   To use Gemini with Hermes, enable billing on your "
+                    "   To use Gemini with Centurion, enable billing on your "
                     "Google Cloud project and regenerate"
                 )
                 print(
@@ -6155,7 +6155,7 @@ def cmd_webhook(args):
 
 
 def cmd_portal(args):
-    """Nous Portal status and Tool Gateway routing surface."""
+    """Centurion Portal status and Tool Gateway routing surface."""
     from centurion_cli.portal_cli import portal_command
 
     return portal_command(args)
@@ -10520,7 +10520,7 @@ def cmd_profile(args):
         if data.get("license"):
             print(f"License:      {data['license']}")
         if data.get("centurion_requires"):
-            print(f"Requires:     Hermes {data['centurion_requires']}")
+            print(f"Requires:     Centurion {data['centurion_requires']}")
         if data.get("source"):
             print(f"Source:       {data['source']}")
         if data.get("installed_at"):
@@ -10549,7 +10549,7 @@ def _render_distribution_plan(plan) -> None:
     if mf.author:
         print(f"  Author:   {mf.author}")
     if mf.centurion_requires:
-        print(f"  Requires: Hermes {mf.centurion_requires}")
+        print(f"  Requires: Centurion {mf.centurion_requires}")
     print(f"  Source:   {plan.provenance}")
     print(f"  Target:   {plan.target_dir}")
     if plan.existing:
@@ -10939,7 +10939,7 @@ def _try_termux_fast_cli_launch() -> bool:
     argv = sys.argv[1:]
     if "-h" in argv or "--help" in argv:
         return False
-    if os.environ.get("HERMES_TUI") == "1" or "--tui" in argv:
+    if os.environ.get("CENTURION_TUI") == "1" or "--tui" in argv:
         return False
 
     if _is_termux_fast_version_argv(argv):
@@ -11014,7 +11014,7 @@ def _try_termux_fast_tui_launch() -> bool:
     if "-h" in sys.argv[1:] or "--help" in sys.argv[1:]:
         return False
 
-    wants_tui = os.environ.get("HERMES_TUI") == "1" or "--tui" in sys.argv[1:]
+    wants_tui = os.environ.get("CENTURION_TUI") == "1" or "--tui" in sys.argv[1:]
     if not wants_tui:
         return False
 
@@ -11033,7 +11033,7 @@ def _try_termux_fast_tui_launch() -> bool:
         return False
     if getattr(args, "command", None) not in {None, "chat"}:
         return False
-    if not (getattr(args, "tui", False) or os.environ.get("HERMES_TUI") == "1"):
+    if not (getattr(args, "tui", False) or os.environ.get("CENTURION_TUI") == "1"):
         return False
 
     cmd_chat(args)
@@ -11422,7 +11422,7 @@ def main():
         help="Local OpenAI-compatible proxy to OAuth providers",
         description=(
             "Run a local HTTP server that forwards OpenAI-compatible requests "
-            "to an OAuth-authenticated provider (e.g. Nous Portal). External "
+            "to an OAuth-authenticated provider (e.g. Centurion Portal). External "
             "apps can point at the proxy with any bearer token; the proxy "
             "attaches your real credentials."
         ),
@@ -11509,7 +11509,7 @@ def main():
     setup_parser.add_argument(
         "--portal",
         action="store_true",
-        help="One-shot Nous Portal setup: log in via OAuth, set Nous as the "
+        help="One-shot Centurion Portal setup: log in via OAuth, set Nous as the "
         "inference provider, and opt into the Tool Gateway. Skips the "
         "rest of the wizard.",
     )
@@ -11989,7 +11989,7 @@ def main():
     webhook_parser.set_defaults(func=cmd_webhook)
 
     # =========================================================================
-    # portal command — Nous Portal status + Tool Gateway routing
+    # portal command — Centurion Portal status + Tool Gateway routing
     # =========================================================================
     from centurion_cli.portal_cli import add_parser as _add_portal_parser
     _add_portal_parser(subparsers)
@@ -12099,7 +12099,7 @@ def main():
         "security",
         help="Supply-chain audit (OSV.dev) for venv, plugins, and MCP servers",
         description=(
-            "On-demand vulnerability scan against OSV.dev. Covers the Hermes "
+            "On-demand vulnerability scan against OSV.dev. Covers the Centurion "
             "venv (installed PyPI dists), Python deps declared by plugins under "
             "~/.centurion/plugins/, and pinned npx/uvx MCP servers in config.yaml. "
             "Does NOT scan globally-installed packages or editor/browser extensions."
@@ -12959,7 +12959,7 @@ Examples:
     # =========================================================================
     mcp_parser = subparsers.add_parser(
         "mcp",
-        help="Manage MCP servers and run Hermes as an MCP server",
+        help="Manage MCP servers and run Centurion as an MCP server",
         description=(
             "Manage MCP server connections and run Centurion as an MCP server.\n\n"
             "MCP servers provide additional tools via the Model Context Protocol.\n"
@@ -12971,7 +12971,7 @@ Examples:
 
     mcp_serve_p = mcp_sub.add_parser(
         "serve",
-        help="Run Hermes as an MCP server (expose conversations to other agents)",
+        help="Run Centurion as an MCP server (expose conversations to other agents)",
     )
     mcp_serve_p.add_argument(
         "-v",
@@ -13488,7 +13488,7 @@ Examples:
     acp_parser.add_argument(
         "--setup",
         action="store_true",
-        help="Run interactive Hermes provider/model setup for ACP terminal auth",
+        help="Run interactive Centurion provider/model setup for ACP terminal auth",
     )
     acp_parser.add_argument(
         "--setup-browser",

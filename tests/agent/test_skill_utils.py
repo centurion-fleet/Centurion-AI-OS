@@ -10,7 +10,7 @@ from agent.skill_utils import (
 
 
 def test_metadata_as_dict_with_hermes():
-    """Normal case: metadata is a dict containing hermes keys."""
+    """Normal case: metadata is a dict containing centurion keys."""
     frontmatter = {
         "metadata": {
             "centurion": {

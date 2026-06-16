@@ -395,13 +395,13 @@ def test_voice_toggle_tts_branch_also_carries_record_key(monkeypatch):
 
 
 def test_load_enabled_toolsets_prefers_tui_env(monkeypatch):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "web, terminal, ,memory")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "web, terminal, ,memory")
 
     assert server._load_enabled_toolsets() == ["web", "terminal", "memory"]
 
 
 def test_load_enabled_toolsets_filters_invalid_tui_env(monkeypatch, capsys):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "web, nope")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "web, nope")
     monkeypatch.setitem(
         sys.modules,
         "centurion_cli.plugins",
@@ -413,7 +413,7 @@ def test_load_enabled_toolsets_filters_invalid_tui_env(monkeypatch, capsys):
 
 
 def test_load_enabled_toolsets_accepts_plugin_env_after_discovery(monkeypatch):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "plugin_demo")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "plugin_demo")
 
     import toolsets
 
@@ -436,7 +436,7 @@ def test_load_enabled_toolsets_accepts_plugin_env_after_discovery(monkeypatch):
 
 
 def test_load_enabled_toolsets_rejects_disabled_mcp_env(monkeypatch, capsys):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "mcp-off")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "mcp-off")
     monkeypatch.setitem(
         sys.modules,
         "centurion_cli.plugins",
@@ -456,7 +456,7 @@ def test_load_enabled_toolsets_rejects_disabled_mcp_env(monkeypatch, capsys):
 
     # Sorted: ["kanban", "memory"]. `kanban` is auto-recovered by
     # _get_platform_tools because it's a non-configurable platform toolset
-    # whose tools live in hermes-cli's universe (see toolsets.py).
+    # whose tools live in centurion-cli's universe (see toolsets.py).
     assert server._load_enabled_toolsets() == ["kanban", "memory"]
     err = capsys.readouterr().err
     assert "ignoring disabled MCP servers" in err
@@ -465,7 +465,7 @@ def test_load_enabled_toolsets_rejects_disabled_mcp_env(monkeypatch, capsys):
 
 
 def test_load_enabled_toolsets_falls_back_when_tui_env_invalid(monkeypatch, capsys):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "nope")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "nope")
     monkeypatch.setitem(
         sys.modules,
         "centurion_cli.plugins",
@@ -483,7 +483,7 @@ def test_load_enabled_toolsets_falls_back_when_tui_env_invalid(monkeypatch, caps
 
 
 def test_load_enabled_toolsets_warns_when_config_fallback_fails(monkeypatch, capsys):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "nope")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "nope")
     monkeypatch.setitem(
         sys.modules,
         "centurion_cli.plugins",
@@ -501,7 +501,7 @@ def test_load_enabled_toolsets_warns_when_config_fallback_fails(monkeypatch, cap
 
 
 def test_load_enabled_toolsets_honors_builtin_env_if_config_fails(monkeypatch):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "web")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "web")
 
     import centurion_cli.config as config_mod
 
@@ -513,7 +513,7 @@ def test_load_enabled_toolsets_honors_builtin_env_if_config_fails(monkeypatch):
 
 
 def test_load_enabled_toolsets_all_env_means_all(monkeypatch):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "all")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "all")
 
     assert server._load_enabled_toolsets() is None
 
@@ -521,14 +521,14 @@ def test_load_enabled_toolsets_all_env_means_all(monkeypatch):
 def test_load_enabled_toolsets_all_env_warns_about_ignored_extra_entries(
     monkeypatch, capsys
 ):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "all,nope")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "all,nope")
 
     assert server._load_enabled_toolsets() is None
     assert "ignoring additional entries: nope" in capsys.readouterr().err
 
 
 def test_load_enabled_toolsets_reports_disabled_mcp_separately(monkeypatch, capsys):
-    monkeypatch.setenv("HERMES_TUI_TOOLSETS", "web,mcp-off,nope")
+    monkeypatch.setenv("CENTURION_TUI_TOOLSETS", "web,mcp-off,nope")
     monkeypatch.setitem(
         sys.modules,
         "centurion_cli.plugins",
@@ -545,7 +545,7 @@ def test_load_enabled_toolsets_reports_disabled_mcp_separately(monkeypatch, caps
 
     assert server._load_enabled_toolsets() == ["web"]
     err = capsys.readouterr().err
-    assert "ignoring unknown HERMES_TUI_TOOLSETS entries: nope" in err
+    assert "ignoring unknown CENTURION_TUI_TOOLSETS entries: nope" in err
     assert "ignoring disabled MCP servers" in err
     assert "mcp-off" in err
 
@@ -682,35 +682,35 @@ def test_resolve_model_strips_config_model(monkeypatch):
     monkeypatch.delenv("HERMES_MODEL", raising=False)
     monkeypatch.delenv("HERMES_INFERENCE_MODEL", raising=False)
     monkeypatch.setattr(
-        server, "_load_cfg", lambda: {"model": {"default": " nous/hermes-test "}}
+        server, "_load_cfg", lambda: {"model": {"default": " nous/centurion-test "}}
     )
 
-    assert server._resolve_model() == "nous/hermes-test"
+    assert server._resolve_model() == "nous/centurion-test"
 
 
 def test_startup_runtime_uses_tui_provider_env(monkeypatch):
-    monkeypatch.setenv("HERMES_MODEL", "nous/hermes-test")
-    monkeypatch.setenv("HERMES_TUI_PROVIDER", "nous")
+    monkeypatch.setenv("HERMES_MODEL", "nous/centurion-test")
+    monkeypatch.setenv("CENTURION_TUI_PROVIDER", "nous")
     monkeypatch.delenv("HERMES_INFERENCE_PROVIDER", raising=False)
 
-    assert server._resolve_startup_runtime() == ("nous/hermes-test", "nous")
+    assert server._resolve_startup_runtime() == ("nous/centurion-test", "nous")
 
 
 def test_startup_runtime_does_not_treat_inference_provider_as_explicit(monkeypatch):
-    monkeypatch.setenv("HERMES_MODEL", "nous/hermes-test")
-    monkeypatch.delenv("HERMES_TUI_PROVIDER", raising=False)
+    monkeypatch.setenv("HERMES_MODEL", "nous/centurion-test")
+    monkeypatch.delenv("CENTURION_TUI_PROVIDER", raising=False)
     monkeypatch.setenv("HERMES_INFERENCE_PROVIDER", "nous")
     monkeypatch.setattr(
         "centurion_cli.models.detect_static_provider_for_model",
         lambda model, provider: None,
     )
 
-    assert server._resolve_startup_runtime() == ("nous/hermes-test", None)
+    assert server._resolve_startup_runtime() == ("nous/centurion-test", None)
 
 
 def test_startup_runtime_detects_provider_for_model_env(monkeypatch):
     monkeypatch.setenv("HERMES_MODEL", "sonnet")
-    monkeypatch.delenv("HERMES_TUI_PROVIDER", raising=False)
+    monkeypatch.delenv("CENTURION_TUI_PROVIDER", raising=False)
     monkeypatch.delenv("HERMES_INFERENCE_PROVIDER", raising=False)
     monkeypatch.setattr(server, "_load_cfg", lambda: {"model": {"provider": "auto"}})
 
@@ -731,7 +731,7 @@ def test_startup_runtime_detects_provider_for_model_env(monkeypatch):
 
 def test_startup_runtime_resolves_short_alias_without_network(monkeypatch):
     monkeypatch.setenv("HERMES_MODEL", "sonnet")
-    monkeypatch.delenv("HERMES_TUI_PROVIDER", raising=False)
+    monkeypatch.delenv("CENTURION_TUI_PROVIDER", raising=False)
     monkeypatch.delenv("HERMES_INFERENCE_PROVIDER", raising=False)
     monkeypatch.setattr(server, "_load_cfg", lambda: {"model": {"provider": "auto"}})
     monkeypatch.setattr(
@@ -749,7 +749,7 @@ def test_startup_runtime_resolves_short_alias_without_network(monkeypatch):
 
 def test_startup_runtime_does_not_call_network_detector(monkeypatch):
     monkeypatch.setenv("HERMES_MODEL", "sonnet")
-    monkeypatch.delenv("HERMES_TUI_PROVIDER", raising=False)
+    monkeypatch.delenv("CENTURION_TUI_PROVIDER", raising=False)
     monkeypatch.delenv("HERMES_INFERENCE_PROVIDER", raising=False)
     monkeypatch.setattr(server, "_load_cfg", lambda: {"model": {"provider": "auto"}})
     monkeypatch.setattr(
@@ -1859,7 +1859,7 @@ def test_config_set_model_syncs_inference_provider_env(monkeypatch):
 
 
 def test_config_set_model_syncs_tui_provider_unconditionally(monkeypatch):
-    """Regression for #16857: /model must set HERMES_TUI_PROVIDER even when
+    """Regression for #16857: /model must set CENTURION_TUI_PROVIDER even when
     it wasn't pre-set on launch, so a later /new (which re-runs
     _resolve_startup_runtime) honours the user's explicit provider choice
     instead of falling through to static-catalog detection and picking a
@@ -1886,7 +1886,7 @@ def test_config_set_model_syncs_tui_provider_unconditionally(monkeypatch):
     )
 
     server._sessions["sid"] = _session(agent=_Agent())
-    monkeypatch.delenv("HERMES_TUI_PROVIDER", raising=False)
+    monkeypatch.delenv("CENTURION_TUI_PROVIDER", raising=False)
     monkeypatch.delenv("HERMES_INFERENCE_PROVIDER", raising=False)
     monkeypatch.setattr(
         "centurion_cli.model_switch.switch_model", lambda **_kwargs: result
@@ -1906,10 +1906,10 @@ def test_config_set_model_syncs_tui_provider_unconditionally(monkeypatch):
         }
     )
 
-    # Both env vars must reflect the user's choice. HERMES_TUI_PROVIDER is
+    # Both env vars must reflect the user's choice. CENTURION_TUI_PROVIDER is
     # the canonical explicit-this-process carrier consumed by
     # _resolve_startup_runtime() on /new.
-    assert os.environ["HERMES_TUI_PROVIDER"] == "custom:xuanji"
+    assert os.environ["CENTURION_TUI_PROVIDER"] == "custom:xuanji"
     assert os.environ["HERMES_INFERENCE_PROVIDER"] == "custom:xuanji"
 
 
@@ -1926,7 +1926,7 @@ def test_config_set_model_syncs_tui_provider_env(monkeypatch):
 
     agent = Agent()
     server._sessions["sid"] = _session(agent=agent)
-    monkeypatch.setenv("HERMES_TUI_PROVIDER", "openai-codex")
+    monkeypatch.setenv("CENTURION_TUI_PROVIDER", "openai-codex")
     monkeypatch.setattr(server, "_restart_slash_worker", lambda session: None)
     monkeypatch.setattr(server, "_emit", lambda *args, **kwargs: None)
 
@@ -1957,7 +1957,7 @@ def test_config_set_model_syncs_tui_provider_env(monkeypatch):
         )
 
         assert resp["result"]["value"] == "anthropic/claude-sonnet-4.6"
-        assert os.environ["HERMES_TUI_PROVIDER"] == "anthropic"
+        assert os.environ["CENTURION_TUI_PROVIDER"] == "anthropic"
         assert os.environ["HERMES_MODEL"] == "anthropic/claude-sonnet-4.6"
         assert os.environ["HERMES_INFERENCE_MODEL"] == "anthropic/claude-sonnet-4.6"
     finally:
@@ -2056,7 +2056,7 @@ def test_session_compress_syncs_session_key_after_rotation(monkeypatch):
     """When AIAgent._compress_context rotates session_id (compression split),
     the gateway session_key must follow so subsequent approval routing,
     DB title/history lookups, and slash worker resume target the new
-    continuation session — mirrors HermesCLI._manual_compress's
+    continuation session — mirrors CenturionCLI._manual_compress's
     session_id sync (cli.py).
     """
     agent = types.SimpleNamespace(session_id="rotated-id")
@@ -2347,7 +2347,7 @@ def test_session_status_reads_live_gateway_agent(monkeypatch):
         server._sessions.pop("sid", None)
 
     out = resp["result"]["output"]
-    assert "Hermes TUI Status" in out
+    assert "Centurion TUI Status" in out
     assert "Session ID: session-key" in out
     assert "Title: Live TUI" in out
     assert "Model: live-model (live-provider)" in out
@@ -3339,14 +3339,14 @@ def test_session_create_no_race_keeps_worker_alive(monkeypatch):
 
 
 def test_get_db_degrades_cleanly_when_sessiondb_init_fails(monkeypatch):
-    fake_mod = types.ModuleType("hermes_state")
+    fake_mod = types.ModuleType("centurion_state")
 
     class _BrokenSessionDB:
         def __init__(self):
             raise RuntimeError("locking protocol")
 
     fake_mod.SessionDB = _BrokenSessionDB
-    monkeypatch.setitem(sys.modules, "hermes_state", fake_mod)
+    monkeypatch.setitem(sys.modules, "centurion_state", fake_mod)
     monkeypatch.setattr(server, "_db", None)
     monkeypatch.setattr(server, "_db_error", None)
 
@@ -3558,13 +3558,13 @@ def test_session_delete_success_returns_deleted_id(monkeypatch):
 
 
 # --------------------------------------------------------------------------
-# model.options — curated-list parity with `hermes model` and classic /model
+# model.options — curated-list parity with `centurion model` and classic /model
 # --------------------------------------------------------------------------
 
 
 def test_model_options_does_not_overwrite_curated_models(monkeypatch):
     """The TUI model.options handler must surface the same curated model
-    list as `hermes model` and the classic CLI /model picker.
+    list as `centurion model` and the classic CLI /model picker.
 
     Regression: earlier versions of this handler unconditionally replaced
     each provider's curated ``models`` field with ``provider_model_ids()``

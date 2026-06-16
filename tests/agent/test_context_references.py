@@ -24,7 +24,7 @@ def sample_repo(tmp_path: Path) -> Path:
     repo = tmp_path / "repo"
     repo.mkdir()
     _git(repo, "init")
-    _git(repo, "config", "user.name", "Hermes Tests")
+    _git(repo, "config", "user.name", "Centurion Tests")
     _git(repo, "config", "user.email", "tests@example.com")
 
     (repo / "src").mkdir()
@@ -315,16 +315,16 @@ async def test_blocks_sensitive_home_and_centurion_paths(tmp_path: Path, monkeyp
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("CENTURION_HOME", str(tmp_path / ".centurion"))
 
-    hermes_env = tmp_path / ".centurion" / ".env"
-    hermes_env.parent.mkdir(parents=True)
-    hermes_env.write_text("API_KEY=super-secret\n", encoding="utf-8")
+    centurion_env = tmp_path / ".centurion" / ".env"
+    centurion_env.parent.mkdir(parents=True)
+    centurion_env.write_text("API_KEY=super-secret\n", encoding="utf-8")
 
     ssh_key = tmp_path / ".ssh" / "id_rsa"
     ssh_key.parent.mkdir(parents=True)
     ssh_key.write_text("PRIVATE-KEY\n", encoding="utf-8")
 
     result = await preprocess_context_references_async(
-        "read @file:.hermes/.env and @file:.ssh/id_rsa",
+        "read @file:.centurion/.env and @file:.ssh/id_rsa",
         cwd=tmp_path,
         allowed_root=tmp_path,
         context_length=100_000,

@@ -36,8 +36,8 @@ services:
     volumes:
       - ~/.centurion:/opt/data
     environment:
-      - HERMES_UID=${CENTURION_UID:-10000}
-      - HERMES_GID=${CENTURION_GID:-10000}
+      - CENTURION_UID=${CENTURION_UID:-10000}
+      - CENTURION_GID=${CENTURION_GID:-10000}
       # To expose the OpenAI-compatible API server beyond localhost,
       # uncomment BOTH lines (API_SERVER_KEY is mandatory for auth):
       # - API_SERVER_HOST=0.0.0.0
@@ -70,7 +70,7 @@ services:
     volumes:
       - ~/.centurion:/opt/data
     environment:
-      - HERMES_UID=${CENTURION_UID:-10000}
-      - HERMES_GID=${CENTURION_GID:-10000}
+      - CENTURION_UID=${CENTURION_UID:-10000}
+      - CENTURION_GID=${CENTURION_GID:-10000}
     # Localhost-only. For remote access, tunnel via `ssh -L 9119:localhost:9119`.
     command: ["dashboard", "--host", "127.0.0.1", "--no-open"]

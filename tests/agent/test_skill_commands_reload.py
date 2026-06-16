@@ -44,7 +44,7 @@ def centurion_home(monkeypatch):
     module-level ``CENTURION_HOME`` / ``SKILLS_DIR`` constants in place so the
     isolation is local to this fixture's scope.
     """
-    td = tempfile.mkdtemp(prefix="hermes-reload-skills-")
+    td = tempfile.mkdtemp(prefix="centurion-reload-skills-")
     monkeypatch.setenv("CENTURION_HOME", td)
     home = Path(td)
     (home / "skills").mkdir(parents=True, exist_ok=True)

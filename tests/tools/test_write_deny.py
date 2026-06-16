@@ -53,7 +53,7 @@ class TestWriteDenyExactPaths:
         could be silently overwritten by ``write_file`` while a profile was
         active.
         """
-        root = tmp_path / "hermes_root"
+        root = tmp_path / "centurion_root"
         profile_home = root / "profiles" / "coder"
         profile_home.mkdir(parents=True)
         global_env = root / ".env"

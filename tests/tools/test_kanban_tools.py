@@ -31,7 +31,7 @@ def test_kanban_tools_hidden_without_env_var(monkeypatch, tmp_path):
     from toolsets import resolve_toolset
 
     invalidate_check_fn_cache()
-    schema = registry.get_definitions(set(resolve_toolset("hermes-cli")), quiet=True)
+    schema = registry.get_definitions(set(resolve_toolset("centurion-cli")), quiet=True)
     names = {s["function"].get("name") for s in schema if "function" in s}
     kanban = {n for n in names if n and n.startswith("kanban_")}
     assert kanban == set(), (
@@ -51,7 +51,7 @@ def test_kanban_tools_visible_with_env_var(monkeypatch, tmp_path):
     from toolsets import resolve_toolset
 
     invalidate_check_fn_cache()
-    schema = registry.get_definitions(set(resolve_toolset("hermes-cli")), quiet=True)
+    schema = registry.get_definitions(set(resolve_toolset("centurion-cli")), quiet=True)
     names = {s["function"].get("name") for s in schema if "function" in s}
     kanban = {n for n in names if n and n.startswith("kanban_")}
     expected = {
@@ -105,7 +105,7 @@ def test_worker_with_kanban_toolset_still_hides_board_routing(monkeypatch, tmp_p
     from toolsets import resolve_toolset
 
     invalidate_check_fn_cache()
-    schema = registry.get_definitions(set(resolve_toolset("hermes-cli")), quiet=True)
+    schema = registry.get_definitions(set(resolve_toolset("centurion-cli")), quiet=True)
     names = {s["function"].get("name") for s in schema if "function" in s}
     kanban = {n for n in names if n and n.startswith("kanban_")}
     assert {
@@ -130,7 +130,7 @@ def test_kanban_tools_visible_with_toolset_config(monkeypatch, tmp_path):
     from toolsets import resolve_toolset
 
     invalidate_check_fn_cache()
-    schema = registry.get_definitions(set(resolve_toolset("hermes-cli")), quiet=True)
+    schema = registry.get_definitions(set(resolve_toolset("centurion-cli")), quiet=True)
     names = {s["function"].get("name") for s in schema if "function" in s}
     kanban = {n for n in names if n and n.startswith("kanban_")}
     expected = {
@@ -716,14 +716,14 @@ def test_comment_rejects_empty_body(worker_env):
 def test_comment_ignores_caller_supplied_author(worker_env):
     """``args["author"]`` is no longer honored — the author is always
     derived from ``HERMES_PROFILE`` so a worker can't forge a comment
-    under an authoritative-looking name like ``hermes-system`` and
+    under an authoritative-looking name like ``centurion-system`` and
     poison the next worker's prompt context. Cross-task commenting
     itself remains unrestricted (see #19713); only the author override
     is removed.
     """
     from tools import kanban_tools as kt
     out = kt._handle_comment({
-        "task_id": worker_env, "body": "hi", "author": "hermes-system",
+        "task_id": worker_env, "body": "hi", "author": "centurion-system",
     })
     assert json.loads(out)["ok"]
     from centurion_cli import kanban_db as kb
@@ -731,7 +731,7 @@ def test_comment_ignores_caller_supplied_author(worker_env):
     try:
         comments = kb.list_comments(conn, worker_env)
         # Author comes from HERMES_PROFILE in the fixture, not the
-        # caller-supplied "hermes-system" override.
+        # caller-supplied "centurion-system" override.
         assert comments[0].author == "test-worker"
     finally:
         conn.close()
@@ -1390,17 +1390,17 @@ def test_orchestrator_complete_any_task_allowed(monkeypatch, tmp_path):
 # Optional ``board`` parameter — per-call DB override
 # ---------------------------------------------------------------------------
 #
-# The dispatcher pins the active board via HERMES_KANBAN_BOARD env var,
+# The dispatcher pins the active board via CENTURION_KANBAN_BOARD env var,
 # but a Telegram-side orchestrator handling multiple boards needs to be
 # able to route a single tool call to a specific board's DB without
-# restarting Hermes. These tests pin that ``board=<slug>`` argument
+# restarting Centurion. These tests pin that ``board=<slug>`` argument
 # routes each handler to that board's sqlite file, and that omitting
 # ``board`` preserves the legacy env-driven resolution.
 
 
 @pytest.fixture
 def multi_board_env(monkeypatch, tmp_path):
-    """Isolated Hermes home with two distinct kanban boards seeded.
+    """Isolated Centurion home with two distinct kanban boards seeded.
 
     Returns ``("default", "alt")`` slugs. The default board has one
     pre-existing task ``seed_default``; ``alt`` has ``seed_alt``. No
@@ -1410,10 +1410,10 @@ def multi_board_env(monkeypatch, tmp_path):
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
-    # Make sure neither HERMES_KANBAN_DB nor HERMES_KANBAN_BOARD pin a
+    # Make sure neither HERMES_KANBAN_DB nor CENTURION_KANBAN_BOARD pin a
     # board — the test is specifically about the per-call override.
     monkeypatch.delenv("HERMES_KANBAN_DB", raising=False)
-    monkeypatch.delenv("HERMES_KANBAN_BOARD", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_BOARD", raising=False)
     monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
     monkeypatch.setenv("HERMES_PROFILE", "test-orchestrator")
     from pathlib import Path as _Path
@@ -1624,7 +1624,7 @@ def test_board_param_routes_heartbeat_to_alt_board(monkeypatch, tmp_path):
     monkeypatch.setenv("CENTURION_HOME", str(home))
     monkeypatch.setenv("HERMES_PROFILE", "alt-worker")
     monkeypatch.delenv("HERMES_KANBAN_DB", raising=False)
-    monkeypatch.delenv("HERMES_KANBAN_BOARD", raising=False)
+    monkeypatch.delenv("CENTURION_KANBAN_BOARD", raising=False)
     from pathlib import Path as _Path
     monkeypatch.setattr(_Path, "home", lambda: tmp_path)
 

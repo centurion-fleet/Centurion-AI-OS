@@ -100,8 +100,8 @@ def restart_container(request, built_image: str):
     """A long-running container with a named volume so docker restart
     preserves $CENTURION_HOME/profiles/."""
     safe = request.node.name.replace("[", "_").replace("]", "_")
-    name = f"hermes-restart-{safe}"
-    volume = f"hermes-restart-vol-{safe}"
+    name = f"centurion-restart-{safe}"
+    volume = f"centurion-restart-vol-{safe}"
     _docker("rm", "-f", name)
     _docker("volume", "rm", "-f", volume)
     _docker("volume", "create", volume, timeout=10).check_returncode()

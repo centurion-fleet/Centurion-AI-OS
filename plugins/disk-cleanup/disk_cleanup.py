@@ -1,4 +1,4 @@
-"""disk_cleanup — ephemeral file cleanup for Hermes Agent.
+"""disk_cleanup — ephemeral file cleanup for Centurion AI OS.
 
 Library module wrapping the deterministic cleanup rules written by
 @LVT382009 in PR #12212. The plugin ``__init__.py`` wires these
@@ -15,7 +15,7 @@ Rules:
   - chrome-profile→ prompt after 14 days (deep only)
   - >500 MB files → prompt always (deep only)
 
-Scope: strictly CENTURION_HOME and /tmp/hermes-*
+Scope: strictly CENTURION_HOME and /tmp/centurion-*
 Never touches: ~/.centurion/logs/ or any system directory.
 """
 
@@ -64,7 +64,7 @@ def get_log_file() -> Path:
 # ---------------------------------------------------------------------------
 
 def is_safe_path(path: Path) -> bool:
-    """Accept only paths under CENTURION_HOME or ``/tmp/hermes-*``.
+    """Accept only paths under CENTURION_HOME or ``/tmp/centurion-*``.
 
     Rejects Windows mounts (``/mnt/c`` etc.) and any system directory.
     """
@@ -74,9 +74,9 @@ def is_safe_path(path: Path) -> bool:
         return True
     except (ValueError, OSError):
         pass
-    # Allow /tmp/hermes-* explicitly
+    # Allow /tmp/centurion-* explicitly
     parts = path.parts
-    if len(parts) >= 3 and parts[1] == "tmp" and parts[2].startswith("hermes-"):
+    if len(parts) >= 3 and parts[1] == "tmp" and parts[2].startswith("centurion-"):
         return True
     return False
 
@@ -485,7 +485,7 @@ def guess_category(path: Path) -> Optional[str]:
         if top == "cache":
             return "temp"
     except ValueError:
-        # Path isn't under CENTURION_HOME (e.g. /tmp/hermes-*) — fall through.
+        # Path isn't under CENTURION_HOME (e.g. /tmp/centurion-*) — fall through.
         pass
 
     name = path.name

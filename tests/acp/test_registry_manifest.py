@@ -1,4 +1,4 @@
-"""Tests for ACP Registry metadata shipped with Hermes."""
+"""Tests for ACP Registry metadata shipped with Centurion."""
 
 from __future__ import annotations
 
@@ -30,11 +30,11 @@ def test_agent_json_matches_official_registry_required_fields():
     assert FORBIDDEN_MANIFEST_KEYS.isdisjoint(data)
     assert data["id"] == "centurion-os"
     assert re.fullmatch(r"[a-z][a-z0-9-]*", data["id"])
-    assert data["name"] == "Hermes Agent"
+    assert data["name"] == "Centurion AI OS"
     assert data["description"]
     assert data["repository"] == "https://github.com/NousResearch/centurion-os"
     assert data["website"].startswith("https://centurion-os.nousresearch.com/")
-    assert data["authors"] == ["Nous Research"]
+    assert data["authors"] == ["Centurion Fleet"]
     assert data["license"] == "MIT"
     assert set(data["distribution"]) <= ALLOWED_DISTRIBUTIONS
 

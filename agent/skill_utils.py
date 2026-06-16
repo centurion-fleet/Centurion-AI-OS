@@ -344,14 +344,14 @@ def extract_skill_conditions(frontmatter: Dict[str, Any]) -> Dict[str, List]:
     # Handle cases where metadata is not a dict (e.g., a string from malformed YAML)
     if not isinstance(metadata, dict):
         metadata = {}
-    hermes = metadata.get("centurion") or {}
-    if not isinstance(hermes, dict):
-        hermes = {}
+    centurion = metadata.get("centurion") or {}
+    if not isinstance(centurion, dict):
+        centurion = {}
     return {
-        "fallback_for_toolsets": hermes.get("fallback_for_toolsets", []),
-        "requires_toolsets": hermes.get("requires_toolsets", []),
-        "fallback_for_tools": hermes.get("fallback_for_tools", []),
-        "requires_tools": hermes.get("requires_tools", []),
+        "fallback_for_toolsets": centurion.get("fallback_for_toolsets", []),
+        "requires_toolsets": centurion.get("requires_toolsets", []),
+        "fallback_for_tools": centurion.get("fallback_for_tools", []),
+        "requires_tools": centurion.get("requires_tools", []),
     }
 
 
@@ -364,7 +364,7 @@ def extract_skill_config_vars(frontmatter: Dict[str, Any]) -> List[Dict[str, Any
     Skills declare config.yaml settings they need via::
 
         metadata:
-          hermes:
+          centurion:
             config:
               - key: wiki.path
                 description: Path to the LLM Wiki knowledge base directory
@@ -377,10 +377,10 @@ def extract_skill_config_vars(frontmatter: Dict[str, Any]) -> List[Dict[str, Any
     metadata = frontmatter.get("metadata")
     if not isinstance(metadata, dict):
         return []
-    hermes = metadata.get("centurion")
-    if not isinstance(hermes, dict):
+    centurion = metadata.get("centurion")
+    if not isinstance(centurion, dict):
         return []
-    raw = hermes.get("config")
+    raw = centurion.get("config")
     if not raw:
         return []
     if isinstance(raw, dict):
@@ -532,7 +532,7 @@ def extract_skill_description(frontmatter: Dict[str, Any]) -> str:
 def iter_skill_index_files(skills_dir: Path, filename: str):
     """Walk skills_dir yielding sorted paths matching *filename*.
 
-    Excludes Hermes metadata, VCS, virtualenv/dependency, and cache
+    Excludes Centurion metadata, VCS, virtualenv/dependency, and cache
     directories so dependencies cannot register nested skills.
     """
     matches = []

@@ -61,7 +61,7 @@ def test_frontmatter_slug_matched_even_when_dir_name_differs(
 
     _write_skill(tmp_skills, "mlops/stable-diffusion", "Stable Diffusion Image Generation")
 
-    # Config disables by declared name (matches what `hermes skills config` writes).
+    # Config disables by declared name (matches what `centurion skills config` writes).
     monkeypatch.setattr(
         "gateway.run._get_disabled_skill_names",
         lambda: {"Stable Diffusion Image Generation"},
@@ -81,7 +81,7 @@ def test_frontmatter_slug_matched_even_when_dir_name_differs(
         "the old code compared the dir name 'stable-diffusion' and returned None"
     )
     assert "disabled" in msg.lower()
-    assert "hermes skills config" in msg
+    assert "centurion skills config" in msg
 
 
 def test_unknown_command_still_returns_none(
@@ -161,7 +161,7 @@ def test_optional_skill_uses_frontmatter_slug(
     # ``get_optional_skills_dir(repo_root / "optional-skills")`` — we
     # can't easily retarget ``repo_root``, so patch the resolver.
     monkeypatch.setattr(
-        "hermes_constants.get_optional_skills_dir",
+        "centurion_constants.get_optional_skills_dir",
         lambda _default: optional,
         raising=False,
     )

@@ -1,7 +1,7 @@
 """
 Canonical model catalogs and lightweight validation helpers.
 
-Add, remove, or reorder entries here — both `hermes setup` and
+Add, remove, or reorder entries here — both `centurion setup` and
 `centurion` provider-selection will pick up the change automatically.
 """
 
@@ -20,7 +20,7 @@ from centurion_cli import __version__ as _HERMES_VERSION
 
 # Identify ourselves so endpoints fronted by Cloudflare's Browser Integrity
 # Check (error 1010) don't reject the default ``Python-urllib/*`` signature.
-_HERMES_USER_AGENT = f"hermes-cli/{_HERMES_VERSION}"
+_HERMES_USER_AGENT = f"centurion-cli/{_HERMES_VERSION}"
 
 COPILOT_BASE_URL = "https://api.githubcopilot.com"
 COPILOT_MODELS_URL = f"{COPILOT_BASE_URL}/models"
@@ -98,7 +98,7 @@ def _codex_curated_models() -> list[str]:
     """Derive the openai-codex curated list from codex_models.py.
 
     Single source of truth: DEFAULT_CODEX_MODELS + forward-compat synthesis.
-    This keeps the gateway /model picker in sync with the CLI `hermes model`
+    This keeps the gateway /model picker in sync with the CLI `centurion model`
     flow without maintaining a separate static list.
     """
     from centurion_cli.codex_models import DEFAULT_CODEX_MODELS, _add_forward_compat_models
@@ -138,7 +138,7 @@ def _xai_curated_models() -> list[str]:
 
     Reads $CENTURION_HOME/models_dev_cache.json directly (no network) so this
     runs at import time without blocking. Falls back to ``_XAI_STATIC_FALLBACK``
-    when the cache is empty or unreadable. Hermes refreshes the cache from
+    when the cache is empty or unreadable. Centurion refreshes the cache from
     https://models.dev/api.json on normal use, so this list self-heals as
     xAI renames models.
 
@@ -485,9 +485,9 @@ _PROVIDER_MODELS: dict[str, list[str]] = {
 _PROVIDER_MODELS["ai-gateway"] = [mid for mid, _ in VERCEL_AI_GATEWAY_MODELS]
 
 # ---------------------------------------------------------------------------
-# Nous Portal free-model helper
+# Centurion Portal free-model helper
 # ---------------------------------------------------------------------------
-# The Nous Portal models endpoint is the source of truth for which models
+# The Centurion Portal models endpoint is the source of truth for which models
 # are currently offered (free or paid). We trust whatever it returns and
 # surface it to users as-is — no local allowlist filtering.
 
@@ -504,11 +504,11 @@ def _is_model_free(model_id: str, pricing: dict[str, dict[str, str]]) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Nous Portal account tier detection
+# Centurion Portal account tier detection
 # ---------------------------------------------------------------------------
 
 def fetch_nous_account_tier(access_token: str, portal_base_url: str = "") -> dict[str, Any]:
-    """Fetch the user's Nous Portal account/subscription info.
+    """Fetch the user's Centurion Portal account/subscription info.
 
     Calls ``<portal>/api/oauth/account`` with the OAuth access token.
 
@@ -527,7 +527,7 @@ def fetch_nous_account_tier(access_token: str, portal_base_url: str = "") -> dic
 
     Returns an empty dict on any failure (network, auth, parse).
     """
-    base = (portal_base_url or "https://portal.nousresearch.com").rstrip("/")
+    base = (portal_base_url or "https://portal.personal-centurion.com").rstrip("/")
     url = f"{base}/api/oauth/account"
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -603,7 +603,7 @@ def union_with_portal_free_recommendations(
 
     For free-tier users this is the source of truth: any model the Portal
     flags as free should be selectable, even if the user is running an
-    older Hermes that doesn't ship that model in its hardcoded curated
+    older Centurion that doesn't ship that model in its hardcoded curated
     list.  This function returns an augmented ``(model_ids, pricing)``
     pair where:
 
@@ -668,7 +668,7 @@ def union_with_portal_paid_recommendations(
     the docs-hosted catalog manifest has been rebuilt since the last release.
 
     For paid-tier users this lets newly-launched paid models surface in the
-    picker even if the user is running an older Hermes that doesn't ship
+    picker even if the user is running an older Centurion that doesn't ship
     them in its hardcoded curated list. This function returns an augmented
     ``(model_ids, pricing)`` pair where:
 
@@ -726,7 +726,7 @@ _free_tier_cache: tuple[bool, float] | None = None  # (result, timestamp)
 
 
 def check_nous_free_tier() -> bool:
-    """Check if the current Nous Portal user is on a free (unpaid) tier.
+    """Check if the current Centurion Portal user is on a free (unpaid) tier.
 
     Results are cached for ``_FREE_TIER_CACHE_TTL`` seconds to avoid
     hitting the Portal API on every call.  The cache is short-lived so
@@ -767,7 +767,7 @@ def check_nous_free_tier() -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Nous Portal recommended models
+# Centurion Portal recommended models
 #
 # The Portal publishes a curated list of suggested models (separated into
 # paid and free tiers) plus dedicated recommendations for compaction (text
@@ -798,7 +798,7 @@ def fetch_nous_recommended_models(
     *,
     force_refresh: bool = False,
 ) -> dict[str, Any]:
-    """Fetch the Nous Portal's curated recommended-models payload.
+    """Fetch the Centurion Portal's curated recommended-models payload.
 
     Hits ``<portal>/api/nous/recommended-models``. The endpoint is public —
     no auth is required. Results are cached per portal URL for
@@ -809,7 +809,7 @@ def fetch_nous_recommended_models(
     (network, parse, non-2xx). Callers must treat missing/null fields as
     "no recommendation" and fall back to their own default.
     """
-    base = (portal_base_url or "https://portal.nousresearch.com").rstrip("/")
+    base = (portal_base_url or "https://portal.personal-centurion.com").rstrip("/")
     now = time.monotonic()
     cached = _nous_recommended_cache.get(base)
     if not force_refresh and cached is not None:
@@ -847,7 +847,7 @@ def _resolve_nous_portal_url() -> str:
             return portal.rstrip("/")
         return str(DEFAULT_NOUS_PORTAL_URL).rstrip("/")
     except Exception:
-        return "https://portal.nousresearch.com"
+        return "https://portal.personal-centurion.com"
 
 
 def _extract_model_name(entry: Any) -> Optional[str]:
@@ -920,18 +920,18 @@ def get_nous_recommended_aux_model(
 # ---------------------------------------------------------------------------
 # Canonical provider list — single source of truth for provider identity.
 # Every code path that lists, displays, or iterates providers derives from
-# this list:  hermes model, /model, list_authenticated_providers.
+# this list:  centurion model, /model, list_authenticated_providers.
 #
 # Fields:
 #   slug        — internal provider ID (used in config.yaml, --provider flag)
 #   label       — short display name
-#   tui_desc    — longer description for the `hermes model` interactive picker
+#   tui_desc    — longer description for the `centurion model` interactive picker
 # ---------------------------------------------------------------------------
 
 class ProviderEntry(NamedTuple):
     slug: str
     label: str
-    tui_desc: str   # detailed description for `hermes model` TUI
+    tui_desc: str   # detailed description for `centurion model` TUI
 
 CANONICAL_PROVIDERS: list[ProviderEntry] = [
     ProviderEntry("openrouter",     "OpenRouter",               "OpenRouter (100+ models, pay-per-use)"),
@@ -1098,11 +1098,11 @@ def get_default_model_for_provider(provider: str) -> str:
     """Return the default model for a provider, or empty string if unknown.
 
     Uses the first entry in _PROVIDER_MODELS as the default.  This is the
-    model a user would be offered first in the ``hermes model`` picker.
+    model a user would be offered first in the ``centurion model`` picker.
 
     Used as a fallback when the user has configured a provider but never
-    selected a model (e.g. ``hermes auth add openai-codex`` without
-    ``hermes model``).
+    selected a model (e.g. ``centurion auth add openai-codex`` without
+    ``centurion model``).
     """
     models = _PROVIDER_MODELS.get(provider, [])
     return models[0] if models else ""
@@ -1127,7 +1127,7 @@ def _openrouter_model_supports_tools(item: Any) -> bool:
     be driven by the agent loop and would fail at the first tool call.
 
     **Permissive when the field is missing.** Some OpenRouter-compatible gateways
-    (Nous Portal, private mirrors, older catalog snapshots) don't populate
+    (Centurion Portal, private mirrors, older catalog snapshots) don't populate
     ``supported_parameters`` at all. Treat that as "unknown capability → allow"
     so the picker doesn't silently empty for those users. Only hide models
     whose ``supported_parameters`` is an explicit list that omits ``tools``.
@@ -1217,7 +1217,7 @@ def model_ids(*, force_refresh: bool = False) -> list[str]:
 
 
 def get_curated_nous_model_ids() -> list[str]:
-    """Return the curated Nous Portal model-id list.
+    """Return the curated Centurion Portal model-id list.
 
     Prefers the remotely-hosted catalog manifest (published under
     ``website/static/api/model-catalog.json``); falls back to the in-repo
@@ -1427,7 +1427,7 @@ def fetch_models_with_pricing(
     """Fetch ``/v1/models`` and return ``{model_id: {prompt, completion}}`` pricing.
 
     Results are cached per *base_url* so repeated calls are free.
-    Works with any OpenRouter-compatible endpoint (OpenRouter, Nous Portal).
+    Works with any OpenRouter-compatible endpoint (OpenRouter, Centurion Portal).
     """
     cache_key = (base_url or "").rstrip("/")
     if not force_refresh and cache_key in _pricing_cache:
@@ -1473,9 +1473,9 @@ def fetch_ai_gateway_pricing(
     *,
     force_refresh: bool = False,
 ) -> dict[str, dict[str, str]]:
-    """Fetch Vercel AI Gateway /v1/models and return hermes-shaped pricing.
+    """Fetch Vercel AI Gateway /v1/models and return centurion-shaped pricing.
 
-    Vercel uses ``input`` / ``output`` field names; hermes's picker expects
+    Vercel uses ``input`` / ``output`` field names; centurion's picker expects
     ``prompt`` / ``completion``. This translates. Cache read/write field names
     already match.
     """
@@ -1527,7 +1527,7 @@ _DEFAULT_NOUS_INFERENCE_BASE = "https://inference-api.nousresearch.com"
 
 
 def _resolve_nous_pricing_credentials() -> tuple[str, str]:
-    """Return ``(api_key, base_url)`` for Nous Portal pricing.
+    """Return ``(api_key, base_url)`` for Centurion Portal pricing.
 
     The Nous inference ``/v1/models`` endpoint exposes pricing without
     authentication, so the api_key is best-effort: when runtime credential
@@ -1651,7 +1651,7 @@ def list_available_providers() -> list[dict[str, str]]:
     Checks which providers have valid credentials configured.
 
     Derives the provider list from :data:`CANONICAL_PROVIDERS` (single
-    source of truth shared with ``hermes model``, ``/model``, etc.).
+    source of truth shared with ``centurion model``, ``/model``, etc.).
     """
     # Derive display order from canonical list + custom
     provider_order = [p.slug for p in CANONICAL_PROVIDERS] + ["custom"]
@@ -1694,7 +1694,7 @@ def parse_model_input(raw: str, current_provider: str) -> tuple[str, str]:
     Supports ``provider:model`` syntax to switch providers at runtime::
 
         openrouter:anthropic/claude-sonnet-4.5  →  ("openrouter", "anthropic/claude-sonnet-4.5")
-        nous:hermes-3                           →  ("nous", "hermes-3")
+        nous:centurion-3                           →  ("nous", "centurion-3")
         anthropic/claude-sonnet-4.5             →  (current_provider, "anthropic/claude-sonnet-4.5")
         gpt-5.4                                 →  (current_provider, "gpt-5.4")
 
@@ -1947,7 +1947,7 @@ def _find_openrouter_slug(model_name: str) -> Optional[str]:
 
 
 def normalize_provider(provider: Optional[str]) -> str:
-    """Normalize provider aliases to Hermes' canonical provider ids.
+    """Normalize provider aliases to Centurion' canonical provider ids.
 
     Note: ``"auto"`` passes through unchanged — use
     ``centurion_cli.auth.resolve_provider()`` to resolve it to a concrete
@@ -2015,7 +2015,7 @@ def _strip_vendor_prefix(model_id: str) -> str:
 
 
 def model_supports_fast_mode(model_id: Optional[str]) -> bool:
-    """Return whether Hermes should expose the /fast toggle for this model."""
+    """Return whether Centurion should expose the /fast toggle for this model."""
     return _is_anthropic_fast_model(model_id) or _is_openai_fast_model(model_id)
 
 
@@ -2064,7 +2064,7 @@ def _resolve_copilot_catalog_api_key() -> str:
       2. ``read_credential_pool("copilot")`` — a token (typically a
          ``gho_*`` from device-code login, or a fine-grained PAT) stored in
          ``auth.json`` under ``credential_pool.copilot[]``. The pool is
-         populated by ``hermes auth add copilot`` and by ``_seed_from_env``
+         populated by ``centurion auth add copilot`` and by ``_seed_from_env``
          when the env var is set in ``~/.centurion/.env``.
 
     Without (2), users whose only Copilot credential is in the pool see
@@ -2189,7 +2189,7 @@ def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) 
     falling back to static lists. For providers in ``_MODELS_DEV_PREFERRED``
     (opencode-go/zen, xiaomi, deepseek, smaller inference providers, etc.),
     models.dev entries are merged on top of curated so new models released
-    on the platform appear in ``/model`` without a Hermes release.
+    on the platform appear in ``/model`` without a Centurion release.
     """
     normalized = normalize_provider(provider)
     if normalized == "openrouter":
@@ -2199,7 +2199,7 @@ def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) 
 
         # Pass the live OAuth access token so the picker matches whatever
         # ChatGPT lists for this account right now (new models appear without
-        # a Hermes release). Falls back to the hardcoded catalog if no token
+        # a Centurion release). Falls back to the hardcoded catalog if no token
         # or the endpoint is unreachable.
         access_token = None
         try:
@@ -2222,7 +2222,7 @@ def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) 
         if normalized == "copilot-acp":
             return list(_PROVIDER_MODELS.get("copilot", []))
     if normalized == "nous":
-        # Try live Nous Portal /models endpoint
+        # Try live Centurion Portal /models endpoint
         try:
             from centurion_cli.auth import fetch_nous_models, resolve_nous_runtime_credentials
             creds = resolve_nous_runtime_credentials()
@@ -2433,7 +2433,7 @@ def copilot_default_headers() -> dict[str, str]:
     except ImportError:
         return {
             "Editor-Version": COPILOT_EDITOR_VERSION,
-            "User-Agent": "HermesAgent/1.0",
+            "User-Agent": "CenturionAgent/1.0",
             "Openai-Intent": "conversation-edits",
             "x-initiator": "agent",
         }
@@ -2807,7 +2807,7 @@ _COPILOT_MODEL_ALIASES = {
     "anthropic/claude-sonnet-4": "claude-sonnet-4",
     "anthropic/claude-sonnet-4.5": "claude-sonnet-4.5",
     "anthropic/claude-haiku-4.5": "claude-haiku-4.5",
-    # Dash-notation fallbacks: Hermes' default Claude IDs elsewhere use
+    # Dash-notation fallbacks: Centurion' default Claude IDs elsewhere use
     # hyphens (anthropic native format), but Copilot's API only accepts
     # dot-notation.  Accept both so users who configure copilot + a
     # default hyphenated Claude model don't hit HTTP 400
@@ -3474,7 +3474,7 @@ def validate_requested_model(
 
         message = (
             f"Note: could not reach this custom endpoint's model listing at `{probe.get('probed_url')}`. "
-            f"Hermes will still save `{requested}`, but the endpoint should expose `/models` for verification."
+            f"Centurion will still save `{requested}`, but the endpoint should expose `/models` for verification."
         )
         if api_mode == "anthropic_messages":
             message += (
@@ -3571,7 +3571,7 @@ def validate_requested_model(
                 "message": (
                     f"Note: `{requested}` was not found in the MiniMax catalog."
                     f"{suggestion_text}"
-                    "\n  MiniMax does not expose a /models endpoint, so Hermes cannot verify the model name."
+                    "\n  MiniMax does not expose a /models endpoint, so Centurion cannot verify the model name."
                     "\n  The model may still work if it exists on the server."
                 ),
             }

@@ -170,7 +170,7 @@ def reclaimer_loop(centurion_home: str, result_file: str) -> None:
 
 
 def main():
-    home = tempfile.mkdtemp(prefix="hermes_mixed_stress_")
+    home = tempfile.mkdtemp(prefix="centurion_mixed_stress_")
     print(f"CENTURION_HOME = {home}")
 
     os.environ["CENTURION_HOME"] = home

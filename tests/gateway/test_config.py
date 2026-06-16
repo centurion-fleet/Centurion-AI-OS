@@ -679,7 +679,7 @@ class TestHomeChannelEnvOverrides:
                 PlatformConfig(
                     enabled=True,
                     extra={
-                        "address": "hermes@test.com",
+                        "address": "centurion@test.com",
                         "imap_host": "imap.test.com",
                         "smtp_host": "smtp.test.com",
                     },

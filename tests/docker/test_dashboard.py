@@ -57,7 +57,7 @@ def test_dashboard_slot_reports_down_when_disabled(
 ) -> None:
     """Without HERMES_DASHBOARD, s6-svstat should report the dashboard
     slot as DOWN (not up-with-sleep-infinity, which would
-    false-positive `hermes doctor` and any other health check).
+    false-positive `centurion doctor` and any other health check).
 
     Locks the PR #30136 review item I3 fix: cont-init.d/03-dashboard-toggle
     writes a `down` marker file in the live service-dir when
@@ -184,8 +184,8 @@ def test_dashboard_restarts_after_crash(
         time.sleep(0.5)
     assert first_pid is not None, "Could not capture initial dashboard PID"
 
-    # Kill the dashboard. The dashboard process runs as hermes, so the
-    # hermes user can kill it (same UID).
+    # Kill the dashboard. The dashboard process runs as centurion, so the
+    # centurion user can kill it (same UID).
     docker_exec(container_name, "kill", "-9", first_pid)
 
     # s6 backs off ~1s before restart; allow up to 15s for the new

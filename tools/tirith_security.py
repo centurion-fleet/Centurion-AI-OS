@@ -134,7 +134,7 @@ _MARKER_TTL = 86400  # 24 hours
 
 
 def _get_centurion_home() -> str:
-    """Return the Hermes home directory, respecting CENTURION_HOME env var."""
+    """Return the Centurion home directory, respecting CENTURION_HOME env var."""
     return str(get_centurion_home())
 
 
@@ -497,12 +497,12 @@ def _resolve_tirith_path(configured_path: str) -> str:
         _clear_install_failed()
         return found
 
-    hermes_bin = os.path.join(_centurion_bin_dir(), "tirith")
-    if os.path.isfile(hermes_bin) and os.access(hermes_bin, os.X_OK):
-        _resolved_path = hermes_bin
+    centurion_bin = os.path.join(_centurion_bin_dir(), "tirith")
+    if os.path.isfile(centurion_bin) and os.access(centurion_bin, os.X_OK):
+        _resolved_path = centurion_bin
         _install_failure_reason = ""
         _clear_install_failed()
-        return hermes_bin
+        return centurion_bin
 
     # Local checks failed.  If a previous install attempt already failed,
     # skip the network retry — UNLESS the failure was "cosign_missing" and
@@ -561,9 +561,9 @@ def _background_install(*, log_failures: bool = True):
             _install_failure_reason = ""
             return
 
-        hermes_bin = os.path.join(_centurion_bin_dir(), "tirith")
-        if os.path.isfile(hermes_bin) and os.access(hermes_bin, os.X_OK):
-            _resolved_path = hermes_bin
+        centurion_bin = os.path.join(_centurion_bin_dir(), "tirith")
+        if os.path.isfile(centurion_bin) and os.access(centurion_bin, os.X_OK):
+            _resolved_path = centurion_bin
             _install_failure_reason = ""
             return
 
@@ -631,12 +631,12 @@ def ensure_installed(*, log_failures: bool = True):
         _clear_install_failed()
         return found
 
-    hermes_bin = os.path.join(_centurion_bin_dir(), "tirith")
-    if os.path.isfile(hermes_bin) and os.access(hermes_bin, os.X_OK):
-        _resolved_path = hermes_bin
+    centurion_bin = os.path.join(_centurion_bin_dir(), "tirith")
+    if os.path.isfile(centurion_bin) and os.access(centurion_bin, os.X_OK):
+        _resolved_path = centurion_bin
         _install_failure_reason = ""
         _clear_install_failed()
-        return hermes_bin
+        return centurion_bin
 
     # If previously failed in-memory, check if the cause is now resolved
     if _resolved_path is _INSTALL_FAILED:

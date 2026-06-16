@@ -190,14 +190,14 @@ _HERMES_BEHAVIORAL_VARS = frozenset({
     "HERMES_MODEL",
     "HERMES_INFERENCE_MODEL",
     "HERMES_INFERENCE_PROVIDER",
-    "HERMES_TUI_PROVIDER",
-    "HERMES_MANAGED",
+    "CENTURION_TUI_PROVIDER",
+    "CENTURION_MANAGED",
     "HERMES_DEV",
     "HERMES_CONTAINER",
     "HERMES_EPHEMERAL_SYSTEM_PROMPT",
     "HERMES_TIMEZONE",
     "HERMES_REDACT_SECRETS",
-    "HERMES_BACKGROUND_NOTIFICATIONS",
+    "CENTURION_BACKGROUND_NOTIFICATIONS",
     "HERMES_EXEC_ASK",
     "CENTURION_HOME_MODE",
     "HERMES_AGENT_USE_LEGACY_SESSION_KEYS",
@@ -205,8 +205,8 @@ _HERMES_BEHAVIORAL_VARS = frozenset({
     # dispatched worker into tests; otherwise tests can write fake tasks to
     # the real ~/.centurion/kanban.db instead of the per-test CENTURION_HOME.
     "HERMES_KANBAN_DB",
-    "HERMES_KANBAN_BOARD",
-    "HERMES_KANBAN_HOME",
+    "CENTURION_KANBAN_BOARD",
+    "CENTURION_KANBAN_HOME",
     "HERMES_KANBAN_WORKSPACES_ROOT",
     "HERMES_KANBAN_LOGS_ROOT",
     "HERMES_KANBAN_TASK",
@@ -344,7 +344,7 @@ def _hermetic_environment(tmp_path, monkeypatch):
     #    fixture. Any code in the codebase reading ``~/.centurion/*`` via
     #    ``Path.home() / ".centurion"`` instead of ``get_centurion_home()``
     #    is a bug to fix at the callsite.
-    fake_centurion_home = tmp_path / "hermes_test"
+    fake_centurion_home = tmp_path / "centurion_test"
     fake_centurion_home.mkdir()
     (fake_centurion_home / "sessions").mkdir()
     (fake_centurion_home / "cron").mkdir()
@@ -419,7 +419,7 @@ def tmp_dir(tmp_path):
 
 @pytest.fixture()
 def mock_config():
-    """Return a minimal hermes config dict suitable for unit tests."""
+    """Return a minimal centurion config dict suitable for unit tests."""
     return {
         "model": "test/mock-model",
         "toolsets": ["terminal", "file"],
@@ -492,7 +492,7 @@ def _ensure_current_event_loop(request):
 # (``cmd_update``, ``kill_gateway_processes``, ``stop_profile_gateway``).
 # When a single test forgets to mock either ``os.kill`` or the global
 # ``find_gateway_pids`` helper, the real call leaks out of the hermetic
-# environment and finds the developer's live ``hermes-gateway`` process
+# environment and finds the developer's live ``centurion-gateway`` process
 # via ``psutil`` — sending it SIGTERM mid-test. The shutdown forensics in
 # PR #23285 caught this happening 5+ times in 3 days, every time
 # correlated with a ``tests/centurion_cli/`` pytest run starting up.
@@ -504,7 +504,7 @@ def _ensure_current_event_loop(request):
 #    a hard ``RuntimeError`` so the offending test gets a stack trace
 #    instead of silently murdering the real gateway.
 #  • ``subprocess.run`` / ``subprocess.Popen`` / ``call`` / ``check_call`` /
-#    ``check_output`` reject any ``systemctl ... <verb> hermes-gateway``
+#    ``check_output`` reject any ``systemctl ... <verb> centurion-gateway``
 #    invocation that would mutate the live unit. Read-only systemctl
 #    calls (``status``, ``show``, ``list-units``) still pass through.
 #
@@ -545,10 +545,10 @@ def _live_system_guard(request, monkeypatch):
       • pty.spawn
       • asyncio.create_subprocess_exec / create_subprocess_shell
     Subprocess inspection looks at the WHOLE command string (not just
-    tokens[0]), so ``bash -c "systemctl restart hermes-gateway"``,
+    tokens[0]), so ``bash -c "systemctl restart centurion-gateway"``,
     ``sudo systemctl ...``, ``env systemctl ...``, ``setsid systemctl ...``
     are all caught. ``pkill``/``killall``/``taskkill`` invocations
-    targeting hermes/python patterns are also blocked.
+    targeting centurion/python patterns are also blocked.
     """
     if request.node.get_closest_marker(_LIVE_SYSTEM_GUARD_BYPASS_MARK):
         yield
@@ -637,12 +637,12 @@ def _live_system_guard(request, monkeypatch):
 
     # ── Subprocess command-string inspection (whole-line) ──────────
     _HERMES_TOKENS = (
-        "hermes-gateway",
-        "hermes.service",
+        "centurion-gateway",
+        "centurion.service",
         "centurion_cli.main gateway",
         "centurion_cli/main.py gateway",
         "gateway/run.py",
-        "hermes gateway",
+        "centurion gateway",
     )
     _MUTATING_VERBS = (
         "restart", "start", "stop", "kill", "reload",
@@ -696,7 +696,7 @@ def _live_system_guard(request, monkeypatch):
             head = tok.rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
             if head in _PROCESS_KILLERS:
                 low = cmd_str.lower()
-                # pkill -f pattern: catch hermes-themed patterns + a
+                # pkill -f pattern: catch centurion-themed patterns + a
                 # plain "python" -f which would catch the live gateway
                 # whose cmdline contains "python -m centurion_cli.main".
                 if (
@@ -712,7 +712,7 @@ def _live_system_guard(request, monkeypatch):
             raise RuntimeError(
                 f"tests/conftest.py live-system guard: blocked "
                 f"subprocess.{name}({cmd!r}) — would mutate the "
-                "live hermes-gateway systemd unit. Mock "
+                "live centurion-gateway systemd unit. Mock "
                 "subprocess.run / _run_systemctl in the test, or "
                 "mark with @pytest.mark.live_system_guard_bypass."
             )
@@ -720,7 +720,7 @@ def _live_system_guard(request, monkeypatch):
             raise RuntimeError(
                 f"tests/conftest.py live-system guard: blocked "
                 f"subprocess.{name}({cmd!r}) — process-killer command "
-                "targeting hermes/python could hit the live gateway. "
+                "targeting centurion/python could hit the live gateway. "
                 "Mark with @pytest.mark.live_system_guard_bypass if "
                 "intentional."
             )

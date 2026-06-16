@@ -103,7 +103,7 @@ class TestFromGlobalConfig:
             "workspace": "my-workspace",
             "environment": "staging",
             "peerName": "alice",
-            "aiPeer": "hermes-custom",
+            "aiPeer": "centurion-custom",
             "enabled": True,
             "saveMessages": False,
             "contextTokens": 2000,
@@ -438,14 +438,14 @@ class TestResolveActiveHost:
             assert resolve_active_host() == "centurion"
 
     def test_explicit_env_var_wins(self):
-        with patch.dict(os.environ, {"HERMES_HONCHO_HOST": "hermes.coder"}):
-            assert resolve_active_host() == "hermes.coder"
+        with patch.dict(os.environ, {"HERMES_HONCHO_HOST": "centurion.coder"}):
+            assert resolve_active_host() == "centurion.coder"
 
     def test_profile_name_derives_host(self):
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("HERMES_HONCHO_HOST", None)
             with patch("centurion_cli.profiles.get_active_profile_name", return_value="coder"):
-                assert resolve_active_host() == "hermes.coder"
+                assert resolve_active_host() == "centurion.coder"
 
     def test_default_profile_returns_hermes(self):
         with patch.dict(os.environ, {}, clear=False):
@@ -478,10 +478,10 @@ class TestResolveActiveHost:
 class TestProfileScopedConfig:
     def test_from_env_uses_profile_host(self):
         with patch.dict(os.environ, {"HONCHO_API_KEY": "key"}):
-            config = HonchoClientConfig.from_env(host="hermes.coder")
-        assert config.host == "hermes.coder"
+            config = HonchoClientConfig.from_env(host="centurion.coder")
+        assert config.host == "centurion.coder"
         assert config.workspace_id == "centurion"  # shared workspace
-        assert config.ai_peer == "hermes.coder"
+        assert config.ai_peer == "centurion.coder"
 
     def test_from_env_default_workspace_preserved_for_default_host(self):
         with patch.dict(os.environ, {"HONCHO_API_KEY": "key"}):
@@ -495,19 +495,19 @@ class TestProfileScopedConfig:
             "apiKey": "shared-key",
             "hosts": {
                 "centurion": {"aiPeer": "centurion", "peerName": "alice"},
-                "hermes.coder": {
-                    "aiPeer": "hermes.coder",
+                "centurion.coder": {
+                    "aiPeer": "centurion.coder",
                     "peerName": "alice-coder",
                     "workspace": "coder-ws",
                 },
             },
         }))
         config = HonchoClientConfig.from_global_config(
-            host="hermes.coder", config_path=config_file,
+            host="centurion.coder", config_path=config_file,
         )
-        assert config.host == "hermes.coder"
+        assert config.host == "centurion.coder"
         assert config.workspace_id == "coder-ws"
-        assert config.ai_peer == "hermes.coder"
+        assert config.ai_peer == "centurion.coder"
         assert config.peer_name == "alice-coder"
 
     def test_from_global_config_auto_resolves_host(self, tmp_path):
@@ -515,12 +515,12 @@ class TestProfileScopedConfig:
         config_file.write_text(json.dumps({
             "apiKey": "key",
             "hosts": {
-                "hermes.dreamer": {"peerName": "dreamer-user"},
+                "centurion.dreamer": {"peerName": "dreamer-user"},
             },
         }))
-        with patch("plugins.memory.honcho.client.resolve_active_host", return_value="hermes.dreamer"):
+        with patch("plugins.memory.honcho.client.resolve_active_host", return_value="centurion.dreamer"):
             config = HonchoClientConfig.from_global_config(config_path=config_file)
-        assert config.host == "hermes.dreamer"
+        assert config.host == "centurion.dreamer"
         assert config.peer_name == "dreamer-user"
 
 

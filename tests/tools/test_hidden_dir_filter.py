@@ -32,17 +32,17 @@ class TestOldFilterBrokenOnWindows:
 
     def test_old_filter_misses_hub_on_windows_path(self):
         """Old filter fails to catch .hub in a Windows-style path string."""
-        win_path = r"C:\Users\me\.hermes\skills\.hub\quarantine\evil-skill\SKILL.md"
+        win_path = r"C:\Users\me\.centurion\skills\.hub\quarantine\evil-skill\SKILL.md"
         assert _old_filter_matches(win_path) is False  # Bug: should be True
 
     def test_old_filter_misses_git_on_windows_path(self):
         """Old filter fails to catch .git in a Windows-style path string."""
-        win_path = r"C:\Users\me\.hermes\skills\.git\config\SKILL.md"
+        win_path = r"C:\Users\me\.centurion\skills\.git\config\SKILL.md"
         assert _old_filter_matches(win_path) is False  # Bug: should be True
 
     def test_old_filter_works_on_unix_path(self):
         """Old filter works fine on Unix paths (the original platform)."""
-        unix_path = "/home/user/.hermes/skills/.hub/quarantine/evil-skill/SKILL.md"
+        unix_path = "/home/user/.centurion/skills/.hub/quarantine/evil-skill/SKILL.md"
         assert _old_filter_matches(unix_path) is True
 
 

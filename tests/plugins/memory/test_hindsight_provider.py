@@ -199,7 +199,7 @@ class TestConfig:
         assert provider._recall_tags is None
         assert provider._bank_mission == ""
         assert provider._bank_retain_mission is None
-        assert provider._retain_context == "conversation between Hermes Agent and the User"
+        assert provider._retain_context == "conversation between Centurion AI OS and the User"
 
     def test_custom_config_values(self, provider_with_config):
         p = provider_with_config(
@@ -302,7 +302,7 @@ class TestConfig:
 
 class TestPostSetup:
     def test_local_embedded_setup_materializes_profile_env(self, tmp_path, monkeypatch):
-        centurion_home = tmp_path / "hermes-home"
+        centurion_home = tmp_path / "centurion-home"
         user_home = tmp_path / "user-home"
         user_home.mkdir()
         monkeypatch.setenv("HOME", str(user_home))
@@ -325,7 +325,7 @@ class TestPostSetup:
         assert "HINDSIGHT_TIMEOUT=120\n" in env_text
         assert "HINDSIGHT_IDLE_TIMEOUT=300\n" in env_text
 
-        profile_env = user_home / ".hindsight" / "profiles" / "hermes.env"
+        profile_env = user_home / ".hindsight" / "profiles" / "centurion.env"
         assert profile_env.exists()
         assert profile_env.read_text() == (
             "HINDSIGHT_API_LLM_PROVIDER=openai\n"
@@ -336,7 +336,7 @@ class TestPostSetup:
         )
 
     def test_local_embedded_setup_respects_existing_profile_name(self, tmp_path, monkeypatch):
-        centurion_home = tmp_path / "hermes-home"
+        centurion_home = tmp_path / "centurion-home"
         user_home = tmp_path / "user-home"
         user_home.mkdir()
         monkeypatch.setenv("HOME", str(user_home))
@@ -354,12 +354,12 @@ class TestPostSetup:
         provider.post_setup(str(centurion_home), {"memory": {}})
 
         coder_env = user_home / ".hindsight" / "profiles" / "coder.env"
-        hermes_env = user_home / ".hindsight" / "profiles" / "hermes.env"
+        centurion_env = user_home / ".hindsight" / "profiles" / "centurion.env"
         assert coder_env.exists()
-        assert not hermes_env.exists()
+        assert not centurion_env.exists()
 
     def test_local_embedded_setup_preserves_existing_key_when_input_left_blank(self, tmp_path, monkeypatch):
-        centurion_home = tmp_path / "hermes-home"
+        centurion_home = tmp_path / "centurion-home"
         user_home = tmp_path / "user-home"
         user_home.mkdir()
         monkeypatch.setenv("HOME", str(user_home))
@@ -379,14 +379,14 @@ class TestPostSetup:
         provider = HindsightMemoryProvider()
         provider.post_setup(str(centurion_home), {"memory": {}})
 
-        profile_env = user_home / ".hindsight" / "profiles" / "hermes.env"
+        profile_env = user_home / ".hindsight" / "profiles" / "centurion.env"
         assert profile_env.exists()
         assert "HINDSIGHT_API_LLM_API_KEY=existing-key\n" in profile_env.read_text()
 
 
     def test_local_embedded_setup_blank_inputs_preserve_existing_config(self, tmp_path, monkeypatch):
         """Pressing Enter through setup should keep existing Hindsight values."""
-        centurion_home = tmp_path / "hermes-home"
+        centurion_home = tmp_path / "centurion-home"
         user_home = tmp_path / "user-home"
         user_home.mkdir()
         monkeypatch.setenv("HOME", str(user_home))
@@ -678,7 +678,7 @@ class TestSyncTurn:
         assert call_kwargs["retain_async"] is True
         assert len(call_kwargs["items"]) == 1
         item = call_kwargs["items"][0]
-        assert item["context"] == "conversation between Hermes Agent and the User"
+        assert item["context"] == "conversation between Centurion AI OS and the User"
         assert item["tags"] == ["conv", "session1", "session:session-1"]
         content = json.loads(item["content"])
         assert len(content) == 1
@@ -725,7 +725,7 @@ class TestSyncTurn:
         assert call_kwargs["document_id"].startswith("test-session-")
         assert call_kwargs["retain_async"] is True
         assert len(call_kwargs["items"]) == 1
-        assert call_kwargs["items"][0]["context"] == "conversation between Hermes Agent and the User"
+        assert call_kwargs["items"][0]["context"] == "conversation between Centurion AI OS and the User"
 
     def test_sync_turn_custom_context(self, provider_with_config):
         p = provider_with_config(retain_context="my-agent")
@@ -1252,10 +1252,10 @@ class TestBankIdTemplate:
 
     def test_resolve_with_profile(self):
         result = _resolve_bank_id_template(
-            "hermes-{profile}", fallback="centurion",
+            "centurion-{profile}", fallback="centurion",
             profile="coder", workspace="", platform="", user="", session="",
         )
-        assert result == "hermes-coder"
+        assert result == "centurion-coder"
 
     def test_resolve_with_multiple_placeholders(self):
         result = _resolve_bank_id_template(
@@ -1267,9 +1267,9 @@ class TestBankIdTemplate:
         assert result == "myorg-coder-cli"
 
     def test_resolve_collapses_empty_placeholders(self):
-        # When user is empty, "hermes-{user}" becomes "hermes-" -> trimmed to "centurion"
+        # When user is empty, "centurion-{user}" becomes "centurion-" -> trimmed to "centurion"
         result = _resolve_bank_id_template(
-            "hermes-{user}", fallback="default",
+            "centurion-{user}", fallback="default",
             profile="", workspace="", platform="", user="", session="",
         )
         assert result == "centurion"
@@ -1300,7 +1300,7 @@ class TestBankIdTemplate:
     def test_resolve_invalid_template_returns_fallback(self):
         # Unknown placeholder should fall back without raising
         result = _resolve_bank_id_template(
-            "hermes-{unknown}", fallback="centurion",
+            "centurion-{unknown}", fallback="centurion",
             profile="", workspace="", platform="", user="", session="",
         )
         assert result == "centurion"
@@ -1311,7 +1311,7 @@ class TestBankIdTemplate:
             "apiKey": "k",
             "api_url": "http://x",
             "bank_id": "fallback-bank",
-            "bank_id_template": "hermes-{profile}",
+            "bank_id_template": "centurion-{profile}",
         }
         config_path = tmp_path / "hindsight" / "config.json"
         config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1326,8 +1326,8 @@ class TestBankIdTemplate:
             agent_identity="coder",
             agent_workspace="centurion",
         )
-        assert p._bank_id == "hermes-coder"
-        assert p._bank_id_template == "hermes-{profile}"
+        assert p._bank_id == "centurion-coder"
+        assert p._bank_id_template == "centurion-{profile}"
 
     def test_provider_without_template_uses_static_bank_id(self, tmp_path, monkeypatch):
         config = {
@@ -1355,8 +1355,8 @@ class TestBankIdTemplate:
             "mode": "cloud",
             "apiKey": "k",
             "api_url": "http://x",
-            "bank_id": "hermes-fallback",
-            "bank_id_template": "hermes-{profile}",
+            "bank_id": "centurion-fallback",
+            "bank_id_template": "centurion-{profile}",
         }
         config_path = tmp_path / "hindsight" / "config.json"
         config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1364,7 +1364,7 @@ class TestBankIdTemplate:
         monkeypatch.setattr("plugins.memory.hindsight.get_centurion_home", lambda: tmp_path)
 
         p = HindsightMemoryProvider()
-        # No agent_identity passed — template renders to "hermes-" which collapses to "centurion"
+        # No agent_identity passed — template renders to "centurion-" which collapses to "centurion"
         p.initialize(session_id="s1", centurion_home=str(tmp_path), platform="cli")
         assert p._bank_id == "centurion"
 

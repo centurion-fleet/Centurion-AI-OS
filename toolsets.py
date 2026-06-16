@@ -28,7 +28,7 @@ from typing import List, Dict, Any, Set, Optional
 
 # Shared tool list for CLI and all messaging platform toolsets.
 # Edit this once to update all platforms simultaneously.
-_HERMES_CORE_TOOLS = [
+_CENTURION_CORE_TOOLS = [
     # Web
     "web_search", "web_extract",
     # Terminal + process management
@@ -75,7 +75,7 @@ _HERMES_CORE_TOOLS = [
 # Webhook events may originate from untrusted third-party content (for example,
 # public PR titles/comments). Keep the default webhook toolset intentionally
 # constrained to avoid local file/system execution by prompt injection.
-_HERMES_WEBHOOK_SAFE_TOOLS = [
+_CENTURION_WEBHOOK_SAFE_TOOLS = [
     "web_search",
     "web_extract",
     "vision_analyze",
@@ -332,7 +332,7 @@ TOOLSETS = {
     },
     
     # ==========================================================================
-    # Full Hermes toolsets (CLI + messaging platforms)
+    # Full Centurion toolsets (CLI + messaging platforms)
     #
     # All platforms share the same core tools (including send_message,
     # which is gated on gateway running via its check_fn).
@@ -357,7 +357,7 @@ TOOLSETS = {
         "includes": []
     },
 
-    "hermes-api-server": {
+    "centurion-api-server": {
         "description": "OpenAI-compatible API server — full agent tools accessible via HTTP (no interactive UI tools like clarify or send_message)",
         "tools": [
             # Web
@@ -390,95 +390,95 @@ TOOLSETS = {
         "includes": []
     },
     
-    "hermes-cli": {
+    "centurion-cli": {
         "description": "Full interactive CLI toolset - all default tools plus cronjob management",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-cron": {
-        # Mirrors hermes-cli so cron's "default" toolset is the same set of
+    "centurion-cron": {
+        # Mirrors centurion-cli so cron's "default" toolset is the same set of
         # core tools users see interactively — then `centurion tools` filters
         # them down per the platform config. _DEFAULT_OFF_TOOLSETS (moa,
         # homeassistant) are excluded by _get_platform_tools() unless
         # the user explicitly enables them.
-        "description": "Default cron toolset - same core tools as hermes-cli; gated by `centurion tools`",
-        "tools": _HERMES_CORE_TOOLS,
+        "description": "Default cron toolset - same core tools as centurion-cli; gated by `centurion tools`",
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-telegram": {
+    "centurion-telegram": {
         "description": "Telegram bot toolset - full access for personal use (terminal has safety checks)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
     
-    "hermes-discord": {
+    "centurion-discord": {
         "description": "Discord bot toolset - full access (terminal has safety checks via dangerous command approval)",
-        "tools": _HERMES_CORE_TOOLS + [
+        "tools": _CENTURION_CORE_TOOLS + [
             "discord",
             "discord_admin",
         ],
         "includes": []
     },
     
-    "hermes-whatsapp": {
+    "centurion-whatsapp": {
         "description": "WhatsApp bot toolset - similar to Telegram (personal messaging, more trusted)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
     
-    "hermes-slack": {
+    "centurion-slack": {
         "description": "Slack bot toolset - full access for workspace use (terminal has safety checks)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
     
-    "hermes-signal": {
+    "centurion-signal": {
         "description": "Signal bot toolset - encrypted messaging platform (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-bluebubbles": {
+    "centurion-bluebubbles": {
         "description": "BlueBubbles iMessage bot toolset - Apple iMessage via local BlueBubbles server",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-homeassistant": {
+    "centurion-homeassistant": {
         "description": "Home Assistant bot toolset - smart home event monitoring and control",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-email": {
-        "description": "Email bot toolset - interact with Hermes via email (IMAP/SMTP)",
-        "tools": _HERMES_CORE_TOOLS,
+    "centurion-email": {
+        "description": "Email bot toolset - interact with Centurion via email (IMAP/SMTP)",
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-mattermost": {
+    "centurion-mattermost": {
         "description": "Mattermost bot toolset - self-hosted team messaging (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-matrix": {
+    "centurion-matrix": {
         "description": "Matrix bot toolset - decentralized encrypted messaging (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-dingtalk": {
+    "centurion-dingtalk": {
         "description": "DingTalk bot toolset - enterprise messaging platform (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-feishu": {
+    "centurion-feishu": {
         "description": "Feishu/Lark bot toolset - enterprise messaging via Feishu/Lark (full access)",
-        "tools": _HERMES_CORE_TOOLS + [
+        "tools": _CENTURION_CORE_TOOLS + [
             "feishu_doc_read",
             "feishu_drive_list_comments",
             "feishu_drive_list_comment_replies",
@@ -488,33 +488,33 @@ TOOLSETS = {
         "includes": []
     },
 
-    "hermes-weixin": {
+    "centurion-weixin": {
         "description": "Weixin bot toolset - personal WeChat messaging via iLink (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-qqbot": {
+    "centurion-qqbot": {
         "description": "QQBot toolset - QQ messaging via Official Bot API v2 (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-wecom": {
+    "centurion-wecom": {
         "description": "WeCom bot toolset - enterprise WeChat messaging (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-wecom-callback": {
+    "centurion-wecom-callback": {
         "description": "WeCom callback toolset - enterprise self-built app messaging (full access)",
-        "tools": _HERMES_CORE_TOOLS,
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-yuanbao": {
+    "centurion-yuanbao": {
         "description": "Yuanbao Bot 元宝消息平台工具集 - 群信息、成员查询、私聊、贴纸表情",
-        "tools": _HERMES_CORE_TOOLS + [
+        "tools": _CENTURION_CORE_TOOLS + [
             "yb_query_group_info",
             "yb_query_group_members",
             "yb_send_dm",
@@ -525,22 +525,22 @@ TOOLSETS = {
         "includes": []
     },
 
-    "hermes-sms": {
-        "description": "SMS bot toolset - interact with Hermes via SMS (Twilio)",
-        "tools": _HERMES_CORE_TOOLS,
+    "centurion-sms": {
+        "description": "SMS bot toolset - interact with Centurion via SMS (Twilio)",
+        "tools": _CENTURION_CORE_TOOLS,
         "includes": []
     },
 
-    "hermes-webhook": {
+    "centurion-webhook": {
         "description": "Webhook toolset - receive and process external webhook events",
-        "tools": _HERMES_WEBHOOK_SAFE_TOOLS,
+        "tools": _CENTURION_WEBHOOK_SAFE_TOOLS,
         "includes": []
     },
 
-    "hermes-gateway": {
+    "centurion-gateway": {
         "description": "Gateway toolset - union of all messaging platform tools",
         "tools": [],
-        "includes": ["hermes-telegram", "hermes-discord", "hermes-whatsapp", "hermes-slack", "hermes-signal", "hermes-bluebubbles", "hermes-homeassistant", "hermes-email", "hermes-sms", "hermes-mattermost", "hermes-matrix", "hermes-dingtalk", "hermes-feishu", "hermes-wecom", "hermes-wecom-callback", "hermes-weixin", "hermes-qqbot", "hermes-webhook", "hermes-yuanbao"]
+        "includes": ["centurion-telegram", "centurion-discord", "centurion-whatsapp", "centurion-slack", "centurion-signal", "centurion-bluebubbles", "centurion-homeassistant", "centurion-email", "centurion-sms", "centurion-mattermost", "centurion-matrix", "centurion-dingtalk", "centurion-feishu", "centurion-wecom", "centurion-wecom-callback", "centurion-weixin", "centurion-qqbot", "centurion-webhook", "centurion-yuanbao"]
     }
 }
 
@@ -635,15 +635,15 @@ def resolve_toolset(name: str, visited: Set[str] = None) -> List[str]:
     # Get toolset definition
     toolset = get_toolset(name)
     if not toolset:
-        # Auto-generate a toolset for plugin platforms (hermes-<name>).
-        # Gives them _HERMES_CORE_TOOLS plus any tools the plugin registered
+        # Auto-generate a toolset for plugin platforms (centurion-<name>).
+        # Gives them _CENTURION_CORE_TOOLS plus any tools the plugin registered
         # into a toolset matching the platform name.
-        if name.startswith("hermes-"):
-            platform_name = name[len("hermes-"):]
+        if name.startswith("centurion-"):
+            platform_name = name[len("centurion-"):]
             try:
                 from gateway.platform_registry import platform_registry
                 if platform_registry.is_registered(platform_name):
-                    plugin_tools = set(_HERMES_CORE_TOOLS)
+                    plugin_tools = set(_CENTURION_CORE_TOOLS)
                     try:
                         from tools.registry import registry
                         plugin_tools.update(

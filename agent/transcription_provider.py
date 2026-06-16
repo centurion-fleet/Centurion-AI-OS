@@ -92,7 +92,7 @@ class TranscriptionProvider(abc.ABC):
         importable. Default: True (providers with no external
         dependencies are always available).
 
-        Must NOT raise — used by the picker and ``hermes setup`` for
+        Must NOT raise — used by the picker and ``centurion setup`` for
         availability displays and should fail gracefully.
         """
         return True

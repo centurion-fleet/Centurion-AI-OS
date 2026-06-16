@@ -42,7 +42,7 @@ MANIFEST_FILE = SKILLS_DIR / ".bundled_manifest"
 def _get_bundled_dir() -> Path:
     """Locate the bundled skills/ directory.
 
-    Checks HERMES_BUNDLED_SKILLS env var first (set by Nix wrapper),
+    Checks CENTURION_BUNDLED_SKILLS env var first (set by Nix wrapper),
     then a wheel-installed data dir, then falls back to the relative
     path from this source file.
     """
@@ -221,7 +221,7 @@ def sync_skills(quiet: bool = False) -> dict:
                         print(
                             f"  ⚠ {skill_name}: bundled version shipped but you "
                             f"already have a local skill by this name — yours "
-                            f"was kept. Run `hermes skills reset {skill_name}` "
+                            f"was kept. Run `centurion skills reset {skill_name}` "
                             f"to replace it with the bundled version."
                         )
                 else:
@@ -354,7 +354,7 @@ def reset_bundled_skill(name: str, restore: bool = False) -> dict:
             "action": "not_in_manifest",
             "message": (
                 f"'{name}' is not a tracked bundled skill. Nothing to reset. "
-                f"(Hub-installed skills use `hermes skills uninstall`.)"
+                f"(Hub-installed skills use `centurion skills uninstall`.)"
             ),
             "synced": None,
         }

@@ -27,11 +27,11 @@ def store(tmp_path, monkeypatch):
 
     Pin DEFAULT_DB_PATH to tmp_path so SessionDB() can't write to the real
     ~/.centurion/state.db. (DEFAULT_DB_PATH is a module-level constant computed
-    at hermes_state import time, before pytest's CENTURION_HOME monkeypatch
+    at centurion_state import time, before pytest's CENTURION_HOME monkeypatch
     fires — the autouse fixture's CENTURION_HOME override doesn't help here.)
     """
     import centurion_state
-    monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", tmp_path / "state.db")
+    monkeypatch.setattr(centurion_state, "DEFAULT_DB_PATH", tmp_path / "state.db")
     config = GatewayConfig()
     s = SessionStore(sessions_dir=tmp_path, config=config)
     return s

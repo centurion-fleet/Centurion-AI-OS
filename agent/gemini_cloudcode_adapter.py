@@ -1,6 +1,6 @@
 """OpenAI-compatible facade that talks to Google's Cloud Code Assist backend.
 
-This adapter lets Hermes use the ``google-gemini-cli`` provider as if it were
+This adapter lets Centurion use the ``google-gemini-cli`` provider as if it were
 a standard OpenAI-shaped chat completion endpoint, while the underlying HTTP
 traffic goes to ``cloudcode-pa.googleapis.com/v1internal:{generateContent,
 streamGenerateContent}`` with a Bearer access token obtained via OAuth PKCE.
@@ -706,7 +706,7 @@ class GeminiCloudCodeClient:
             "Accept": "application/json",
             "Authorization": f"Bearer {access_token}",
             "User-Agent": "centurion-os (gemini-cli-compat)",
-            "X-Goog-Api-Client": "gl-python/hermes",
+            "X-Goog-Api-Client": "gl-python/centurion",
             "x-activity-request-id": str(uuid.uuid4()),
         }
         headers.update(self._default_headers)
@@ -867,7 +867,7 @@ def _gemini_http_error(response: httpx.Response) -> CodeAssistError:
         target = model_hint or "this Gemini model"
         message = (
             f"Gemini capacity exhausted for {target} (Google-side throttle, "
-            f"not a Hermes issue). Try a different Gemini model or set a "
+            f"not a Centurion issue). Try a different Gemini model or set a "
             f"fallback_providers entry to a non-Gemini provider."
         )
         if retry_delay_seconds is not None:

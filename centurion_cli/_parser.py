@@ -1,5 +1,5 @@
 """
-Top-level argparse construction for the hermes CLI.
+Top-level argparse construction for the centurion CLI.
 
 Lives in its own module so other modules (e.g. ``relaunch.py``) can
 introspect the parser to discover which flags exist without running the
@@ -39,43 +39,43 @@ def _inherited_flag(parser, *args, **kwargs):
 
 _EPILOGUE = """
 Examples:
-    hermes                        Start interactive chat
+    centurion                        Start interactive chat
     centurion chat -q "Hello"        Single query mode
-    hermes -c                     Resume the most recent session
-    hermes -c "my project"        Resume a session by name (latest in lineage)
-    hermes --resume <session_id>  Resume a specific session by ID
-    hermes setup                  Run setup wizard
-    hermes logout                 Clear stored authentication
-    hermes auth add <provider>    Add a pooled credential
-    hermes auth list              List pooled credentials
-    hermes auth remove <p> <t>    Remove pooled credential by index, id, or label
-    hermes auth reset <provider>  Clear exhaustion status for a provider
-    hermes model                  Select default model
-    hermes fallback [list]        Show fallback provider chain
-    hermes fallback add           Add a fallback provider (same picker as `hermes model`)
-    hermes fallback remove        Remove a fallback provider from the chain
-    hermes config                 View configuration
-    hermes config edit            Edit config in $EDITOR
-    hermes config set model gpt-4 Set a config value
-    hermes gateway                Run messaging gateway
-    hermes -s centurion-os-dev,github-auth
-    hermes -w                     Start in isolated git worktree
-    hermes gateway install        Install gateway background service
-    hermes sessions list          List past sessions
-    hermes sessions browse        Interactive session picker
-    hermes sessions rename ID T   Rename/title a session
-    hermes logs                   View agent.log (last 50 lines)
-    hermes logs -f                Follow agent.log in real time
-    hermes logs errors            View errors.log
-    hermes logs --since 1h        Lines from the last hour
-    hermes debug share             Upload debug report for support
+    centurion -c                     Resume the most recent session
+    centurion -c "my project"        Resume a session by name (latest in lineage)
+    centurion --resume <session_id>  Resume a specific session by ID
+    centurion setup                  Run setup wizard
+    centurion logout                 Clear stored authentication
+    centurion auth add <provider>    Add a pooled credential
+    centurion auth list              List pooled credentials
+    centurion auth remove <p> <t>    Remove pooled credential by index, id, or label
+    centurion auth reset <provider>  Clear exhaustion status for a provider
+    centurion model                  Select default model
+    centurion fallback [list]        Show fallback provider chain
+    centurion fallback add           Add a fallback provider (same picker as `centurion model`)
+    centurion fallback remove        Remove a fallback provider from the chain
+    centurion config                 View configuration
+    centurion config edit            Edit config in $EDITOR
+    centurion config set model gpt-4 Set a config value
+    centurion gateway                Run messaging gateway
+    centurion -s centurion-os-dev,github-auth
+    centurion -w                     Start in isolated git worktree
+    centurion gateway install        Install gateway background service
+    centurion sessions list          List past sessions
+    centurion sessions browse        Interactive session picker
+    centurion sessions rename ID T   Rename/title a session
+    centurion logs                   View agent.log (last 50 lines)
+    centurion logs -f                Follow agent.log in real time
+    centurion logs errors            View errors.log
+    centurion logs --since 1h        Lines from the last hour
+    centurion debug share             Upload debug report for support
     centurion update                 Update to latest version
     centurion dashboard              Start web UI dashboard (port 9119)
     centurion dashboard --stop       Stop running dashboard processes
     centurion dashboard --status     List running dashboard processes
 
 For more help on a command:
-    hermes <command> --help
+    centurion <command> --help
 """
 
 
@@ -88,7 +88,7 @@ def build_top_level_parser():
     """
     parser = argparse.ArgumentParser(
         prog="centurion",
-        description="Hermes Agent - AI assistant with tool-calling capabilities",
+        description="Centurion AI OS - AI assistant with tool-calling capabilities",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=_EPILOGUE,
     )
@@ -130,7 +130,7 @@ def build_top_level_parser():
         help=(
             "Provider override for this invocation (e.g. openrouter, anthropic). "
             "Applies to -z/--oneshot and --tui. The persistent provider lives in config.yaml "
-            "under model.provider — use `hermes setup` or edit the file to change it."
+            "under model.provider — use `centurion setup` or edit the file to change it."
         ),
     )
     parser.add_argument(
@@ -235,7 +235,7 @@ def build_top_level_parser():
     chat_parser = subparsers.add_parser(
         "chat",
         help="Interactive chat with the agent",
-        description="Start an interactive chat session with Hermes Agent",
+        description="Start an interactive chat session with Centurion AI OS",
     )
     chat_parser.add_argument(
         "-q", "--query", help="Single query (non-interactive mode)"

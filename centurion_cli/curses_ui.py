@@ -1,6 +1,6 @@
-"""Shared curses-based UI components for Hermes CLI.
+"""Shared curses-based UI components for Centurion CLI.
 
-Used by `centurion tools` and `hermes skills` for interactive checklists.
+Used by `centurion tools` and `centurion skills` for interactive checklists.
 Provides a curses multi-select with keyboard navigation, plus a
 text-based numbered fallback for terminals without curses support.
 """

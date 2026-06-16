@@ -52,7 +52,7 @@ def _install_fake_tools_package(*, credential_mounts=None):
     centurion_cli.__path__ = []  # type: ignore[attr-defined]
     sys.modules["centurion_cli"] = centurion_cli
     sys.modules["centurion_cli.config"] = types.SimpleNamespace(
-        get_centurion_home=lambda: Path(tempfile.gettempdir()) / "hermes-home",
+        get_centurion_home=lambda: Path(tempfile.gettempdir()) / "centurion-home",
     )
 
     tools_package = types.ModuleType("tools")
@@ -281,7 +281,7 @@ def test_managed_modal_rejects_host_credential_passthrough():
     _install_fake_tools_package(
         credential_mounts=[{
             "host_path": "/tmp/token.json",
-            "container_path": "/root/.hermes/token.json",
+            "container_path": "/root/.centurion/token.json",
         }]
     )
     managed_modal = _load_tool_module("tools.environments.managed_modal", "environments/managed_modal.py")

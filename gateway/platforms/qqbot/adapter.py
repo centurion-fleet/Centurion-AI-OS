@@ -451,7 +451,7 @@ class QQAdapter(BasePlatformAdapter):
             await self._session.close()
         self._session = None
 
-        # Honor WSL proxy env for QQ WebSocket. Hermes upgrades overwrite this
+        # Honor WSL proxy env for QQ WebSocket. Centurion upgrades overwrite this
         # local patch, so QQ can regress to direct-connect timeouts after update.
         self._session = aiohttp.ClientSession(trust_env=True)
         ws_proxy = (
@@ -2176,7 +2176,7 @@ class QQAdapter(BasePlatformAdapter):
                                  or ("glm-asr" if provider in {"zai", "glm"} else "whisper-1"),
                     }
 
-        # 2. QQ-specific env vars (set by `hermes setup gateway` / `hermes gateway`)
+        # 2. QQ-specific env vars (set by `centurion setup gateway` / `centurion gateway`)
         qq_stt_key = os.getenv("QQ_STT_API_KEY", "")
         if qq_stt_key:
             base_url = os.getenv(

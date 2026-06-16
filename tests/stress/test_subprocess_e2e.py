@@ -53,7 +53,7 @@ def make_spawn_fn(home: str):
 
 
 def main():
-    home = tempfile.mkdtemp(prefix="hermes_e2e_")
+    home = tempfile.mkdtemp(prefix="centurion_e2e_")
     os.environ["CENTURION_HOME"] = home
     os.environ["HOME"] = home
     sys.path.insert(0, WT)

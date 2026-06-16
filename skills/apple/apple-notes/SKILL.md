@@ -2,11 +2,11 @@
 name: apple-notes
 description: "Manage Apple Notes via memo CLI: create, search, edit."
 version: 1.0.0
-author: Hermes Agent
+author: Centurion Fleet
 license: MIT
 platforms: [macos]
 metadata:
-  hermes:
+  centurion:
     tags: [Notes, Apple, macOS, note-taking]
     related_skills: [obsidian]
 prerequisites:

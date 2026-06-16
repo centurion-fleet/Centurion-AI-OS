@@ -929,11 +929,11 @@ class TestDiskFailureMarker:
         from tools.tirith_security import _resolve_tirith_path, _INSTALL_FAILED
         import tempfile
         tmpdir = tempfile.mkdtemp()
-        hermes_bin = os.path.join(tmpdir, "tirith")
+        centurion_bin = os.path.join(tmpdir, "tirith")
         # Create a fake executable
-        with open(hermes_bin, "w") as f:
+        with open(centurion_bin, "w") as f:
             f.write("#!/bin/sh\n")
-        os.chmod(hermes_bin, 0o755)
+        os.chmod(centurion_bin, 0o755)
 
         _tirith_mod._resolved_path = _INSTALL_FAILED
 
@@ -941,8 +941,8 @@ class TestDiskFailureMarker:
              patch("tools.tirith_security._centurion_bin_dir", return_value=tmpdir), \
              patch("tools.tirith_security._clear_install_failed") as mock_clear:
             result = _resolve_tirith_path("tirith")
-            assert result == hermes_bin
-            assert _tirith_mod._resolved_path == hermes_bin
+            assert result == centurion_bin
+            assert _tirith_mod._resolved_path == centurion_bin
             mock_clear.assert_called_once()
 
         _tirith_mod._resolved_path = None
@@ -1070,7 +1070,7 @@ class TestDiskFailureMarker:
 # CENTURION_HOME isolation
 # ---------------------------------------------------------------------------
 
-class TestHermesHomeIsolation:
+class TestCenturionHomeIsolation:
     def test_centurion_bin_dir_respects_centurion_home(self):
         """_centurion_bin_dir must use CENTURION_HOME, not hardcoded ~/.centurion."""
         from tools.tirith_security import _centurion_bin_dir
@@ -1084,15 +1084,15 @@ class TestHermesHomeIsolation:
     def test_failure_marker_respects_centurion_home(self):
         """_failure_marker_path must use CENTURION_HOME, not hardcoded ~/.centurion."""
         from tools.tirith_security import _failure_marker_path
-        with patch.dict(os.environ, {"CENTURION_HOME": "/custom/hermes"}):
+        with patch.dict(os.environ, {"CENTURION_HOME": "/custom/centurion"}):
             result = _failure_marker_path()
-        assert result == "/custom/hermes/.tirith-install-failed"
+        assert result == "/custom/centurion/.tirith-install-failed"
 
     def test_conftest_isolation_prevents_real_home_writes(self):
         """The conftest autouse fixture sets CENTURION_HOME; verify it's active."""
         centurion_home = os.getenv("CENTURION_HOME")
         assert centurion_home is not None, "CENTURION_HOME should be set by conftest"
-        assert "hermes_test" in centurion_home, "Should point to test temp dir"
+        assert "centurion_test" in centurion_home, "Should point to test temp dir"
 
     def test_get_centurion_home_fallback(self):
         """Without CENTURION_HOME set, falls back to the active OS home."""

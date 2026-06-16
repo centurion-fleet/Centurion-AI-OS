@@ -1,20 +1,20 @@
-"""`hermes checkpoints` CLI subcommand.
+"""`centurion checkpoints` CLI subcommand.
 
 Gives users direct visibility and control over the filesystem checkpoint
 store at ``~/.centurion/checkpoints/``.  Actions:
 
-    hermes checkpoints               # same as `status`
-    hermes checkpoints status        # total size, project count, breakdown
-    hermes checkpoints list          # per-project checkpoint counts + workdir
-    hermes checkpoints prune [opts]  # force a sweep (ignores the 24h marker)
-    hermes checkpoints clear [-f]    # nuke the entire base (asks first)
-    hermes checkpoints clear-legacy  # delete just the legacy-* archives
+    centurion checkpoints               # same as `status`
+    centurion checkpoints status        # total size, project count, breakdown
+    centurion checkpoints list          # per-project checkpoint counts + workdir
+    centurion checkpoints prune [opts]  # force a sweep (ignores the 24h marker)
+    centurion checkpoints clear [-f]    # nuke the entire base (asks first)
+    centurion checkpoints clear-legacy  # delete just the legacy-* archives
 
 Examples::
 
-    hermes checkpoints
-    hermes checkpoints prune --retention-days 3 --max-size-mb 200
-    hermes checkpoints clear -f
+    centurion checkpoints
+    centurion checkpoints prune --retention-days 3 --max-size-mb 200
+    centurion checkpoints clear -f
 
 None of these require the agent to be running.  Safe to call any time.
 """
@@ -99,7 +99,7 @@ def cmd_status(args: argparse.Namespace) -> int:
         for arch in sorted(legacy, key=lambda a: a.get("mtime", 0), reverse=True):
             print(f"  {arch['name']:<40}  {_fmt_bytes(arch['size_bytes']):>10}")
         print()
-        print("Clear with: hermes checkpoints clear-legacy")
+        print("Clear with: centurion checkpoints clear-legacy")
     return 0
 
 
@@ -195,8 +195,8 @@ def cmd_clear_legacy(args: argparse.Namespace) -> int:
 
 
 def register_cli(parser: argparse.ArgumentParser) -> None:
-    """Wire subcommands onto the ``hermes checkpoints`` parser."""
-    parser.set_defaults(func=cmd_status)  # bare `hermes checkpoints` → status
+    """Wire subcommands onto the ``centurion checkpoints`` parser."""
+    parser.set_defaults(func=cmd_status)  # bare `centurion checkpoints` → status
     subs = parser.add_subparsers(dest="checkpoints_command", metavar="COMMAND")
 
     p_status = subs.add_parser(

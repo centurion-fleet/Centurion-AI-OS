@@ -1,1 +1,1 @@
-# Hermes plugins package
+# Centurion plugins package

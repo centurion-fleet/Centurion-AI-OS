@@ -534,7 +534,7 @@ def _(home, kb):
     anyone doing string interpolation without quoting."""
     # Note: home was already created with a safe prefix. We need to
     # reset to a weird one for this test.
-    weird = tempfile.mkdtemp(prefix="hermes with spaces ")
+    weird = tempfile.mkdtemp(prefix="centurion with spaces ")
     os.environ["CENTURION_HOME"] = weird
     os.environ["HOME"] = weird
     kb._INITIALIZED_PATHS.clear()
@@ -582,7 +582,7 @@ def _(home, kb):
     """CENTURION_HOME is a symlink to the real dir. _INITIALIZED_PATHS
     uses Path.resolve() — two different symlink names pointing at the
     same dir should NOT double-init."""
-    real = tempfile.mkdtemp(prefix="hermes_real_")
+    real = tempfile.mkdtemp(prefix="centurion_real_")
     link1 = real + "_link1"
     link2 = real + "_link2"
     os.symlink(real, link1)

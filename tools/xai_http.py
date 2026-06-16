@@ -63,21 +63,21 @@ def get_env_value(name: str, default=None):
     return os.environ.get(name, default)
 
 
-def hermes_xai_user_agent() -> str:
-    """Return a stable Hermes-specific User-Agent for xAI HTTP calls."""
+def centurion_xai_user_agent() -> str:
+    """Return a stable Centurion-specific User-Agent for xAI HTTP calls."""
     try:
         from centurion_cli import __version__
     except Exception:
         __version__ = "unknown"
-    return f"Hermes-Agent/{__version__}"
+    return f"Centurion-AI-OS/{__version__}"
 
 
 def resolve_xai_http_credentials(*, force_refresh: bool = False) -> Dict[str, str]:
     """Resolve bearer credentials for direct xAI HTTP endpoints.
 
-    Prefers Hermes-managed xAI OAuth credentials when available, then falls back
+    Prefers Centurion-managed xAI OAuth credentials when available, then falls back
     to ``XAI_API_KEY`` resolved via ``centurion_cli.config.get_env_value`` so keys
-    stored in ``~/.centurion/.env`` (the standard Hermes location) are honored —
+    stored in ``~/.centurion/.env`` (the standard Centurion location) are honored —
     not just ones already exported into ``os.environ``. This keeps direct xAI
     endpoints (images, TTS, STT, etc.) aligned with the main runtime auth model
     and preserves the regression contract from PR #17140 / #17163.

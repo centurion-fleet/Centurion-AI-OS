@@ -728,7 +728,7 @@ class TestXAIBackendWiring:
 
 class TestXAIProviderOAuthPath:
     """Verifies the provider works when credentials come from the OAuth
-    runtime resolver (``hermes auth`` sign-in) rather than an env-var key.
+    runtime resolver (``centurion auth`` sign-in) rather than an env-var key.
     Patches at the ``centurion_cli.runtime_provider.resolve_runtime_provider``
     boundary so the full ``tools.xai_http.resolve_xai_http_credentials``
     chain is exercised end-to-end.
@@ -745,7 +745,7 @@ class TestXAIProviderOAuthPath:
             "api_mode": "codex_responses",
             "base_url": "https://api.x.ai/v1",
             "api_key": "ya29.fake-oauth-access-token",
-            "source": "hermes-auth-store",
+            "source": "centurion-auth-store",
         }
 
         captured: dict = {}

@@ -31,7 +31,7 @@ COMMON_HERMES_TOOLS = ["read_file", "search_files", "terminal", "patch", "write_
 
 class TestToolKindMap:
     def test_all_centurion_tools_have_kind(self):
-        """Every common hermes tool should appear in TOOL_KIND_MAP."""
+        """Every common centurion tool should appear in TOOL_KIND_MAP."""
         for tool in COMMON_HERMES_TOOLS:
             assert tool in TOOL_KIND_MAP, f"{tool} missing from TOOL_KIND_MAP"
 
@@ -561,12 +561,12 @@ class TestBuildToolComplete:
         result = build_tool_complete(
             "tc-search-files",
             "search_files",
-            '{"total_count":36,"files":["/home/nour/.hermes/config.yaml","/home/nour/.hermes/profiles/recall-test/config.yaml"],"truncated":true}',
+            '{"total_count":36,"files":["/home/nour/.centurion/config.yaml","/home/nour/.centurion/profiles/recall-test/config.yaml"],"truncated":true}',
         )
         text = result.content[0].content.text
         assert "File search results" in text
         assert "Found 36 files; showing 2." in text
-        assert "/home/nour/.hermes/config.yaml" in text
+        assert "/home/nour/.centurion/config.yaml" in text
         assert "use offset to page" in text
         assert "{\"total_count\"" not in text
         assert result.raw_output is None
@@ -602,13 +602,13 @@ class TestBuildToolComplete:
     def test_build_tool_complete_for_write_file_summarizes_without_repeating_diff(self, tmp_path):
         target = tmp_path / "diff-test.txt"
         snapshot = type("Snapshot", (), {"paths": [target], "before": {str(target): None}})()
-        target.write_text("hello from hermes\n", encoding="utf-8")
+        target.write_text("hello from centurion\n", encoding="utf-8")
 
         result = build_tool_complete(
             "tc-wf1",
             "write_file",
             '{"bytes_written": 18, "dirs_created": false}',
-            function_args={"path": str(target), "content": "hello from hermes\n"},
+            function_args={"path": str(target), "content": "hello from centurion\n"},
             snapshot=snapshot,
         )
         assert isinstance(result, ToolCallProgress)

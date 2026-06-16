@@ -9,7 +9,7 @@ persistent profiles, recreate the s6 service slots, and auto-start
 only those whose last recorded state was ``running``.
 
 Wired into the image as /etc/cont-init.d/02-reconcile-profiles by the
-Dockerfile (Phase 4 Task 4.0). Runs as root after 01-hermes-setup
+Dockerfile (Phase 4 Task 4.0). Runs as root after 01-centurion-setup
 (the stage2 hook) has chowned the volume and seeded $CENTURION_HOME, but
 before s6-rc starts user services.
 
@@ -64,8 +64,8 @@ def reconcile_profile_gateways(
     (the implicit profile that lives at the top of ``$CENTURION_HOME``,
     not under ``profiles/``). The dispatcher in ``centurion_cli.gateway``
     maps an empty profile suffix to ``gateway-default``, so this slot
-    is what ``hermes gateway start`` (no ``-p``) targets. Without it,
-    bare ``hermes gateway start`` inside the container would land on
+    is what ``centurion gateway start`` (no ``-p``) targets. Without it,
+    bare ``centurion gateway start`` inside the container would land on
     ``s6-svc -u /run/service/gateway-default`` → uncaught
     ``CalledProcessError`` → traceback to the user (PR #30136 review).
 
@@ -91,7 +91,7 @@ def reconcile_profile_gateways(
 
     # Default profile — always register, even if nothing has ever
     # populated the root profile dir. The slot exists so
-    # ``hermes gateway start`` (no ``-p``) has somewhere to land;
+    # ``centurion gateway start`` (no ``-p``) has somewhere to land;
     # auto-up only when the prior state was "running" (same rule as
     # named profiles).
     default_prior_state = _read_prior_state(centurion_home)
@@ -110,8 +110,8 @@ def reconcile_profile_gateways(
         for entry in sorted(profiles_root.iterdir()):
             if not entry.is_dir():
                 continue
-            # SOUL.md is always seeded by `hermes profile create` (config.yaml
-            # is not — that comes later via `hermes setup`). Use it as the
+            # SOUL.md is always seeded by `centurion profile create` (config.yaml
+            # is not — that comes later via `centurion setup`). Use it as the
             # "real profile" marker so stray dirs (backups, manual mkdir)
             # aren't picked up.
             if not (entry / "SOUL.md").exists():
@@ -120,7 +120,7 @@ def reconcile_profile_gateways(
             # profile (above) — if a user has somehow created a
             # ``profiles/default/`` directory, skip it to avoid the
             # slot collision. Their gateway would still be reachable
-            # via ``hermes -p default-named gateway start`` if they
+            # via ``centurion -p default-named gateway start`` if they
             # rename the directory; we don't try to disambiguate here.
             if entry.name == "default":
                 log.warning(
@@ -227,19 +227,19 @@ def _register_service(scandir: Path, profile: str, *, start: bool) -> None:
 
         # The presence of a `down` file tells s6-supervise to NOT
         # start the service when s6-svscan picks it up. User brings
-        # it up explicitly with `hermes -p <profile> gateway start`
+        # it up explicitly with `centurion -p <profile> gateway start`
         # (which routes through the Phase 4
         # _dispatch_via_service_manager_if_s6 helper to `s6-svc -u`).
         if not start:
             (tmp_dir / "down").touch()
 
-        # Pre-create the supervise/ skeleton with hermes ownership
+        # Pre-create the supervise/ skeleton with centurion ownership
         # BEFORE we publish the slot. Mirrors the same pre-creation
         # step in S6ServiceManager.register_profile_gateway — when
         # s6-svscan picks the published slot up, the s6-supervise it
-        # spawns will EEXIST our dirs/FIFOs and inherit hermes
+        # spawns will EEXIST our dirs/FIFOs and inherit centurion
         # ownership, so runtime s6-svc / s6-svstat / s6-svwait calls
-        # (all dispatched as the hermes user) won't hit EACCES. See
+        # (all dispatched as the centurion user) won't hit EACCES. See
         # ``_seed_supervise_skeleton`` in service_manager.py for the
         # full rationale.
         _seed_supervise_skeleton(tmp_dir)

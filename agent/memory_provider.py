@@ -227,7 +227,7 @@ class MemoryProvider(ABC):
     def get_config_schema(self) -> List[Dict[str, Any]]:
         """Return config fields this provider needs for setup.
 
-        Used by 'hermes memory setup' to walk the user through configuration.
+        Used by 'centurion memory setup' to walk the user through configuration.
         Each field is a dict with:
           key:         config key name (e.g. 'api_key', 'mode')
           description: human-readable description
@@ -245,7 +245,7 @@ class MemoryProvider(ABC):
     def save_config(self, values: Dict[str, Any], centurion_home: str) -> None:
         """Write non-secret config to the provider's native location.
 
-        Called by 'hermes memory setup' after collecting user inputs.
+        Called by 'centurion memory setup' after collecting user inputs.
         ``values`` contains only non-secret fields (secrets go to .env).
         ``centurion_home`` is the active CENTURION_HOME directory path.
 

@@ -61,7 +61,7 @@ def test_agent_browser_stays_eager() -> None:
         "agent-browser is the default browser-tool backend used by every "
         "session that doesn't have a cloud browser provider configured. "
         "It must stay in root package.json dependencies so it is present "
-        "after `hermes setup` / `centurion update` without an explicit "
+        "after `centurion setup` / `centurion update` without an explicit "
         "post_setup step."
     )
 

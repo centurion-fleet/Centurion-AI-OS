@@ -21,7 +21,7 @@ esac
 
 cd /opt/data
 # shellcheck disable=SC1091
-. /opt/hermes/.venv/bin/activate
+. /opt/centurion/.venv/bin/activate
 
 dash_host="${HERMES_DASHBOARD_HOST:-0.0.0.0}"
 dash_port="${HERMES_DASHBOARD_PORT:-9119}"
@@ -36,5 +36,5 @@ case "$dash_host" in
 esac
 
 # shellcheck disable=SC2086  # word-splitting of $insecure is intentional
-exec s6-setuidgid hermes hermes dashboard \
+exec s6-setuidgid centurion centurion dashboard \
     --host "$dash_host" --port "$dash_port" --no-open $insecure

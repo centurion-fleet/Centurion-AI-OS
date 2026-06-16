@@ -879,7 +879,7 @@ class TestRunJobSessionPersistence:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -926,7 +926,7 @@ class TestRunJobSessionPersistence:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -963,7 +963,7 @@ class TestRunJobSessionPersistence:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -991,7 +991,7 @@ class TestRunJobSessionPersistence:
             patch("cron.scheduler._centurion_home", tmp_path),
             patch("cron.scheduler._resolve_origin", return_value=None),
             patch("dotenv.load_dotenv"),
-            patch("hermes_state.SessionDB", return_value=fake_db),
+            patch("centurion_state.SessionDB", return_value=fake_db),
             patch(
                 "centurion_cli.runtime_provider.resolve_runtime_provider",
                 return_value={
@@ -1082,7 +1082,7 @@ class TestRunJobSessionPersistence:
         kwargs = mock_agent_cls.call_args.kwargs
         # Resolution happened — not None, is a list.
         assert isinstance(kwargs["enabled_toolsets"], list)
-        # The cron default is _HERMES_CORE_TOOLS with _DEFAULT_OFF_TOOLSETS
+        # The cron default is _CENTURION_CORE_TOOLS with _DEFAULT_OFF_TOOLSETS
         # (``moa``, ``homeassistant``, ``rl``) removed. The most important
         # invariant: ``moa`` is NOT in the default cron toolset, so a cron
         # run cannot accidentally spin up frontier models.
@@ -1130,7 +1130,7 @@ class TestRunJobSessionPersistence:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -1206,7 +1206,7 @@ class TestRunJobSessionPersistence:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -1245,7 +1245,7 @@ class TestRunJobSessionPersistence:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -1334,7 +1334,7 @@ class TestRunJobSessionPersistence:
                 return {"final_response": "ok"}
 
         with patch("cron.scheduler._centurion_home", tmp_path), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -1400,7 +1400,7 @@ class TestRunJobSessionPersistence:
                 return {"final_response": "ok"}
 
         with patch("cron.scheduler._centurion_home", tmp_path), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -1515,7 +1515,7 @@ class TestRunJobConfigEnvVarExpansion:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch("centurion_cli.runtime_provider.resolve_runtime_provider",
                    return_value=self._RUNTIME), \
              patch("run_agent.AIAgent") as mock_agent_cls:
@@ -1547,7 +1547,7 @@ class TestRunJobConfigEnvVarExpansion:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch("centurion_cli.runtime_provider.resolve_runtime_provider",
                    return_value=self._RUNTIME), \
              patch("run_agent.AIAgent") as mock_agent_cls:
@@ -1576,7 +1576,7 @@ class TestRunJobConfigEnvVarExpansion:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch("centurion_cli.runtime_provider.resolve_runtime_provider",
                    return_value=self._RUNTIME), \
              patch("run_agent.AIAgent") as mock_agent_cls:
@@ -1618,7 +1618,7 @@ class TestRunJobSkillBacked:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -1678,7 +1678,7 @@ class TestRunJobSkillBacked:
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("tools.credential_files._resolve_centurion_home", return_value=tmp_path), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -1716,7 +1716,7 @@ class TestRunJobSkillBacked:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={
@@ -1762,7 +1762,7 @@ class TestRunJobSkillBacked:
         with patch("cron.scheduler._centurion_home", tmp_path), \
              patch("cron.scheduler._resolve_origin", return_value=None), \
              patch("dotenv.load_dotenv"), \
-             patch("hermes_state.SessionDB", return_value=fake_db), \
+             patch("centurion_state.SessionDB", return_value=fake_db), \
              patch(
                  "centurion_cli.runtime_provider.resolve_runtime_provider",
                  return_value={

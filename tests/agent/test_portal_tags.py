@@ -1,4 +1,4 @@
-"""Tests for agent.portal_tags — Nous Portal request tag contract."""
+"""Tests for agent.portal_tags — Centurion Portal request tag contract."""
 
 from __future__ import annotations
 
@@ -8,22 +8,22 @@ def test_centurion_client_tag_includes_current_version():
     from centurion_cli import __version__
     from agent.portal_tags import centurion_client_tag
 
-    assert centurion_client_tag() == f"client=hermes-client-v{__version__}"
+    assert centurion_client_tag() == f"client=centurion-client-v{__version__}"
 
 
 def test_centurion_client_tag_format():
-    """The client tag has the exact shape Nous Portal expects."""
+    """The client tag has the exact shape Centurion Portal expects."""
     from agent.portal_tags import centurion_client_tag
 
     tag = centurion_client_tag()
-    assert tag.startswith("client=hermes-client-v")
+    assert tag.startswith("client=centurion-client-v")
     # No spaces, no commas — single tag value
     assert " " not in tag
     assert "," not in tag
 
 
 def test_nous_portal_tags_contains_product_and_client():
-    """Every Nous Portal request gets BOTH the product tag and the version tag."""
+    """Every Centurion Portal request gets BOTH the product tag and the version tag."""
     from agent.portal_tags import centurion_client_tag, nous_portal_tags
 
     tags = nous_portal_tags()

@@ -77,7 +77,7 @@ class _ProviderEntry:
 
 
 # ---------------------------------------------------------------------------
-# HermesMCPOAuthProvider — OAuthClientProvider subclass with disk-watch
+# CenturionMCPOAuthProvider — OAuthClientProvider subclass with disk-watch
 # ---------------------------------------------------------------------------
 
 
@@ -92,7 +92,7 @@ def _make_centurion_provider_class() -> Optional[type]:
     except ImportError:  # pragma: no cover — SDK required in CI
         return None
 
-    class HermesMCPOAuthProvider(OAuthClientProvider):
+    class CenturionMCPOAuthProvider(OAuthClientProvider):
         """OAuthClientProvider with pre-flow disk-mtime reload.
 
         Before every ``async_auth_flow`` invocation, asks the manager to
@@ -154,9 +154,9 @@ def _make_centurion_provider_class() -> Optional[type]:
             # guessed ``{server_url}/token`` path (returns 404 on most real
             # providers) and require a full browser re-authorization.
             storage = self.context.storage
-            from tools.mcp_oauth import HermesTokenStorage
+            from tools.mcp_oauth import CenturionTokenStorage
             if (
-                isinstance(storage, HermesTokenStorage)
+                isinstance(storage, CenturionTokenStorage)
                 and self.context.oauth_metadata is None
             ):
                 meta = storage.load_oauth_metadata()
@@ -253,8 +253,8 @@ def _make_centurion_provider_class() -> Optional[type]:
                         # Persist immediately so a subsequent cold-load can
                         # skip discovery entirely.
                         storage = self.context.storage
-                        from tools.mcp_oauth import HermesTokenStorage
-                        if isinstance(storage, HermesTokenStorage):
+                        from tools.mcp_oauth import CenturionTokenStorage
+                        if isinstance(storage, CenturionTokenStorage):
                             storage.save_oauth_metadata(asm)
                         logger.debug(
                             "MCP OAuth '%s': pre-flight ASM discovered "
@@ -274,8 +274,8 @@ def _make_centurion_provider_class() -> Optional[type]:
             if meta is None:
                 return
             storage = self.context.storage
-            from tools.mcp_oauth import HermesTokenStorage
-            if not isinstance(storage, HermesTokenStorage):
+            from tools.mcp_oauth import CenturionTokenStorage
+            if not isinstance(storage, CenturionTokenStorage):
                 return
             existing = storage.load_oauth_metadata()
             if (
@@ -324,7 +324,7 @@ def _make_centurion_provider_class() -> Optional[type]:
                 self._persist_oauth_metadata_if_changed()
                 return
 
-    return HermesMCPOAuthProvider
+    return CenturionMCPOAuthProvider
 
 
 # Cached at import time. Tested and used by :class:`MCPOAuthManager`.
@@ -407,7 +407,7 @@ class MCPOAuthManager:
 
         # Local imports avoid circular deps at module import time.
         from tools.mcp_oauth import (
-            HermesTokenStorage,
+            CenturionTokenStorage,
             _OAUTH_AVAILABLE,
             _build_client_metadata,
             _configure_callback_port,
@@ -421,7 +421,7 @@ class MCPOAuthManager:
             return None
 
         cfg = dict(entry.oauth_config or {})
-        storage = HermesTokenStorage(server_name)
+        storage = CenturionTokenStorage(server_name)
 
         if not _is_interactive() and not storage.has_cached_tokens():
             logger.warning(
@@ -448,8 +448,8 @@ class MCPOAuthManager:
     def remove(self, server_name: str) -> None:
         """Evict the provider from cache AND delete tokens from disk.
 
-        Called by ``hermes mcp remove <name>`` and (indirectly) by
-        ``hermes mcp login <name>`` during forced re-auth.
+        Called by ``centurion mcp remove <name>`` and (indirectly) by
+        ``centurion mcp login <name>`` during forced re-auth.
         """
         with self._entries_lock:
             self._entries.pop(server_name, None)

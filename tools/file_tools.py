@@ -195,10 +195,10 @@ def _check_sensitive_path(filepath: str, task_id: str = "default") -> str | None
 
 def _check_cross_profile_path(filepath: str, task_id: str = "default") -> str | None:
     """Return a cross-profile warning string when ``filepath`` lands in
-    another Hermes profile's skills/plugins/cron/memories directory.
+    another Centurion profile's skills/plugins/cron/memories directory.
 
     Returns ``None`` when the write is in-scope (same profile) or outside
-    Hermes scope entirely. Soft guard — the agent can override by passing
+    Centurion scope entirely. Soft guard — the agent can override by passing
     ``cross_profile=True`` to its write tool after explicit user direction.
 
     Defense-in-depth, NOT a security boundary — the terminal tool runs
@@ -560,7 +560,7 @@ def read_file_tool(path: str, offset: int = 1, limit: int = 500, task_id: str = 
                 ),
             })
 
-        # ── Hermes internal path guard ────────────────────────────────
+        # ── Centurion internal path guard ────────────────────────────────
         # Prevent prompt injection via catalog or hub metadata files,
         # and block credential stores under CENTURION_HOME.  Pass the
         # already-resolved path so a relative-path read against
@@ -886,7 +886,7 @@ def write_file_tool(path: str, content: str, task_id: str = "default",
                     cross_profile: bool = False) -> str:
     """Write content to a file.
 
-    ``cross_profile`` opts out of the soft cross-Hermes-profile guard. The
+    ``cross_profile`` opts out of the soft cross-Centurion-profile guard. The
     guard fires only on writes that land in another profile's
     skills/plugins/cron/memories directory; everything else is unaffected.
     Pass ``True`` after explicit user direction — same shape as ``force``
@@ -956,7 +956,7 @@ def patch_tool(mode: str = "replace", path: str = None, old_string: str = None,
                task_id: str = "default", cross_profile: bool = False) -> str:
     """Patch a file using replace mode or V4A patch format.
 
-    ``cross_profile`` opts out of the soft cross-Hermes-profile guard for
+    ``cross_profile`` opts out of the soft cross-Centurion-profile guard for
     targets under another profile's skills/plugins/cron/memories
     directory. Same shape as ``write_file``'s flag.
     """
@@ -1210,7 +1210,7 @@ WRITE_FILE_SCHEMA = {
             "content": {"type": "string", "description": "Complete content to write to the file"},
             "cross_profile": {
                 "type": "boolean",
-                "description": "Opt out of the cross-profile soft guard. Defaults to false. Set true ONLY after explicit user direction to edit another Hermes profile's skills/plugins/cron/memories — by default these writes are blocked with a warning because they affect a different profile than the one this session is running under.",
+                "description": "Opt out of the cross-profile soft guard. Defaults to false. Set true ONLY after explicit user direction to edit another Centurion profile's skills/plugins/cron/memories — by default these writes are blocked with a warning because they affect a different profile than the one this session is running under.",
                 "default": False,
             },
         },
@@ -1261,7 +1261,7 @@ PATCH_SCHEMA = {
             },
             "cross_profile": {
                 "type": "boolean",
-                "description": "Opt out of the cross-profile soft guard. Defaults to false. Set true ONLY after explicit user direction to edit another Hermes profile's skills/plugins/cron/memories.",
+                "description": "Opt out of the cross-profile soft guard. Defaults to false. Set true ONLY after explicit user direction to edit another Centurion profile's skills/plugins/cron/memories.",
                 "default": False,
             },
         },

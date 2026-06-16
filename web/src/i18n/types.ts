@@ -453,7 +453,7 @@ export interface Translations {
     switchTheme: string;
   };
 
-  // ── Achievements plugin (plugins/hermes-achievements) ──
+  // ── Achievements plugin (plugins/centurion-achievements) ──
   achievements: {
     hero: {
       kicker: string;

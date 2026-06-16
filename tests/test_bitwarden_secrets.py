@@ -41,14 +41,14 @@ def _reset_caches():
 
 @pytest.fixture
 def centurion_home(tmp_path, monkeypatch):
-    """Point Hermes at an isolated home directory."""
+    """Point Centurion at an isolated home directory."""
     home = tmp_path / ".centurion"
     home.mkdir()
     monkeypatch.setenv("CENTURION_HOME", str(home))
     # Some modules cache get_centurion_home; clear if needed.
     import centurion_constants
-    if hasattr(hermes_constants, "_CENTURION_HOME_CACHE"):
-        hermes_constants._CENTURION_HOME_CACHE = None  # type: ignore[attr-defined]
+    if hasattr(centurion_constants, "_CENTURION_HOME_CACHE"):
+        centurion_constants._CENTURION_HOME_CACHE = None  # type: ignore[attr-defined]
     return home
 
 

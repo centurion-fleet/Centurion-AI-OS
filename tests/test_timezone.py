@@ -21,14 +21,14 @@ import centurion_time
 
 
 def _reset_centurion_time_cache():
-    """Reset the hermes_time module cache (replacement for removed reset_cache)."""
-    hermes_time._cached_tz = None
-    hermes_time._cached_tz_name = None
-    hermes_time._cache_resolved = False
+    """Reset the centurion_time module cache (replacement for removed reset_cache)."""
+    centurion_time._cached_tz = None
+    centurion_time._cached_tz_name = None
+    centurion_time._cache_resolved = False
 
 
 # =========================================================================
-# hermes_time.now() — core helper
+# centurion_time.now() — core helper
 # =========================================================================
 
 class TestHermesTimeNow:
@@ -44,7 +44,7 @@ class TestHermesTimeNow:
     def test_valid_timezone_applies(self):
         """With a valid IANA timezone, now() returns time in that zone."""
         os.environ["HERMES_TIMEZONE"] = "Asia/Kolkata"
-        result = hermes_time.now()
+        result = centurion_time.now()
         assert result.tzinfo is not None
         # IST is UTC+5:30
         offset = result.utcoffset()
@@ -53,13 +53,13 @@ class TestHermesTimeNow:
     def test_utc_timezone(self):
         """UTC timezone works."""
         os.environ["HERMES_TIMEZONE"] = "UTC"
-        result = hermes_time.now()
+        result = centurion_time.now()
         assert result.utcoffset() == timedelta(0)
 
     def test_us_eastern(self):
         """US/Eastern timezone works (DST-aware zone)."""
         os.environ["HERMES_TIMEZONE"] = "America/New_York"
-        result = hermes_time.now()
+        result = centurion_time.now()
         assert result.tzinfo is not None
         # Offset is -5h or -4h depending on DST
         offset_hours = result.utcoffset().total_seconds() / 3600
@@ -69,7 +69,7 @@ class TestHermesTimeNow:
         """Invalid timezone logs warning and falls back to server-local."""
         os.environ["HERMES_TIMEZONE"] = "Mars/Olympus_Mons"
         with caplog.at_level(logging.WARNING, logger="hermes_time"):
-            result = hermes_time.now()
+            result = centurion_time.now()
         assert result.tzinfo is not None  # Still tz-aware (server-local)
         assert "Invalid timezone" in caplog.text
         assert "Mars/Olympus_Mons" in caplog.text
@@ -77,13 +77,13 @@ class TestHermesTimeNow:
     def test_empty_timezone_uses_local(self):
         """No timezone configured → server-local time (still tz-aware)."""
         os.environ.pop("HERMES_TIMEZONE", None)
-        result = hermes_time.now()
+        result = centurion_time.now()
         assert result.tzinfo is not None
 
     def test_format_unchanged(self):
         """Timestamp formatting matches original strftime pattern."""
         os.environ["HERMES_TIMEZONE"] = "Asia/Kolkata"
-        result = hermes_time.now()
+        result = centurion_time.now()
         formatted = result.strftime("%A, %B %d, %Y %I:%M %p")
         # Should produce something like "Monday, March 03, 2026 05:30 PM"
         assert len(formatted) > 10
@@ -94,12 +94,12 @@ class TestHermesTimeNow:
         """Changing env var + reset_cache picks up new timezone."""
         os.environ["HERMES_TIMEZONE"] = "UTC"
         _reset_centurion_time_cache()
-        r1 = hermes_time.now()
+        r1 = centurion_time.now()
         assert r1.utcoffset() == timedelta(0)
 
         os.environ["HERMES_TIMEZONE"] = "Asia/Kolkata"
         _reset_centurion_time_cache()
-        r2 = hermes_time.now()
+        r2 = centurion_time.now()
         assert r2.utcoffset() == timedelta(hours=5, minutes=30)
 
 
@@ -115,18 +115,18 @@ class TestGetTimezone:
 
     def test_returns_zoneinfo_for_valid(self):
         os.environ["HERMES_TIMEZONE"] = "Europe/London"
-        tz = hermes_time.get_timezone()
+        tz = centurion_time.get_timezone()
         assert isinstance(tz, ZoneInfo)
         assert str(tz) == "Europe/London"
 
     def test_returns_none_for_empty(self):
         os.environ.pop("HERMES_TIMEZONE", None)
-        tz = hermes_time.get_timezone()
+        tz = centurion_time.get_timezone()
         assert tz is None
 
     def test_returns_none_for_invalid(self):
         os.environ["HERMES_TIMEZONE"] = "Not/A/Timezone"
-        tz = hermes_time.get_timezone()
+        tz = centurion_time.get_timezone()
         assert tz is None
 
 
@@ -262,7 +262,7 @@ class TestCronTimezone:
         """_ensure_aware must preserve the absolute instant for naive datetimes.
 
         Regression: the old code used replace(tzinfo=hermes_tz) which shifted
-        absolute time when system-local tz != Hermes tz.  The fix interprets
+        absolute time when system-local tz != Centurion tz.  The fix interprets
         naive values as system-local wall time, then converts.
         """
         from cron.jobs import _ensure_aware
@@ -288,7 +288,7 @@ class TestCronTimezone:
         )
 
     def test_ensure_aware_normalizes_aware_to_centurion_tz(self):
-        """Already-aware datetimes should be normalized to Hermes tz."""
+        """Already-aware datetimes should be normalized to Centurion tz."""
         from cron.jobs import _ensure_aware
 
         os.environ["HERMES_TIMEZONE"] = "Asia/Kolkata"
@@ -298,17 +298,17 @@ class TestCronTimezone:
         utc_dt = datetime(2026, 3, 11, 15, 0, 0, tzinfo=timezone.utc)
         result = _ensure_aware(utc_dt)
 
-        # Must be in Hermes tz (Kolkata) but same absolute instant
+        # Must be in Centurion tz (Kolkata) but same absolute instant
         kolkata = ZoneInfo("Asia/Kolkata")
         assert result.utctimetuple()[:5] == (2026, 3, 11, 15, 0)
         expected_local = utc_dt.astimezone(kolkata)
         assert result == expected_local
 
     def test_ensure_aware_due_job_not_skipped_when_system_ahead(self, tmp_path, monkeypatch):
-        """Reproduce the actual bug: system tz ahead of Hermes tz caused
+        """Reproduce the actual bug: system tz ahead of Centurion tz caused
         overdue jobs to appear as not-yet-due.
 
-        Scenario: system is Asia/Kolkata (UTC+5:30), Hermes is UTC.
+        Scenario: system is Asia/Kolkata (UTC+5:30), Centurion is UTC.
         A naive timestamp from 5 minutes ago (local time) should still
         be recognized as due after conversion.
         """
@@ -338,14 +338,14 @@ class TestCronTimezone:
         )
 
     def test_get_due_jobs_naive_cross_timezone(self, tmp_path, monkeypatch):
-        """Naive past timestamps must be detected as due even when Hermes tz
+        """Naive past timestamps must be detected as due even when Centurion tz
         is behind system local tz — the scenario that triggered #806."""
         import cron.jobs as jobs_module
         monkeypatch.setattr(jobs_module, "CRON_DIR", tmp_path / "cron")
         monkeypatch.setattr(jobs_module, "JOBS_FILE", tmp_path / "cron" / "jobs.json")
         monkeypatch.setattr(jobs_module, "OUTPUT_DIR", tmp_path / "cron" / "output")
 
-        # Use a Hermes timezone far behind UTC so that the numeric wall time
+        # Use a Centurion timezone far behind UTC so that the numeric wall time
         # of the naive timestamp exceeds _centurion_now's wall time — this would
         # have caused a false "not due" with the old replace(tzinfo=...) approach.
         os.environ["HERMES_TIMEZONE"] = "Pacific/Midway"  # UTC-11
@@ -362,7 +362,7 @@ class TestCronTimezone:
 
         due = get_due_jobs()
         assert len(due) == 1, (
-            "Naive past timestamp should be due regardless of Hermes timezone"
+            "Naive past timestamp should be due regardless of Centurion timezone"
         )
 
     def test_create_job_stores_tz_aware_timestamps(self, tmp_path, monkeypatch):

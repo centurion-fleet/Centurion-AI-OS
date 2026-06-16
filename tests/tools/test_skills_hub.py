@@ -56,7 +56,7 @@ class TestParseFrontmatterQuick:
         assert fm == {}
 
     def test_nested_yaml(self):
-        content = "---\nname: test\nmetadata:\n  hermes:\n    tags: [a, b]\n---\n\nBody.\n"
+        content = "---\nname: test\nmetadata:\n  centurion:\n    tags: [a, b]\n---\n\nBody.\n"
         fm = GitHubSource._parse_frontmatter_quick(content)
         assert fm["metadata"]["centurion"]["tags"] == ["a", "b"]
 
@@ -731,7 +731,7 @@ class TestUrlSource:
                 "name: sharethis-chat\n"
                 "description: Share agent conversations.\n"
                 "metadata:\n"
-                "  hermes:\n"
+                "  centurion:\n"
                 "    tags: [sharing, chat]\n"
                 "---\n\n# Body\n"
             ),

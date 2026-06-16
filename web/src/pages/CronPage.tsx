@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { Clock, Pause, Play, Trash2, X, Zap } from "lucide-react";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Badge } from "@centurion-fleet/ui/ui/components/badge";
+import { Button } from "@centurion-fleet/ui/ui/components/button";
+import { Select, SelectOption } from "@centurion-fleet/ui/ui/components/select";
+import { Spinner } from "@centurion-fleet/ui/ui/components/spinner";
 import { H2 } from "@/components/NouiTypography";
 import { api } from "@/lib/api";
 import type { CronJob, ProfileInfo } from "@/lib/api";

@@ -214,7 +214,7 @@ class TestMem0Defaults:
         provider = Mem0MemoryProvider()
         provider.initialize("test")
 
-        assert provider._user_id == "hermes-user"
+        assert provider._user_id == "centurion-user"
 
     def test_default_agent_id_hermes(self, monkeypatch, tmp_path):
         monkeypatch.setenv("MEM0_API_KEY", "test-key")

@@ -26,7 +26,7 @@ def curator_env(tmp_path, monkeypatch):
 
     import importlib
     import centurion_constants
-    importlib.reload(hermes_constants)
+    importlib.reload(centurion_constants)
     from agent import curator
     importlib.reload(curator)
     from tools import skill_usage

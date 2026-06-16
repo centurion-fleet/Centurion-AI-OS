@@ -1,9 +1,9 @@
-"""On-demand supply-chain audit for Hermes Agent installs.
+"""On-demand supply-chain audit for Centurion AI OS installs.
 
-Scans three surfaces a Hermes user actually controls and we can map to
+Scans three surfaces a Centurion user actually controls and we can map to
 upstream advisories without auth or extra binaries:
 
-1. The Hermes venv (every PyPI dist via ``importlib.metadata``).
+1. The Centurion venv (every PyPI dist via ``importlib.metadata``).
 2. Python deps declared by user-installed plugins under ``~/.centurion/plugins``
    (``requirements.txt`` + ``pyproject.toml`` best-effort pin extraction).
 3. MCP servers wired in ``config.yaml`` whose ``command/args`` look like
@@ -526,7 +526,7 @@ def _count_components(
 
 
 def cmd_security_audit(args: argparse.Namespace) -> int:
-    """Implementation of `hermes security audit`."""
+    """Implementation of `centurion security audit`."""
     home = Path(get_centurion_home())
     skip_venv = bool(getattr(args, "skip_venv", False))
     skip_plugins = bool(getattr(args, "skip_plugins", False))

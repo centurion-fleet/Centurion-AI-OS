@@ -1,4 +1,4 @@
-"""Helpers for loading Hermes .env files consistently across entrypoints."""
+"""Helpers for loading Centurion .env files consistently across entrypoints."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ _WARNED_KEYS: set[str] = set()
 
 # Map of env-var name → source label ("bitwarden", etc.) for credentials
 # that were injected by an external secret source during load_centurion_dotenv().
-# Used by setup / `hermes model` flows to label detected credentials so
+# Used by setup / `centurion model` flows to label detected credentials so
 # users understand WHERE a key came from when their .env doesn't contain it
 # directly (otherwise the "credentials detected ✓" line looks identical to
 # the .env case and they don't know Bitwarden is wired up).
@@ -137,7 +137,7 @@ def _sanitize_loaded_credentials() -> None:
             "rich-text editor, or web page that substituted lookalike\n"
             "  Unicode glyphs for ASCII letters. If authentication fails "
             "(e.g. \"API key not valid\"), re-copy the key from the\n"
-            "  provider's dashboard and run `hermes setup` (or edit the "
+            "  provider's dashboard and run `centurion setup` (or edit the "
             ".env file in a plain-text editor).",
             file=sys.stderr,
         )
@@ -169,7 +169,7 @@ def _sanitize_env_file_if_needed(path: Path) -> None:
     copy-pasting API keys from terminals or rich-text editors.
 
     We delegate to ``centurion_cli.config._sanitize_env_lines`` which
-    already knows all valid Hermes env-var names and can split
+    already knows all valid Centurion env-var names and can split
     concatenated lines correctly.
     """
     if not path.exists():
@@ -214,7 +214,7 @@ def load_centurion_dotenv(
     centurion_home: str | os.PathLike | None = None,
     project_env: str | os.PathLike | None = None,
 ) -> list[Path]:
-    """Load Hermes environment files with user config taking precedence.
+    """Load Centurion environment files with user config taking precedence.
 
     Behavior:
     - `~/.centurion/.env` overrides stale shell-exported values when present.
@@ -251,7 +251,7 @@ def _apply_external_secret_sources(home_path: Path) -> None:
     """Pull secrets from external sources (currently Bitwarden) into env.
 
     Runs AFTER dotenv loads so .env values are visible (we use them to
-    locate the access token) but BEFORE the rest of Hermes reads
+    locate the access token) but BEFORE the rest of Centurion reads
     ``os.environ`` for credentials.  Any failure here is logged and
     swallowed — external secret sources must never block startup.
 
@@ -299,7 +299,7 @@ def _apply_external_secret_sources(home_path: Path) -> None:
         # and might have the same copy-paste corruption as a manually
         # edited .env (see #6843).
         _sanitize_loaded_credentials()
-        # Remember where these came from so the setup / `hermes model`
+        # Remember where these came from so the setup / `centurion model`
         # flows can label detected credentials with "(from Bitwarden)" —
         # otherwise users see "credentials ✓" with no hint that the value
         # came from BSM rather than .env.
