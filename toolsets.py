@@ -268,6 +268,15 @@ TOOLSETS = {
         "includes": [],
     },
 
+    "fleet": {
+        "description": (
+            "Fleet update management — check upstream commits, apply security "
+            "fixes, and report install health to the Centurion cloud portal."
+        ),
+        "tools": ["fleet_update"],
+        "includes": [],
+    },
+
     "discord": {
         "description": "Discord read and participate tools (fetch messages, search members, create threads)",
         "tools": ["discord"],

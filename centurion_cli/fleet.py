@@ -102,6 +102,11 @@ def fleet_checkin(args: argparse.Namespace) -> None:
         print(f"❌ {centurion_id} not found in registry")
         sys.exit(1)
 
+    if getattr(args, "cloud", False):
+        from centurion_cli.fleet_cloud import cloud_checkin_from_cli
+
+        sys.exit(cloud_checkin_from_cli())
+
 
 def fleet_policies(args: argparse.Namespace) -> None:
     from centurion.policies.engine import PolicyStore
@@ -178,6 +183,11 @@ def _add_fleet_subcommands(
     p_ci = sub.add_parser("checkin", help="Send health check heartbeat")
     p_ci.add_argument("--id", dest="centurion_id", help="Centurion ID (default: $CENTURION_ID)")
     p_ci.add_argument("--status", default="active", help="Status to report")
+    p_ci.add_argument(
+        "--cloud",
+        action="store_true",
+        help="Also POST check-in to Centurion cloud portal (requires OPENROUTER_API_KEY)",
+    )
     p_ci.set_defaults(func=fleet_checkin)
 
     p_pol = sub.add_parser("policies", help="Manage fleet policies")

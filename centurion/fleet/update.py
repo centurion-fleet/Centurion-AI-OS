@@ -27,7 +27,7 @@ from typing import Dict, List, Optional, Tuple
 logger = logging.getLogger(__name__)
 
 # Default upstream — the canonical Centurion OS repo
-DEFAULT_UPSTREAM = "https://github.com/TheSpaceFox/CenturionAI-OS-v4.git"
+DEFAULT_UPSTREAM = "https://github.com/centurion-fleet/Centurion-AI-OS.git"
 UPSTREAM_REMOTE = "upstream"
 
 COMMIT_CATEGORIES = {

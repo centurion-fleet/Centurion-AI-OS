@@ -785,6 +785,78 @@ def _read_nearest_vercel_project(start: Path | None = None) -> dict[str, str]:
 
 
 
+def _setup_centurion_subscription_path(config: dict) -> bool:
+    """Three-path inference setup when billing is enabled. Returns True if configured."""
+    from centurion_cli.billing import is_billing_enabled
+
+    if not is_billing_enabled(config):
+        return False
+
+    from centurion_cli.cloud_client import (
+        apply_openrouter_key_to_config,
+        validate_subscription_key,
+    )
+
+    billing = config.get("billing") if isinstance(config.get("billing"), dict) else {}
+    portal_url = str(billing.get("portal_url") or "https://www.personal-centurion.com").rstrip("/")
+    subscribe_url = f"{portal_url}/subscribe"
+
+    print_header("Centurion Subscription")
+    print_info("Connect Centurion OS to your Centurion cloud subscription.")
+    print()
+
+    choices = [
+        f"Subscribe — open {subscribe_url}",
+        "I already have a Centurion API key — paste and validate",
+        "Use my own model provider (bring your own API key)",
+    ]
+    idx = prompt_choice("How would you like to connect?", choices, 0)
+
+    if idx == 0:
+        try:
+            import webbrowser
+
+            webbrowser.open(subscribe_url)
+            print_success(f"Opened {subscribe_url} in your browser.")
+        except Exception:
+            print_info(f"Open this URL in your browser: {subscribe_url}")
+        print_info("After subscribing, copy your API key from Account → API Keys.")
+        print()
+        pasted = prompt("  Paste your Centurion API key (sk-or-v1-…)", password=True).strip()
+        if not pasted:
+            print_info("No key entered — continuing with provider picker.")
+            return False
+        result = validate_subscription_key(pasted, config=config, use_cache=False)
+        if not result.valid:
+            print_error(f"  Key validation failed: {result.error or 'invalid'}")
+            return False
+        apply_openrouter_key_to_config(pasted, config)
+        from centurion_cli.config import save_config
+
+        save_config(config)
+        print_success(f"  Centurion subscription active ({result.plan or 'active'}).")
+        return True
+
+    if idx == 1:
+        pasted = prompt("  Paste your Centurion API key (sk-or-v1-…)", password=True).strip()
+        if not pasted:
+            print_info("No key entered — continuing with provider picker.")
+            return False
+        result = validate_subscription_key(pasted, config=config, use_cache=False)
+        if not result.valid:
+            print_error(f"  Key validation failed: {result.error or 'invalid'}")
+            print_info(f"  Subscribe at: {subscribe_url}")
+            return False
+        apply_openrouter_key_to_config(pasted, config)
+        from centurion_cli.config import save_config
+
+        save_config(config)
+        print_success(f"  API key validated ({result.plan or 'active'}).")
+        return True
+
+    return False
+
+
 def setup_model_provider(config: dict, *, quick: bool = False):
     """Configure the inference provider and default model.
 
@@ -802,6 +874,14 @@ def setup_model_provider(config: dict, *, quick: bool = False):
     print_info("Choose how to connect to your main chat model.")
     print_info(f"   Guide: {_DOCS_BASE}/integrations/providers")
     print()
+
+    if _setup_centurion_subscription_path(config):
+        from centurion_cli.config import load_config as _reload_config
+
+        _refreshed = _reload_config()
+        config.clear()
+        config.update(_refreshed)
+        return
 
     # Delegate to the shared centurion model flow — handles provider picker,
     # credential prompting, model selection, and config persistence.

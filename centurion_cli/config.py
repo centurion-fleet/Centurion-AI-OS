@@ -1718,9 +1718,10 @@ DEFAULT_CONFIG = {
     # When false (default), Nous/Centurion Portal OAuth is hidden and users
     # configure bring-your-own-key providers via centurion setup / model.
     "billing": {
-        "enabled": False,
-        "portal_url": "https://portal.personal-centurion.com",
-        "inference_url": "https://inference-api.personal-centurion.com/v1",
+        "enabled": True,
+        "portal_url": "https://www.personal-centurion.com",
+        "inference_url": "https://openrouter.ai/api/v1",
+        "fleet_api_url": "https://www.personal-centurion.com/api/v1",
     },
 
     # Gateway settings — control how messaging platforms (Telegram, Discord,

@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-DEFAULT_CENTURION_PORTAL_URL = "https://portal.personal-centurion.com"
-DEFAULT_CENTURION_INFERENCE_URL = "https://inference-api.personal-centurion.com/v1"
+DEFAULT_CENTURION_PORTAL_URL = "https://www.personal-centurion.com"
+DEFAULT_CENTURION_INFERENCE_URL = "https://openrouter.ai/api/v1"
 DEFAULT_CENTURION_CLIENT_ID = "centurion-cli"
 
 
