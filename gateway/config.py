@@ -118,6 +118,7 @@ class Platform(Enum):
     SMS = "sms"
     DINGTALK = "dingtalk"
     API_SERVER = "api_server"
+    PORTAL = "portal"
     WEBHOOK = "webhook"
     MSGRAPH_WEBHOOK = "msgraph_webhook"
     FEISHU = "feishu"
@@ -423,6 +424,11 @@ _PLATFORM_CONNECTED_CHECKERS: dict[Platform, Callable[[PlatformConfig], bool]] =
     Platform.EMAIL: lambda cfg: bool(cfg.extra.get("address")),
     Platform.SMS: lambda cfg: bool(os.getenv("TWILIO_ACCOUNT_SID")),
     Platform.API_SERVER: lambda cfg: True,
+    Platform.PORTAL: lambda cfg: bool(
+        (cfg.api_key or cfg.token or os.getenv("CENTURION_AGENT_API_KEY", "")).strip().startswith(
+            "centurion_key_"
+        )
+    ),
     Platform.WEBHOOK: lambda cfg: True,
     Platform.MSGRAPH_WEBHOOK: lambda cfg: bool(
         str(cfg.extra.get("client_state") or "").strip()
@@ -1209,7 +1215,17 @@ def _validate_gateway_config(config: "GatewayConfig") -> None:
 
 def _apply_env_overrides(config: GatewayConfig) -> None:
     """Apply environment variable overrides to config."""
-    
+
+    portal_key = os.getenv("CENTURION_AGENT_API_KEY", "").strip()
+    if portal_key.startswith("centurion_key_"):
+        if Platform.PORTAL not in config.platforms:
+            config.platforms[Platform.PORTAL] = PlatformConfig()
+        config.platforms[Platform.PORTAL].enabled = True
+        config.platforms[Platform.PORTAL].api_key = portal_key
+        ws_url = os.getenv("CENTURION_PORTAL_WS_URL", "").strip()
+        if ws_url:
+            config.platforms[Platform.PORTAL].extra["ws_url"] = ws_url.rstrip("/")
+
     # Telegram
     telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
     if telegram_token:

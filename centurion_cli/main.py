@@ -12008,6 +12008,12 @@ def main():
     webhook_parser.set_defaults(func=cmd_webhook)
 
     # =========================================================================
+    # platform connect — portal realtime chat (primary owner channel)
+    # =========================================================================
+    from centurion_cli.platform_connect_cli import add_parser as _add_platform_connect_parser
+    _add_platform_connect_parser(subparsers)
+
+    # =========================================================================
     # portal command — Centurion Portal status + Tool Gateway routing
     # =========================================================================
     from centurion_cli.portal_cli import add_parser as _add_portal_parser

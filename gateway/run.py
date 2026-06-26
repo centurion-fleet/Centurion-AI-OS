@@ -6280,6 +6280,16 @@ class GatewayRunner:
                 return None
             return APIServerAdapter(config)
 
+        elif platform == Platform.PORTAL:
+            from gateway.platform_portal import PortalPlatformAdapter, check_portal_requirements
+            if not check_portal_requirements():
+                logger.warning(
+                    "Portal: aiohttp not installed or CENTURION_AGENT_API_KEY not set "
+                    "(run: centurion platform connect --key centurion_key_...)"
+                )
+                return None
+            return PortalPlatformAdapter(config)
+
         elif platform == Platform.WEBHOOK:
             from gateway.platforms.webhook import WebhookAdapter, check_webhook_requirements
             if not check_webhook_requirements():
@@ -6337,7 +6347,7 @@ class GatewayRunner:
         # connection, so HA events are always authorized.
         # Webhook events are authenticated via HMAC signature validation in
         # the adapter itself — no user allowlist applies.
-        if source.platform in {Platform.HOMEASSISTANT, Platform.WEBHOOK}:
+        if source.platform in {Platform.HOMEASSISTANT, Platform.WEBHOOK, Platform.PORTAL}:
             return True
 
         user_id = source.user_id
