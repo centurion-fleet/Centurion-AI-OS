@@ -12013,6 +12013,9 @@ def main():
     from centurion_cli.platform_connect_cli import add_parser as _add_platform_connect_parser
     _add_platform_connect_parser(subparsers)
 
+    from centurion_cli.swarm_mc_cli import add_parser as _add_swarm_mc_parser
+    _add_swarm_mc_parser(subparsers)
+
     # =========================================================================
     # portal command — Centurion Portal status + Tool Gateway routing
     # =========================================================================
